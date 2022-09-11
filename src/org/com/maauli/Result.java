@@ -914,8 +914,14 @@ public class Result extends JFrame {
 		String todayDate = commonObj.getCurrentDate();
 		String academic = commonObj.getAcademicYear(todayDate);
 		int initialYearFromAcademic = Integer.parseInt(academic.substring(0, academic.indexOf("-")));
-		if(initialYearFromAcadSel < initialYearFromAcademic){
+//		if(initialYearFromAcadSel < initialYearFromAcademic){
 //			updateResultButton.setEnabled(false);
+//		}
+//		else{
+//			updateResultButton.setEnabled(true);
+//		}
+		if(examClass.equalsIgnoreCase("FUT") || examClass.equalsIgnoreCase("SUT") || examClass.equalsIgnoreCase("SELECT")) {
+			updateResultButton.setEnabled(false);
 		}
 		else{
 			updateResultButton.setEnabled(true);
@@ -1290,13 +1296,19 @@ public class Result extends JFrame {
 				logger.info("inside exam_combo.addActionListener");
 				String examSel = (String) exam_combo.getSelectedItem();
 				String std = (String) Std_combo.getSelectedItem();
-				int stdInt = commonObj.RomanToInteger(std);
+				int stdInt = 0;
+				if(!std.equalsIgnoreCase("SELECT") && !std.equalsIgnoreCase("")) {
+					stdInt = commonObj.RomanToInteger(std);
+				}
+				else {
+					JOptionPane.showMessageDialog(null, "Please select Std and Div");
+				}
 				updateCheck.setSelected(false);
 				if (examSel.equalsIgnoreCase("FUT") || examSel.equalsIgnoreCase("SUT")) {
 					try {
 						printUnitTestResultButton.setText("Print " +examSel);
 						findPanel.add(printUnitTestResultButton);
-//						updateResultButton.setEnabled(false);
+						updateResultButton.setEnabled(false);
 						findPanel.revalidate();
 						findPanel.repaint();
 					} catch (Exception e2) {
@@ -1328,7 +1340,7 @@ public class Result extends JFrame {
 //					updateResultButton.setEnabled(false);
 				}
 				else{
-					updateResultButton.setEnabled(true);
+//					updateResultButton.setEnabled(true);
 				}
 
 			}

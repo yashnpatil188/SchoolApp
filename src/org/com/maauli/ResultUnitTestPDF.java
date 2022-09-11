@@ -46,7 +46,7 @@ public class ResultUnitTestPDF {
 		logger.info("Inside Result Unit Test pdf constructor..............");
 		System.gc();
 		
-		String semester = "";
+		String semester = "", displaySection = "";
 		boolean fileOpenFlag = false;
     	secName = bundle.getString(sec.toUpperCase()+"_SEC");
     	logger.info("secName :: "+secName);
@@ -64,6 +64,10 @@ public class ResultUnitTestPDF {
 		int image_pdf_pos_y = Integer.parseInt(bundle.getString("IMAGE_PDF_RESULT_POS_Y"));
 		float image_pdf_scalepercent = Float.parseFloat(bundle.getString("IMAGE_PDF_RESULT_SCALEPERCENT"));
 		String pdf_header_img_flag = bundle.getString("PDF_HEADER_RESULT_IMAGE_FLAG");
+		
+		if(sessionData.getAppType().equalsIgnoreCase("College")){
+			displaySection = sec;
+		}
 		
     	/*if (exam.equalsIgnoreCase("Semester 1")) {
 			semester = "SEM1";
@@ -301,8 +305,8 @@ public class ResultUnitTestPDF {
 //				 cell4.setPaddingBottom(5.0f);
 //				// cell4.setBackgroundColor (new BaseColor (140, 221, 8));
 //				table.addCell(cell4);
-	
-				PdfPCell cell5 = new PdfPCell(new Paragraph(std, FontFactory.getFont(FontFactory.TIMES_ROMAN, 12)));
+				
+				PdfPCell cell5 = new PdfPCell(new Paragraph(std +" "+ displaySection, FontFactory.getFont(FontFactory.TIMES_ROMAN, 12)));
 				cell5.setColspan(2);
 				cell5.setHorizontalAlignment(Element.ALIGN_CENTER);
 				cell5.setVerticalAlignment(Element.ALIGN_MIDDLE);
