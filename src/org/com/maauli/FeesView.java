@@ -1417,6 +1417,23 @@ public class FeesView extends JFrame {
 					validateField = validate(penaltyAmount, bank, cheque_dd_no, chequeDD_date, modeSel);
 				}
 				
+				String optionSms = "";
+				if(bundle.getString("SMS_FEE_FLAG").equalsIgnoreCase("true") && bundle.getString("STAFF_FEE_SMS").equalsIgnoreCase("true")) {
+					optionSms = JOptionPane.showInputDialog("=== SMS will be sent to Parents and Staff === \n Please Enter option \n 1 : Proceed "
+							+ " \n 2 : Cancel Fee Payment");
+				} else if(bundle.getString("SMS_FEE_FLAG").equalsIgnoreCase("true")) {
+					optionSms = JOptionPane.showInputDialog("=== SMS will be sent to Parents === \n Please Enter option \n 1 : Proceed "
+							+ " \n 2 : Cancel Fee Payment");
+				} else if(bundle.getString("STAFF_FEE_SMS").equalsIgnoreCase("true")) {
+					optionSms = JOptionPane.showInputDialog("=== SMS will be sent to Staff === \n Please Enter option \n 1 : Proceed "
+							+ " \n 2 : Cancel Fee Payment");
+				}
+				
+				if(optionSms == null || optionSms.trim().equalsIgnoreCase("null") || optionSms.equalsIgnoreCase("2")){
+					validateField = false;
+					JOptionPane.showMessageDialog(null, "Fee Payment cancelled");
+				}
+				
 				if(validateField) {
 					if(!commonObj.charExceeded("Bank Name", bank, 100).equalsIgnoreCase("")){
 						JOptionPane.showMessageDialog(null, commonObj.charExceeded("Bank Name", bank, 100));

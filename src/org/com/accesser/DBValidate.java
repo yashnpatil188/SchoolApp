@@ -1973,6 +1973,7 @@ public class DBValidate {
 				messageId = resultSet.getString("MESSAGE_ID") == null ? " "	: (resultSet.getString("MESSAGE_ID").trim());
 				studentDetailsMap.put("messageId", messageId);
 				message = resultSet.getString("MESSAGE") == null ? " ": (resultSet.getString("MESSAGE").trim());
+				message = cm.revertCommaApostrophy(message);
 				studentDetailsMap.put("message", message);
 				messageType = resultSet.getString("TYPE") == null ? " ": (resultSet.getString("TYPE").trim());
 				studentDetailsMap.put("messageType", messageType);
@@ -17387,7 +17388,7 @@ public class DBValidate {
 		}
 		
 		try {
-			smsText = smsText.replace("'", "*");
+			smsText = cm.replaceCommaApostrophy(smsText);
 			insertSmsData = "INSERT INTO "+sessionData.getDBName()+"."+"SMS_DATA " + "(GR_NO,PRESENT_STD,PRESENT_DIV,ACADEMIC_YEAR,PHONE,MESSAGE,SENDER,PRIORITY,TYPE,STATUS,RESPONSE,MESSAGE_ID,"
 					+ "API_KEY,SCHEDULED_DATE,CREATED_DATE,CREATED_BY,MODIFIED_DATE,MODIFIED_BY,SECTION_NM,NAME,ROLL_NO,MODULE_NAME) "
 					+ "VALUES ('" + gr + "','" + std + "'," + "'"+ div + "','" + academic.trim().toUpperCase() + "','"+phone+"','"+smsText+"'"
@@ -18122,6 +18123,153 @@ public class DBValidate {
 		}
 	}
 	
+	// /////Add SMS Saff details///////////////////////////////////
+	public boolean addSMSStaff(SessionData sessionData, String staffName, String designation, String contact, 
+    		String std, String div, String sms, String academic, boolean isUpdate) throws Exception {
+
+		String createdBy = sessionData.getUserName();
+		String addUpdate = "added";
+		boolean retFlag = false;
+		boolean validateStaffName = false;
+
+		try {
+			connectDatabase(sessionData);
+			
+			
+			if(!isUpdate){
+				try {
+					String findStaffQuery = "SELECT DISTINCT STAFF_NAME " + "FROM "+sessionData.getDBName()+"."+"STAFF_DATA WHERE ACADEMIC_YEAR='"+academic+"' "
+							+ "AND DESIGNATION='"+designation+"' AND STD_1='"+std+"' AND DIV_1='"+div+"' AND SECTION_NM='"+sessionData.getSectionName()+"' "
+							+ "AND STATUS IS NULL";
+
+					statement = connection.createStatement();
+					resultSet = statement.executeQuery(findStaffQuery);
+					String staffNameDB = "";
+					while (resultSet.next()) {
+						staffNameDB = resultSet.getString("STAFF_NAME");
+						if(staffNameDB.trim().equalsIgnoreCase(staffName.trim())) {
+							validateStaffName = true;
+							JOptionPane.showMessageDialog(null, "Staff " + staffName + " already exist for STD " + std + " in academic year "+academic);
+							break;
+						}
+					}
+					
+					//Proceed if staff name doesn't exist
+					if(!validateStaffName) {
+						String insertStaffName = "INSERT INTO "+sessionData.getDBName()+"."+"STAFF_DATA (STAFF_NAME,DESIGNATION,CONTACT_1,STD_1,DIV_1,SMS_FEE_ENABLED,"
+								+ "ACADEMIC_YEAR,SECTION_NM,CREATED_DATE,CREATED_BY) "
+								+ "VALUES ('"+staffName+"', '"+designation+"', '"+contact+"', '"+std+"', '"+div+"', '"+sms+"', '"+academic+"', "
+									+ "'"+sessionData.getSectionName()+"', SYSDATE(), '"+sessionData.getUserName()+"')";
+						statement = connection.createStatement();
+						statement.executeUpdate(insertStaffName);
+					}
+					
+					retFlag = true;
+					
+				} catch (Exception e) {
+					cm.logException(e);
+					return retFlag;
+				}
+			}
+			else {
+				try {
+					String updateStaffSms = "Update "+sessionData.getDBName()+"."+"STAFF_DATA set "
+							+ "MODIFIED_BY='"+createdBy.trim()+"',SMS_FEE_ENABLED='"+sms+"',"
+							+ "MODIFIED_DATE=SYSDATE() where SECTION_NM='"+sessionData.getSectionName().toUpperCase()+"' "
+							+ "AND STAFF_NAME='"+staffName.toUpperCase()+"' AND DESIGNATION='"+designation+"' "
+							+ "AND CONTACT_1='"+contact+"' AND STD_1='"+std+"' AND DIV_1='"+div+"' AND STATUS IS NULL "
+							+ "AND ACADEMIC_YEAR='"+academic+"'";
+					statement = connection.createStatement();
+					statement.executeUpdate(updateStaffSms);
+					
+					retFlag = true;
+					
+				} catch (Exception e) {
+					cm.logException(e);
+					return retFlag;
+				}
+			}
+
+//			if (!validateFeeName) {
+//				if(isUpdate){
+//					addUpdate = "updated";
+//					insertFeeName = "Update "+sessionData.getDBName()+"."+"FEES_HEAD set "
+//							+ "FEES_NAME='"+feeName.trim().toUpperCase()+"',"
+//							+ "CATEGORY='"+feeCategory.trim()+"',"
+//							+ "AMOUNT="+amount.trim()+","
+//							+ "OPTIONAL='"+optional.trim()+"',"
+//							+ "FREQUENCY='"+payFrequency.trim()+"',"
+//							+ "MODIFIED_BY='"+createdBy.trim()+"',SHORT_NAME='"+shortName+"',"
+//							+ "MODIFIED_DATE=SYSDATE() where (SECTION_NM='"+section.toUpperCase()+"') "
+//							+ "AND ORDER_NO='"+orderNo+"' "
+//							+ "AND ACADEMIC_YEAR='"+academic+"' AND STD_1='"+std+"'";
+//					
+//					statement = connection.createStatement();
+//					statement.executeUpdate(insertFeeName);
+//					logger.info("Fee Name " + feeName.trim() + " "+addUpdate+" successfully...");
+//					std = "'"+std+"'";
+//					
+//				}
+//				else if(isAllSelected){
+//					std = "";
+//					allStd = allStd.replace("Select,", "");
+//					String[] stdList = allStd.split(",");
+//					for(int i = 0; i < stdList.length; i++){
+//						insertFeeName += "('" + academic.trim() + "','" + stdList[i].trim().toUpperCase() + "','" + feeName.trim().toUpperCase() + "'," + "'"
+//								+ feeCategory.trim() + "'," + amount.trim() + "," + "'"
+//								+ payFrequency.trim() + "','" + optional.trim() + "','"+section+"'," + 
+//								"SYSDATE(),'" + createdBy.trim() + "','"+shortName+"'),";
+//						std = "'"+stdList[i].trim().toUpperCase()+"'" +","+ std;
+//					}
+//					insertFeeName = insertFeeName.substring(0,  insertFeeName.length()-1);
+//					insertFeeName = "INSERT INTO "+sessionData.getDBName()+"."+"FEES_HEAD (ACADEMIC_YEAR,STD_1,FEES_NAME,CATEGORY,AMOUNT,"
+//							+ "FREQUENCY,OPTIONAL,SECTION_NM,CREATED_DATE,CREATED_BY,SHORT_NAME) VALUES "+insertFeeName;
+//					
+//					statement = connection.createStatement();
+//					statement.executeUpdate(insertFeeName);
+//					logger.info("Fee Name " + feeName.trim() + " "+addUpdate+" successfully for Std "+allStd);
+//					std = std.substring(0,  std.length()-1);;
+//				}
+//				else {
+//					insertFeeName = "INSERT INTO "+sessionData.getDBName()+"."+"FEES_HEAD " + "(ACADEMIC_YEAR,STD_1,FEES_NAME,CATEGORY,AMOUNT,"
+//							+ "FREQUENCY,OPTIONAL,SECTION_NM,CREATED_DATE,CREATED_BY,SHORT_NAME)  "
+//							+ "VALUES ('" + academic.trim() + "','" + std.trim().toUpperCase() + "','" + feeName.trim().toUpperCase() + "'," + "'"
+//							+ feeCategory.trim() + "'," + amount.trim() + "," + "'"
+//							+ payFrequency.trim() + "','" + optional.trim() + "','"+section+"'," + 
+//							"SYSDATE(),'" + createdBy.trim() + "','"+shortName+"')";
+//					
+//					logger.info("insertFeeName query===>" + insertFeeName);
+//					statement = connection.createStatement();
+//					statement.executeUpdate(insertFeeName);
+//					std = "'"+std+"'";
+//					logger.info("Fee Name " + feeName.trim() + " "+addUpdate+" successfully...");
+//				}
+//				
+//				String updateShortName = "Update "+sessionData.getDBName()+"."+"FEES_HEAD set "
+//						+ "MODIFIED_BY='"+createdBy.trim()+"',SHORT_NAME='"+shortName+"',"
+//						+ "MODIFIED_DATE=SYSDATE() where SECTION_NM='"+section.toUpperCase()+"' "
+//						+ "AND CATEGORY='"+feeCategory.trim()+"' "
+//						+ "AND ACADEMIC_YEAR='"+academic+"' AND STD_1 IN ("+std+")";
+//				statement = connection.createStatement();
+//				statement.executeUpdate(updateShortName);
+//				
+//				JOptionPane.showMessageDialog(null,
+//						"Fee Name " + cm.revertCommaApostrophy(feeName.trim().replace("$$", ".")) + " "+addUpdate+" successfully for std "+std);
+//				retFlag = true;
+//			} else {
+//				retFlag = false;
+//				JOptionPane.showMessageDialog(null, "Fee Name " + feeName + " already exist for STD " + std);
+//			}
+			
+			return retFlag;
+		} catch (Exception e) {
+			cm.logException(e);
+			return false;
+		} finally {
+			closeDatabase(sessionData);
+		}
+	}
+	
 	// /////////Find insert fee name column////////////////////////////////////////
 	public boolean insertFeeNameColumn(SessionData sessionData1, String fee_name, String payFrequency, String optional) throws Exception {
 
@@ -18360,6 +18508,56 @@ public class DBValidate {
 		return retFeesHeadMap;
 	}
 	
+	///////////get Fees Head Data////////////////////////////////////////
+	public LinkedHashMap<String,LinkedHashMap<String, String>> getStaffSMSData(SessionData sessionData, String academic) throws Exception {
+		LinkedHashMap<String, LinkedHashMap<String, String>> retStaffDetailsMap = new LinkedHashMap<String, LinkedHashMap<String, String>>();
+		String findStaffDetailsQuery, addToCondition = "";
+		String staffName,designation,contact,std,div,smsEnabled = "";
+		
+		try
+		{
+//	//		retFeesHeadMap.put("Select", null);
+//			if(!category.equalsIgnoreCase("")){
+//				addToCondition = " AND CATEGORY='"+category+"'";
+//			}
+//			if(std.contains(",")) {
+//				addToCondition += " AND STD_1 IN ("+std+")";
+//			}
+//			else {
+//				addToCondition += " AND STD_1='"+std+"'";
+//			}
+			
+			findStaffDetailsQuery = "SELECT * FROM "+sessionData.getDBName()+"."+"STAFF_DATA WHERE ACADEMIC_YEAR='"+academic+"' "
+					+ "AND SECTION_NM='"+sessionData.getSectionName()+"' AND STATUS IS NULL ORDER BY CREATED_DATE ASC";
+			statement = connection.createStatement();
+			resultSet = statement.executeQuery(findStaffDetailsQuery);
+			
+			while (resultSet.next()) {
+				LinkedHashMap<String, String> staffDetailMap = new LinkedHashMap<String, String>();
+				staffName = resultSet.getString("STAFF_NAME") == null ? "" : (resultSet.getString("STAFF_NAME").trim());
+				staffDetailMap.put("staffName", staffName);
+				designation = resultSet.getString("DESIGNATION") == null ? "" : (resultSet.getString("DESIGNATION").trim());
+				staffDetailMap.put("designation", designation);
+				contact = resultSet.getString("CONTACT_1") == null ? "" : (resultSet.getString("CONTACT_1").trim());
+				staffDetailMap.put("contact", contact);
+				std = resultSet.getString("STD_1") == null ? "" : (resultSet.getString("STD_1").trim());
+				staffDetailMap.put("std", std);
+				div = resultSet.getString("DIV_1") == null ? "" : (resultSet.getString("DIV_1").trim());
+				staffDetailMap.put("div", div);
+				smsEnabled = resultSet.getString("SMS_FEE_ENABLED") == null ? "" : (resultSet.getString("SMS_FEE_ENABLED").trim());
+				staffDetailMap.put("smsEnabled", smsEnabled);
+				
+				if(retStaffDetailsMap.get(staffName) == null) {
+					retStaffDetailsMap.put(staffName, staffDetailMap);
+				}
+			}
+			
+		} catch (Exception e) {
+			cm.logException(e);
+		}
+		return retStaffDetailsMap;
+	}
+	
 	///////////get consolidated Fees Head Data////////////////////////////////////////
 	public LinkedHashMap<String,String> getConsolidatedFeesHead(SessionData sessionData, String academic,
 			String section, String category) throws Exception {
@@ -18397,7 +18595,6 @@ public class DBValidate {
 	///delete fee name/////
 	public boolean deleteFeeName(SessionData sessionData, String orderNo) throws Exception {
 
-		logger.info("========deleteFeeName==========");
 		boolean updateFlag = false;
 		String deleteFeeName = "";
 		int udpdateCount = 0;
@@ -18416,8 +18613,84 @@ public class DBValidate {
 		return updateFlag;
 	}
 	
+	///delete staff name/////
+	public boolean deleteStaffName(SessionData sessionData, String staffName, String designation, String contact, 
+    		String std, String div, String sms, String academic) throws Exception {
+
+		boolean updateFlag = false;
+		String deleteStaffName = "";
+		int udpdateCount = 0;
+		String createdBy = sessionData.getUserName();
+		try {
+//			deleteStaffName = "DELETE FROM "+sessionData.getDBName()+"."+"STAFF_DATA WHERE order_no='" + orderNo + "'";
+			
+			
+			deleteStaffName = "Update "+sessionData.getDBName()+"."+"STAFF_DATA set "
+					+ "MODIFIED_BY='"+createdBy.trim()+"',STATUS='DELETE',"
+					+ "MODIFIED_DATE=SYSDATE() where SECTION_NM='"+sessionData.getSectionName().toUpperCase()+"' "
+					+ "AND STAFF_NAME='"+staffName.toUpperCase()+"' AND DESIGNATION='"+designation+"' "
+					+ "AND CONTACT_1='"+contact+"' AND STD_1='"+std+"' AND DIV_1='"+div+"' AND STATUS IS NULL "
+					+ "AND ACADEMIC_YEAR='"+academic+"'";
+
+			statement = connection.createStatement();
+			udpdateCount = statement.executeUpdate(deleteStaffName);
+			if (udpdateCount > 0) {
+				updateFlag = true;
+			}
+
+		} catch (Exception e) {
+			cm.logException(e);
+		}
+		return updateFlag;
+	}
+	
 	///////////getFeesCategoryList////////////////////////////////////////
 	public String getFeesCategoryList(SessionData sessionData, String academic, String std, String section, 
+			String columnName, String tableName) throws Exception {
+		logger.info("=========getFeesCategoryList Query============");
+		String findFeesCategoryList = "",category = "", condition = "";
+		String feesCategoryList = "Select";
+		String[] splitList;
+		LinkedHashMap<String, String> retFeesMap = new LinkedHashMap<String, String>();
+		
+		try
+		{
+			if(columnName.equalsIgnoreCase("CATEGORY")) {
+				feesCategoryList = bundle.getString("FEE_CATEGORY");
+				
+				splitList = feesCategoryList.split(",");
+				for(int i = 0; i < splitList.length; i++) {
+					retFeesMap.put(splitList[i], "");
+				}
+			}
+			if(!std.equalsIgnoreCase("") && !std.equalsIgnoreCase("All")) {
+				condition = " AND STD_1='"+std+"'";
+			}
+			
+			findFeesCategoryList = "SELECT DISTINCT("+columnName+") FROM "+sessionData.getDBName()+"."+tableName+" WHERE ACADEMIC_YEAR='"+academic+"' "
+					+ condition +" AND SECTION_NM='"+section+"' ORDER BY "+columnName+" ASC";
+			statement = connection.createStatement();
+			resultSet = statement.executeQuery(findFeesCategoryList);
+			
+			while (resultSet.next()) {
+				category = resultSet.getString(columnName) == null ? "" : (resultSet.getString(columnName).trim());
+				if(retFeesMap.get(category) == null){
+					feesCategoryList = feesCategoryList + "," + category;
+					retFeesMap.put(category, "");
+				}
+			}
+			
+		} catch (Exception e) {
+			cm.logException(e);
+		}
+		if(columnName.equalsIgnoreCase("CATEGORY")) {
+			feesCategoryList = feesCategoryList + ",Other";
+		}
+		return feesCategoryList;
+	}
+	
+	///////////getSMSStaffList////////////////////////////////////////
+	public String getSMSStaffList(SessionData sessionData, String academic, String std, String section, 
 			String columnName, String tableName) throws Exception {
 		logger.info("=========getFeesCategoryList Query============");
 		String findFeesCategoryList = "",category = "", condition = "";
@@ -18945,7 +19218,7 @@ public class DBValidate {
 		List<String> passGrList = new ArrayList();
 		LinkedHashMap foundStudentMap = new LinkedHashMap<>();
 		LinkedHashMap grMap = new LinkedHashMap<>();
-		String smsText = "", sms_fee_flag = "", smsTemplate;
+		String smsText = "", sms_fee_flag = "", staff_fee_sms_flag = "", smsTemplate;
 		String smsType = "Send Sms";
 		String currentDate = cm.dateToYYYYMMDD(new Date());
 		String mandate_opt = "MANDATORY";
@@ -18953,6 +19226,10 @@ public class DBValidate {
 		String firstKey = "";
 
 		try {
+			smsTemplate = bundle.getString("SMS_FEE");
+			sms_fee_flag = bundle.getString("SMS_FEE_FLAG");
+			staff_fee_sms_flag = bundle.getString("STAFF_FEE_SMS");
+			
 			//check one time concession and not individual feehead
 			Set setConcessionMap = concessionMap.entrySet();
 			Iterator ic = setConcessionMap.iterator();
@@ -18977,8 +19254,6 @@ public class DBValidate {
 			if(!backDate.equalsIgnoreCase("")) {
 				insertDate = "STR_TO_DATE('"+backDate+"', '%d/%m/%Y')";
 			}
-			smsTemplate = bundle.getString("SMS_FEE");
-			sms_fee_flag = bundle.getString("SMS_FEE_FLAG");
 			
 //			if(optional.equalsIgnoreCase("Yes")){
 //				mandate_opt = "OPTIONAL";
@@ -19215,12 +19490,10 @@ public class DBValidate {
 //				}
 //			}
 			
-			logger.info("feeDataQuery query==>" + feeDataQuery);
 			statement = connection.createStatement();
 			statement.executeUpdate(feeDataQuery);
 			returnFlag = true;
 			
-			logger.info("feeReportQuery query===>" + feeReportQuery);
 			statement = connection.createStatement();
 			statement.executeUpdate(feeReportQuery);
 			
@@ -19239,6 +19512,7 @@ public class DBValidate {
 				grMap.put("div", div);
 				grMap.put("roll_no", rollNo);
 				grMap.put("name", name);
+				/////add eligible staff mobile numbers in contact1 as comma separated
 				grMap.put("contact1", contact1);
 				grMap.put("contact2", contact2);
 				foundStudentMap.put(grNo, grMap);
@@ -19253,6 +19527,12 @@ public class DBValidate {
 						academic, std, div, "", "FEE");
 				if(!smsResponse.contains("connecting")){
 					smsResponse = "SMS sent successfully..";
+					
+					//send same fee SMS to staff
+					if(staff_fee_sms_flag.equalsIgnoreCase("true")) {
+						smsResponse = cm.sendHspStaffFeeSms(sessionData, passGrList, foundStudentMap, smsText, 
+								sessionData.getSectionName(), "", academic, std, div, "", "SMS_FEE_STAFF");
+					}
 				}
 			}
 			
@@ -21193,16 +21473,17 @@ public class DBValidate {
 		return feesReportMap;
 	}
 	
-	public double getFeesCollection(SessionData sessionData, String period){
+	public double getFeesCollection(SessionData sessionData, String period, String fromDate, String toDate, 
+			String std, String div, String academicYear){
 		double totalAmount = 0;
-		String fromDate = "";
-		String toDate = "";
+		String condition = "";
 		LinkedHashMap<String,String> dateMap = new LinkedHashMap<String,String>();
 		
 		try{
-			fromDate = toDate = cm.dateToYYYYMMDD(new Date());
 			dateMap = cm.getDateForADayInWeek(sessionData);
-			if(period.equalsIgnoreCase("2")){
+			if(period.equalsIgnoreCase("1")){
+				fromDate = toDate = cm.dateToYYYYMMDD(new Date());
+			} else if(period.equalsIgnoreCase("2")){
 				fromDate = dateMap.get("firstDay");
 				toDate = dateMap.get("lastDay");
 			}
@@ -21211,21 +21492,31 @@ public class DBValidate {
 				toDate = dateMap.get("lastDayOfMonth");
 			}
 			
+			if(!std.equalsIgnoreCase("All") && !std.equalsIgnoreCase("")) {
+				condition = condition + " AND STD_1='"+std+"'";
+			}
+			if(!div.equalsIgnoreCase("All") && !div.equalsIgnoreCase("")) {
+				condition = condition + " AND DIV_1='"+div+"'";
+			}
+			
 			String queryMandatory = "select SUM(TOTAL_AMOUNT) AS TOTAL_AMOUNT from "+sessionData.getDBName()+".fees_report_mandatory "
-					+ "where FEE_DATE between '"+fromDate+"' and '"+toDate+"'";
+					+ "where FEE_DATE between '"+fromDate+"' and '"+toDate+"' AND SECTION_NM='"+sessionData.getSectionName()+"' "
+					+ "AND ACADEMIC_YEAR='"+academicYear+"' "+condition;
 			statement = connection.createStatement();
 			resultSet = statement.executeQuery(queryMandatory);
 			while (resultSet.next()) {
 				totalAmount = totalAmount + resultSet.getDouble("TOTAL_AMOUNT");
 			}
 			
-			String queryOptional = "select SUM(TOTAL_AMOUNT) AS TOTAL_AMOUNT from "+sessionData.getDBName()+".fees_report_optional "
-					+ "where FEE_DATE between '"+fromDate+"' and '"+toDate+"'";
-			statement = connection.createStatement();
-			resultSet = statement.executeQuery(queryOptional);
-			while (resultSet.next()) {
-				totalAmount = totalAmount + resultSet.getDouble("TOTAL_AMOUNT");
-			}
+//			if(totalAmount == 0) {
+//				String queryOptional = "select SUM(TOTAL_AMOUNT) AS TOTAL_AMOUNT from "+sessionData.getDBName()+".fees_report_optional "
+//						+ "where FEE_DATE between '"+fromDate+"' and '"+toDate+"'";
+//				statement = connection.createStatement();
+//				resultSet = statement.executeQuery(queryOptional);
+//				while (resultSet.next()) {
+//					totalAmount = totalAmount + resultSet.getDouble("TOTAL_AMOUNT");
+//				}
+//			}
 		}
 		catch(Exception e){
 			cm.logException(e);
@@ -21252,6 +21543,40 @@ public class DBValidate {
 		}
 		
 		return leftDataMap;
+	}
+	
+	public LinkedHashMap<String,String> getFeeStaffMap(SessionData sessionData, String academicYear, 
+			String std, String div) throws Exception {
+		LinkedHashMap<String,String> staffMap = new LinkedHashMap<String,String>();
+		String condition = "", findQuery = "";
+		
+		if(!std.equalsIgnoreCase("All") && !std.equalsIgnoreCase("")) {
+			condition = condition + " AND STD_1='"+std+"'";
+		}
+		if(!div.equalsIgnoreCase("All") && !div.equalsIgnoreCase("")) {
+			condition = condition + " AND DIV_1='"+div+"'";
+		}
+		
+		if(!std.equalsIgnoreCase("All") && !std.equalsIgnoreCase("") && !div.equalsIgnoreCase("All") && !div.equalsIgnoreCase("")) {
+			findQuery = "SELECT STAFF_NAME, CONTACT_1 FROM "+sessionData.getDBName()+"."+"staff_data "
+					+ "WHERE ACADEMIC_YEAR='"+academicYear+"' AND SECTION_NM='"+sessionData.getSectionName()+"' "
+					+ "AND SMS_FEE_ENABLED='Enable' "+condition;
+		}
+		else {
+			findQuery = "SELECT STAFF_NAME, CONTACT_1 FROM "+sessionData.getDBName()+"."+"staff_data "
+					+ "WHERE ACADEMIC_YEAR='"+academicYear+"' AND SECTION_NM='"+sessionData.getSectionName()+"' "
+					+ "AND SMS_FEE_ENABLED='Enable' AND DESIGNATION !='Class Teacher'";
+		}
+		
+
+		statement = connection.createStatement();
+		resultSet = statement.executeQuery(findQuery);
+
+		while (resultSet.next()) {
+			staffMap.put(resultSet.getString("STAFF_NAME"), resultSet.getString("CONTACT_1"));
+		}
+		
+		return staffMap;
 	}
 	
 	public LinkedHashMap<String,String> deleteDuplicateData(SessionData sessionData, String academicYear, 

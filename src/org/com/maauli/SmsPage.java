@@ -192,12 +192,15 @@ public class SmsPage extends JFrame {
     static int app_header_2_widthSpace = 0;
     static int app_header_2_heightSpace = 0;
     static String sms_required = "";
+    static String fee_required = "";
+    static String fee_visible_master_only = "";
     static String account_required = "";
     static String staff_required = "";
     static String dateTimeClass = "";
     static String fromDtClass = "";
     static String toDtClass = "";
     static int daysCheckStatus = 0;
+    static boolean fee_visible_flag = true;
 
 	private static LinkedHashMap foundStudentMap;
 
@@ -208,6 +211,7 @@ public class SmsPage extends JFrame {
 
 		logger.info("======SmsPage========");
 		System.gc();
+		fee_visible_flag = true;
 		dateTimeClass = retDateTime;
 		sessionData = sessionData1;
 		user_name = retUserName;
@@ -272,6 +276,8 @@ public class SmsPage extends JFrame {
     	app_header_2_widthSpace = Integer.parseInt(bundle.getString("APP_HEADER_2_WIDTHSPACE_"+sessionData.getAppType()));
     	app_header_2_heightSpace = Integer.parseInt(bundle.getString("APP_HEADER_2_HEIGHTSPACE_"+sessionData.getAppType()));
     	sms_required = bundle.getString("SMS_REQUIRED");
+    	fee_required = bundle.getString("FEE_REQUIRED");
+    	fee_visible_master_only = bundle.getString("FEE_VISIBLE_MASTER_ONLY");
     	account_required = bundle.getString("ACCOUNT_REQUIRED");
     	staff_required = bundle.getString("STAFF_REQUIRED");
     	daysCheckStatus = Integer.parseInt(bundle.getString("DAYS_STATUS_CHECK"));
@@ -283,6 +289,12 @@ public class SmsPage extends JFrame {
         remarkStr = remarkStr.replace("YYYY", currentYear);
         
 		try {
+			if(fee_visible_master_only.equalsIgnoreCase("true") && !sessionData.getConfigMap().get("SchoolApp_IP").contains("127.0.0.1")) {
+        		fee_visible_flag = false;
+        	}
+        	else {
+        		fee_visible_flag = true;
+        	}
 			if (dbValidate.connectDatabase(sessionData)) {
 				String userActive = dbValidate.checkFormData(sessionData, user_name, "LEAVING CERTIFICATE", user_role, section);
 				if (userActive.equalsIgnoreCase("") || userActive.equalsIgnoreCase(null)) {
@@ -570,6 +582,24 @@ public class SmsPage extends JFrame {
 	        });
         }
 
+        if(fee_required.equalsIgnoreCase("true") && fee_visible_flag){
+	        p = p + 50;
+	        JButton feeButton = new JButton("FEE");
+	        feeButton.setFont(new Font("Book Antiqua", Font.BOLD, 18));
+	        feeButton.setBounds(10, p + 50, 130, 35);
+	        leftPanel.add(feeButton);
+	
+	        feeButton.addActionListener(new ActionListener() {
+	
+	            public void actionPerformed(ActionEvent e) {
+	
+	            	frame.setVisible(false);
+	            	LinkedHashMap findStudentMap = new LinkedHashMap();
+					new CreateFeesHead(sessionData, "", "", section);
+	            }
+	        });
+        }
+        
 		panelHome.add(leftPanel, BorderLayout.WEST);
 
 		// ///////////main panel////////////////////////////////////////
@@ -607,6 +637,51 @@ public class SmsPage extends JFrame {
 		subMenuTitle.setForeground(Color.orange);
 		subMenuTitle.setBounds(20, 45, 100, 30);
 		topbandPanel.add(subMenuTitle);
+		
+		int width = 80;
+		JButton smsHomeButton = new JButton("SMS Home");
+		smsHomeButton.setFont(new Font("Book Antiqua", Font.PLAIN, 18));
+		smsHomeButton.setBackground(Color.GREEN);
+		smsHomeButton.setBounds(width, 50, 140, 24);
+		topbandPanel.add(smsHomeButton);
+
+		smsHomeButton.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				frame.setVisible(false);
+            	LinkedHashMap findStudentMap = new LinkedHashMap();
+				new SmsPage(sessionData, "", "", "", "", "", "", findStudentMap, false, "", "", "", "", "",
+						"", section, "", user_name, user_role,"","","");
+			}
+		});
+		
+		width = width + 150;
+		JButton staffEntryButton = new JButton("Staff Entry");
+		staffEntryButton.setFont(new Font("Book Antiqua", Font.PLAIN, 18));
+		staffEntryButton.setBounds(width, 50, 140, 24);
+		topbandPanel.add(staffEntryButton);
+
+		staffEntryButton.addActionListener(new ActionListener() {
+
+			public void actionPerformed(ActionEvent e) {
+				frame.setVisible(false);
+				new CreateSMSStaff(sessionData, "", section);
+
+			}
+		});
+		
+//		width = width + 150;
+//		JButton smsFeeReportButton = new JButton("SMS Fee Report");
+//		smsFeeReportButton.setFont(new Font("Book Antiqua", Font.PLAIN, 18));
+//		smsFeeReportButton.setBackground(Color.GREEN);
+//		smsFeeReportButton.setBounds(width, 50, 140, 24);
+//		topbandPanel.add(smsFeeReportButton);
+//
+//		smsFeeReportButton.addActionListener(new ActionListener() {
+//
+//			public void actionPerformed(ActionEvent e) {
+//
+//			}
+//		});
 
 		mainPanel.add(topbandPanel, BorderLayout.EAST);
 		// mainPanel.add(bottombandPanel, BorderLayout.SOUTH);
@@ -727,18 +802,19 @@ public class SmsPage extends JFrame {
 		lcType_label.setBounds(710, 00, 110, 50);
 		findPanel.add(lcType_label);
 
-		String lcSel = "";
-		if (!smsTypeClass.equalsIgnoreCase("")) {
-			lcSel = smsTypeClass;
-			smsTypeList = lcSel + "," + smsTypeList;
-		} else {
-			smsTypeList = "Select," + smsTypeList;
-		}
+//		String lcSel = "";
+//		if (!smsTypeClass.equalsIgnoreCase("")) {
+//			lcSel = smsTypeClass;
+//			smsTypeList = lcSel + "," + smsTypeList;
+//		} else {
+//			smsTypeList = "Select," + smsTypeList;
+//		}
 
 		String[] smsList = smsTypeList.split(",");
 		final JComboBox sms_combo = new JComboBox(smsList);
 		sms_combo.setFont(new Font("Book Antiqua", Font.BOLD, 16));
 		sms_combo.setBounds(770, 12, 180, 25);
+		sms_combo.setSelectedItem(smsTypeClass);
 		findPanel.add(sms_combo);
 
 		// /////////////Roll No.//////////////
@@ -2078,6 +2154,7 @@ public class SmsPage extends JFrame {
 					contact1_labels[i] = new JLabel(contact1);
 					contact1_labels[i].setFont(new Font("Book Antiqua", Font.BOLD, 16));
 					contact1_labels[i].setBounds(650, j + 12, 100, 20);
+					contact1_labels[i].setToolTipText(contact1);
 					dataPanel.add(contact1_labels[i]);
 
 					pipe_labels4[i] = new JLabel("|");

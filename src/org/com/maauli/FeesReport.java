@@ -800,7 +800,7 @@ public class FeesReport extends JFrame {
  		// /////////Report category///////////////30, 80, 120, 50
  		JLabel report_label = new JLabel("Report Type :");
  		report_label.setFont(new Font("Book Antiqua", Font.BOLD, 16));
- 		report_label.setBounds(890, bottomBandItemHeight, 100, 50);
+ 		report_label.setBounds(890, bottomBandItemHeight, 120, 50);
  		bottombandPanel.add(report_label);
 
  		String[] reportTypeList = reportType.split(",");
@@ -871,10 +871,20 @@ public class FeesReport extends JFrame {
  		submitButton.setBounds(700, bottomBandItemHeight+15, 130, 25);
  		bottombandPanel.add(submitButton);
  		
- 		JButton smsAdminButton = new JButton("Sms to Admin");
- 		smsAdminButton.setFont(new Font("Book Antiqua", Font.BOLD, 16));
- 		smsAdminButton.setBounds(850, bottomBandItemHeight+15, 160, 25);
+ 		String smsbuttonName = "";
  		if(bundle.getString("DAILY_ADMIN_SMS").equalsIgnoreCase("true") && 
+ 				bundle.getString("STAFF_FEE_REPORT_SMS").equalsIgnoreCase("true")) {
+ 			smsbuttonName = "Sms to Admin/Staff";
+ 		} else if(bundle.getString("DAILY_ADMIN_SMS").equalsIgnoreCase("true")) {
+ 			smsbuttonName = "Sms to Admin";
+ 		} else if(bundle.getString("STAFF_FEE_REPORT_SMS").equalsIgnoreCase("true")) {
+ 			smsbuttonName = "Sms to Staff";
+ 		}
+ 		JButton smsAdminButton = new JButton(smsbuttonName);
+ 		smsAdminButton.setFont(new Font("Book Antiqua", Font.BOLD, 16));
+ 		smsAdminButton.setBounds(850, bottomBandItemHeight+15, 200, 25);
+ 		if((bundle.getString("DAILY_ADMIN_SMS").equalsIgnoreCase("true") || 
+ 				bundle.getString("STAFF_FEE_REPORT_SMS").equalsIgnoreCase("true")) && 
  				bundle.getString("SMS_FEE_FLAG").equalsIgnoreCase("true")){
  			bottombandPanel.add(smsAdminButton);
  		}
@@ -913,27 +923,135 @@ public class FeesReport extends JFrame {
 
 			public void actionPerformed(ActionEvent e) {
 				String todayDate = commonObj.getCurrentDate();
-				String period = "", smsText = "";
+				String period = "", smsText = "", fromDate = "", toDate = "", optionSelect = "", smsType = "", stdStr = "";
+				String std = (String) admittedStd_combo.getSelectedItem();
+				String div = (String) admittedDiv_combo.getSelectedItem();
+				String academic = (String) academicYear_combo.getSelectedItem();
 				List<String> passGrList = new ArrayList();
 				LinkedHashMap foundStudentMap = new LinkedHashMap<>();
 				double totalAmount = 0;
-				String optionSelect = JOptionPane.showInputDialog("===Send SMS to Admin=== \n Please Enter option \n 1 : Todays Collection "
-						+ " \n 2 : This Week Collection \n 3 : This Month Collection");
+				boolean isValid = true;
+				String optionAdminStaff = "";
 				
-				if(optionSelect != null && !optionSelect.trim().equalsIgnoreCase("null")){
-					if(optionSelect.equalsIgnoreCase("1")){
-						period = "Today's";
-					} else if(optionSelect.equalsIgnoreCase("2")){
-						period = "This week's";
-					} else if(optionSelect.equalsIgnoreCase("3")){
-						period = "This month's";
+				if(bundle.getString("DAILY_ADMIN_SMS").equalsIgnoreCase("true") && 
+		 				bundle.getString("STAFF_FEE_REPORT_SMS").equalsIgnoreCase("true")) {
+					optionAdminStaff = JOptionPane.showInputDialog("=== Send SMS === \n Please Enter option \n 1 : To Admin "
+							+ " \n 2 : To Staff");
+		 		} else if(bundle.getString("DAILY_ADMIN_SMS").equalsIgnoreCase("true")) {
+		 			optionAdminStaff = "1";
+		 		} else if(bundle.getString("STAFF_FEE_REPORT_SMS").equalsIgnoreCase("true")) {
+		 			optionAdminStaff = "2";
+		 		}
+				
+				if(optionAdminStaff != null && !optionAdminStaff.trim().equalsIgnoreCase("null")) {
+					if(optionAdminStaff.equalsIgnoreCase("1")){
+						optionSelect = JOptionPane.showInputDialog("===Send SMS to Admin=== \n Please Enter option \n 1 : Todays Collection "
+								+ " \n 2 : This Week Collection \n 3 : This Month Collection \n 4 : Selected Date Range");
+						
+						if(optionSelect != null && !optionSelect.trim().equalsIgnoreCase("null")){
+							if(optionSelect.equalsIgnoreCase("1")){
+								period = "Today's";
+							} else if(optionSelect.equalsIgnoreCase("2")){
+								period = "This week's";
+							} else if(optionSelect.equalsIgnoreCase("3")){
+								period = "This month's";
+							} else if(optionSelect.equalsIgnoreCase("4")){
+								Date selectedFromDate = (Date) datePickerFrom.getModel().getValue();
+								Date selectedToDate = (Date) datePickerTo.getModel().getValue();
+						        if(selectedFromDate.after(selectedToDate)) {
+						        	isValid = false;
+									JOptionPane.showMessageDialog(null, "From date cannot be greater than To date.");
+								}
+								else {
+								    fromDate = commonObj.dateToYYYYMMDD(selectedFromDate);
+							        toDate = commonObj.dateToYYYYMMDD(selectedToDate);
+							        period = fromDate + " to " + toDate;
+								}
+							}
+							
+							smsType = "SMS_FEE_ADMIN";
+							dbValidate.connectDatabase(sessionData);
+							totalAmount = dbValidate.getFeesCollection(sessionData, optionSelect, fromDate, toDate, std, div, academic);
+							smsText = "Fees Report\n"+period + " fees collection amount is Rs."+totalAmount;
+							if(isValid) {
+								String smsResponse = commonObj.sendHspSms(sessionData, passGrList, foundStudentMap, smsText, section, "", 
+										academicYearClass, "", "", "", smsType);
+							}
+						}
+						else {
+							isValid = false;
+							JOptionPane.showMessageDialog(null, "Please enter valid option.");
+						}
+						
+					} else if(optionAdminStaff.equalsIgnoreCase("2")){
+						if(bundle.getString("STAFF_FEE_REPORT_SMS").equalsIgnoreCase("true") && 
+				 				bundle.getString("SMS_FEE_FLAG").equalsIgnoreCase("true")){
+							
+							optionSelect = JOptionPane.showInputDialog("===Send SMS to Staff=== \n Please Enter option \n 1 : Todays Collection "
+									+ " \n 2 : This Week Collection \n 3 : This Month Collection \n 4 : Selected Date Range");
+								
+							if(optionSelect != null && !optionSelect.trim().equalsIgnoreCase("null")){
+								LinkedHashMap<String,String> dateMap = new LinkedHashMap<String,String>();
+								dateMap = commonObj.getDateForADayInWeek(sessionData);
+								
+								if(optionSelect.equalsIgnoreCase("1")){
+									fromDate = toDate = commonObj.dateToYYYYMMDD(new Date());
+									period = "Today's";
+								} else if(optionSelect.equalsIgnoreCase("2")){
+									fromDate = dateMap.get("firstDay");
+									toDate = dateMap.get("lastDay");
+									period = "This week's";
+								} else if(optionSelect.equalsIgnoreCase("3")){
+									fromDate = dateMap.get("firstDayOfMonth");
+									toDate = dateMap.get("lastDayOfMonth");
+									period = "This month's";
+								} else if(optionSelect.equalsIgnoreCase("4")){
+									Date selectedFromDate = (Date) datePickerFrom.getModel().getValue();
+									Date selectedToDate = (Date) datePickerTo.getModel().getValue();
+							        if(selectedFromDate.after(selectedToDate)) {
+							        	isValid = false;
+										JOptionPane.showMessageDialog(null, "From date cannot be greater than To date.");
+									}
+									else {
+									    fromDate = commonObj.dateToYYYYMMDD(selectedFromDate);
+								        toDate = commonObj.dateToYYYYMMDD(selectedToDate);
+								        period = fromDate + " to " + toDate;
+									}
+								}
+								
+								smsType = "SMS_FEE_STAFF";
+								dbValidate.connectDatabase(sessionData);
+								totalAmount = dbValidate.getFeesCollection(sessionData, optionSelect, fromDate, toDate, std, div, academic);
+								String smsSchoolStr = bundle.getString("SMS_"+sessionData.getAppType());
+								String smsCondition = "";
+								if(!std.equalsIgnoreCase("All") && !std.equalsIgnoreCase("")) {
+									smsCondition = " STD="+std+"";
+								}
+								if(!div.equalsIgnoreCase("All") && !div.equalsIgnoreCase("")) {
+									smsCondition = smsCondition + " DIV="+div+"";
+								}
+								smsText = "Fees Report\n" + smsSchoolStr + smsCondition +" total fees collection is Rs. "+totalAmount+ " from date "+fromDate+ " to "+toDate;
+								if(isValid) {
+									String smsResponse = commonObj.sendHspStaffFeeSms(sessionData, passGrList, foundStudentMap, smsText, section, "", 
+											academicYearClass, std, div, "", smsType);
+									if(smsResponse.contains("Success")) {
+										JOptionPane.showMessageDialog(null, smsResponse);
+									}
+									else {
+										JOptionPane.showMessageDialog(null, smsResponse);
+									}
+								}
+							}
+							else {
+								isValid = false;
+								JOptionPane.showMessageDialog(null, "Please enter valid option.");
+							}
+						}
+						else {
+							isValid = false;
+							JOptionPane.showMessageDialog(null, "Fee SMS to Staff is not enabled");
+						}
 					}
-					
-					dbValidate.connectDatabase(sessionData);
-					totalAmount = dbValidate.getFeesCollection(sessionData, optionSelect);
-					smsText = period + " fees collection amount is Rs."+totalAmount;
-					String smsResponse = commonObj.sendHspSms(sessionData, passGrList, foundStudentMap, smsText, section, "", 
-							academicYearClass, "", "", "", "SMS_FEE_ADMIN");
 				}
 			}
         });

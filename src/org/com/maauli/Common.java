@@ -3855,6 +3855,115 @@ public class Common {
 			return "Error " + e;
 		}
 	}
+	
+	/// send hsp Staff Fee SMS
+	public String sendHspStaffFeeSms(SessionData sessionData, List<String> passGrList, LinkedHashMap foundStudent,
+			String smsText, String section, String smsType, String academic, String std, String div, 
+			String dateTime, String moduleName) {
+		String sResult = "SMS sent successfully..";
+		try {
+			// Construct data
+			LinkedHashMap studenthmap = new LinkedHashMap();
+			String sms_url = bundle.getString("SMS_URL");
+			String sms_user = bundle.getString("SMS_"+sessionData.getAppType()+"_USER");
+			String sms_pass = bundle.getString("SMS_"+sessionData.getAppType()+"_PASS");
+			String sms_sender = bundle.getString("SMS_"+sessionData.getAppType()+"_SENDER");
+			String apiKey = bundle.getString(sessionData.getAppType()+"_APIKEY");
+			String sms_maauli_flag = bundle.getString("SMS_MAAULI_FLAG");
+			
+			if(sessionData.getUserName().equalsIgnoreCase("prp") && sms_maauli_flag.equalsIgnoreCase("true")){
+				sms_user = bundle.getString("SMS_USER");
+				sms_pass = bundle.getString("SMS_PASS");
+				sms_sender = bundle.getString("SMS_SENDER");
+				apiKey = bundle.getString("SMS_APIKEY");
+			}
+			String phonenumbers = "", staffName = "";
+			String phonePassed = "";
+			String type = "TRANS";
+			String scheduleTime = dateTime;
+			
+			if(moduleName.equalsIgnoreCase("SMS_FEE_STAFF") && dbValidate.connectDatabase(sessionData)){
+				
+				LinkedHashMap<String,String> feeStaffMap = new LinkedHashMap<String,String>();
+				feeStaffMap = dbValidate.getFeeStaffMap(sessionData, academic, std, div);
+				
+				Set set = feeStaffMap.entrySet();
+				Iterator i = set.iterator();
+				while(i.hasNext()) {
+					Map.Entry me = (Map.Entry)i.next();
+					staffName = (String) me.getKey();
+					phonenumbers = (String) me.getValue();
+					
+					if(phonenumbers.length() != 10){
+						continue;
+					}
+					
+					String data = "username=" + sms_user;
+					data += "&" + "apikey=" + apiKey;
+					data += "&" + "smstype=" + type;
+					data += "&" + "sendername=" + sms_sender;
+					data += "&" + "numbers=" + phonenumbers;
+					data += "&" + "message=" + URLEncoder.encode(smsText, "UTF-8");
+		
+					if (smsType.equalsIgnoreCase("Schedule SMS") && sms_url.contains("hspsms")) {
+						dateTime = dateTime.replace("-", "");
+						dateTime = dateTime.replace(" ", "");
+						dateTime = dateTime.replace(":", "");
+						data += "&scheduled=" + URLEncoder.encode(dateTime, "UTF-8");
+						sms_url = bundle.getString("SMS_SCHEDULE");
+					}
+
+					URL urlTest = new URL(sms_url);
+					String internetStatus = checkInternet(urlTest).toString();
+					if (!internetStatus.equalsIgnoreCase("Success")) {
+						return internetStatus;
+					}
+		
+					URL url = new URL(sms_url + data);
+					BufferedReader br = new BufferedReader(new InputStreamReader(url.openStream()));
+		
+					String line;
+					String sResult1 = "";
+					smsText = smsText.replace("\n", "newLine");
+					
+					try {
+						if (dbValidate.connectDatabase(sessionData)) {
+							while ((line = br.readLine()) != null) {
+								sResult1 += line;
+							}
+		
+							String response = "";
+							String status = "";
+							String msgId = "";
+							int noOfResultCount = 0;
+							
+							response = sResult1.substring(sResult1.indexOf("responseCode") + 15,
+									sResult1.indexOf(",") - 2);
+							if (response.contains("Submitted") || response.contains("SUBMITTED")) {
+								response = "SUBMITTED";
+							}
+							status = response;
+							msgId = sResult1.substring(sResult1.indexOf("msgid") + 8, sResult1.lastIndexOf("}") - 1);
+
+							dbValidate.insertSmsData(sessionData, "", "", "", academic,
+								phonenumbers, smsText, sms_sender, "", type, status, response, msgId,
+								section, scheduleTime, apiKey, smsType, staffName, "", moduleName);
+						}
+					} catch (Exception e1) {
+						sResult = "SMS sent failed...";
+						logException(e1);
+					} finally {
+						dbValidate.closeDatabase(sessionData);
+					}
+				}
+			}
+			/////end sending SMS to staff
+			return sResult;
+		} catch (Exception e) {
+			logException(e);
+			return "Error " + e;
+		}
+	}
 
 	/// Check SMS Balance
 	public String checkSmsBalance(SessionData sessionData) {
