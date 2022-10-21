@@ -19981,6 +19981,10 @@ public class DBValidate {
 				rollNoDb = resultSetFeesData.getString("ROLL_NO");
 				data = new String[20];
 				
+				if(grNoDb.equalsIgnoreCase("0013504")){
+					System.out.println("");
+				}
+				
 				if(!prevStd.equalsIgnoreCase(stdDb)){
 					feesHeadMap = getFeesHeadData(sessionData, academicYear, stdDb, sessionData.getSectionName(), category);
 				}
@@ -20057,7 +20061,7 @@ public class DBValidate {
 					}
 					else if(frequencyInt == 2){
 						for(int i = 0; i < 12; i+=6){
-							feesDate = resultSetFeesData.getString(cm.replaceCommaApostrophy(feesHead)+"_"+cm.intgerToMonth(startMonth+"")+"_DATE");
+							feesDate = resultSetFeesData.getString(cm.replaceCommaApostrophy(feesHead)+"_"+cm.intgerToMonth((startMonth + i)+"")+"_DATE");
 							if(cm.isDateBetween(fromDateStr, toDateStr, feesDate))
 							{
 								feesHeadAmount = resultSetFeesData.getDouble(feesHead+"_"+cm.intgerToMonth((startMonth + i)+""));
