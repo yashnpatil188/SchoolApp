@@ -218,9 +218,8 @@ public class ResultMarksPDF {
 				else if(resultName.equalsIgnoreCase("Final")){
 					resultName = "Annual";
 				}
-				if(!std.equalsIgnoreCase("IX") && !std.equalsIgnoreCase("X") && 
-						!std.equalsIgnoreCase("XI") && !std.equalsIgnoreCase("XII") && 
-						exam.equalsIgnoreCase("Semester 2")){
+				if(!std.equalsIgnoreCase("IX") && !std.equalsIgnoreCase("X") && !std.equalsIgnoreCase("XI") 
+						&& !std.equalsIgnoreCase("XII") && !std.equalsIgnoreCase("JR KG") && !std.equalsIgnoreCase("SR KG") && exam.equalsIgnoreCase("Semester 2")){
 					resultName = "Annual";
 				}
 				Chunk chunk06 = new Chunk(resultName.toUpperCase()+" RESULT "+academic);
@@ -880,6 +879,8 @@ public class ResultMarksPDF {
 				      
 				      table3.setWidthPercentage(100);
 				      
+				      //////////////table for JR & SR KG/////////
+				      //////////////////////////////////////////
 
 				      Chunk chunkNote = new Chunk("Note : "+note);
 						Font fontNote = FontFactory.getFont("TIMES_ROMAN");

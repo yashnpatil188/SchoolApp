@@ -623,6 +623,8 @@ public class CreateSMSStaff extends JFrame {
         
         ///////////////start Details for adding order////////////
         int itemWidth = 40;
+        std = std + ",All";
+        div = div + ",All";
         String[] stdList = std.split(",");
         String[] divList = div.split(",");
         final JTextField staffNameText = new JTextField();
@@ -714,6 +716,8 @@ public class CreateSMSStaff extends JFrame {
             jSeparator2.setFont(new Font("Book Antiqua", Font.BOLD, 18));
             jSeparator2.setBounds(40, bottomBandItemHeight, (screenWidth - 200), 50);
             bottombandPanel.add(jSeparator2);
+            
+            
         }
         
         /////start order headers////////////////
@@ -822,7 +826,7 @@ public class CreateSMSStaff extends JFrame {
 	        	staffName_text[k].setFont(new Font("Book Antiqua", Font.BOLD, 16));
 	        	staffName_text[k].setToolTipText(staffName);
 	        	staffName_text[k].setBounds(itemWidth, j, 200, 25);
-	        	staffName_text[k].setEditable(false);
+	        	staffName_text[k].enable(false);
 	    		dataPanel.add(staffName_text[k]);
 	    		
 	    		itemWidth = itemWidth + 220;
@@ -839,14 +843,14 @@ public class CreateSMSStaff extends JFrame {
 	    		contact_text[k].setFont(new Font("Book Antiqua", Font.BOLD, 16));
 	    		contact_text[k].setToolTipText(staffName);
 	    		contact_text[k].setBounds(itemWidth, j, 120, 25);
-	    		contact_text[k].setEditable(false);
+	    		contact_text[k].enable(false);
 	    		dataPanel.add(contact_text[k]);
 	    		
 	    		itemWidth = itemWidth + 140;
 	    		std_combo[k] = new JComboBox(stdList);
 	    		std_combo[k].setSelectedItem(((LinkedHashMap<?, ?>) staffDetailMap.get(me.getKey())).get("std").toString());
 	    		std_combo[k].setFont(new Font("Book Antiqua", Font.BOLD, 16));
-	    		std_combo[k].setBounds(itemWidth, j, 70, 25);
+	    		std_combo[k].setBounds(itemWidth, j, 80, 25);
 	    		std_combo[k].setEnabled(false);
 	    		dataPanel.add(std_combo[k]);
 	    		
@@ -855,7 +859,7 @@ public class CreateSMSStaff extends JFrame {
 	    		div_combo[k].setSelectedItem(((LinkedHashMap<?, ?>) staffDetailMap.get(me.getKey())).get("div").toString());
 	    		div_combo[k].setToolTipText(shortName);
 	    		div_combo[k].setFont(new Font("Book Antiqua", Font.BOLD, 16));
-	    		div_combo[k].setBounds(itemWidth, j, 70, 25);
+	    		div_combo[k].setBounds(itemWidth, j, 80, 25);
 	    		div_combo[k].setEnabled(false);
 	    		dataPanel.add(div_combo[k]);
 	    		
@@ -963,7 +967,8 @@ public class CreateSMSStaff extends JFrame {
 							}
 							
 							if(isEditable){
-//								staffName_text[m].setEditable(true);
+								contact_text[m].enable(true);
+								contact_text[m].setEditable(true);
 								sms_combo[m].setEnabled(true);
 								edit_buttons[m].setEnabled(false);
 								save_buttons[m].setEnabled(true);
@@ -1113,6 +1118,16 @@ public class CreateSMSStaff extends JFrame {
             	String div = divCombo.getSelectedItem().toString();
             	String sms = smsCombo.getSelectedItem().toString();	
             	addToStaff(sessionData, staffName, designation, contact, std, div, sms, academic);
+			}
+        });
+        
+        stdCombo.addActionListener(new ActionListener() {
+
+			public void actionPerformed(ActionEvent e) {
+				String std = stdCombo.getSelectedItem().toString();
+				if(std.equalsIgnoreCase("All")){
+					divCombo.setSelectedItem("All");
+				}
 			}
         });
         

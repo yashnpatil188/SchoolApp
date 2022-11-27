@@ -95,11 +95,11 @@ public class Common {
 	private static final int IMG_HEIGHT = 140;
 
 	private enum RomanStd {
-		I, II, III, IV, V, VI, VII, VIII, IX, X, XI, XII, XIII, XIV, XV, NURSERY, LOWER_KG, UPPER_KG
+		I, II, III, IV, V, VI, VII, VIII, IX, X, XI, XII, XIII, XIV, XV, NURSERY, LOWER_KG, UPPER_KG, JR_KG, SR_KG
 	}
 
 	private enum WordStd {
-		a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, a16, a17, a18, a31
+		am3, am2, am1, a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, a16, a17, a18, a31
 	}
 
 	private enum Alphabet {
@@ -773,6 +773,12 @@ public class Common {
 		RomanStd word = RomanStd.valueOf(RomanWord.trim()); // surround with
 
 		switch (word) {
+		case JR_KG:
+			RomanToInteger = -2;
+			break;
+		case SR_KG:
+			RomanToInteger = -1;
+			break;
 		case I:
 			RomanToInteger = 1;
 			break;
@@ -839,11 +845,21 @@ public class Common {
 
 		String intToRoman = "";
 
+		stdWord = stdWord.replace("-", "m");
 		WordStd word = WordStd.valueOf(stdWord.trim()); // surround with
 														// try/catch
 		// one, two, three, four, five, six, seven, eight, nine, ten, eleven,
 		// twelve
 		switch (word) {
+		case am3:
+			intToRoman = "NURSERY";
+			break;
+		case am2:
+			intToRoman = "JR KG";
+			break;
+		case am1:
+			intToRoman = "SR KG";
+			break;
 		case a1:
 			intToRoman = "I";
 			break;

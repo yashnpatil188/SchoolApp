@@ -4610,6 +4610,7 @@ public class MarksAllotmentNew extends JFrame {
 							if (!sem2DailyObs_text[k].getText().equalsIgnoreCase(subMaxMinMap.get("sem2_dobs"))) {
 								updateMarksEntryList.add(subName_label[k].getText() + "_SDOB");
 								updateMarksEntryList.add(subName_label[k].getText() + "_STOT");
+								sem2DailyObsCt_text[k].setText(sem2DailyObs_text[k].getText());
 							}
 							updateMaxMinMap("sem2DailyObs", subMaxMinMap, sem1DailyObs_text[k].getText(),
 									sem1Obt_text[k].getText(), sem1Oral_text[k].getText(), sem1Assign_text[k].getText(),
@@ -4672,6 +4673,7 @@ public class MarksAllotmentNew extends JFrame {
 							if (!sem2Obt_text[k].getText().equalsIgnoreCase(subMaxMinMap.get("sem2_obt"))) {
 								updateMarksEntryList.add(subName_label[k].getText() + "_SOBT");
 								updateMarksEntryList.add(subName_label[k].getText() + "_STOT");
+								sem2ObtCt_text[k].setText(sem2Obt_text[k].getText());
 							}
 							updateMaxMinMap("sem2Obt", subMaxMinMap, sem1DailyObs_text[k].getText(),
 									sem1Obt_text[k].getText(), sem1Oral_text[k].getText(), sem1Assign_text[k].getText(),
@@ -4734,6 +4736,7 @@ public class MarksAllotmentNew extends JFrame {
 							if (!sem2Oral_text[k].getText().equalsIgnoreCase(subMaxMinMap.get("sem2_oral"))) {
 								updateMarksEntryList.add(subName_label[k].getText() + "_SORA");
 								updateMarksEntryList.add(subName_label[k].getText() + "_STOT");
+								sem2OralCt_text[k].setText(sem2Oral_text[k].getText());
 							}
 							updateMaxMinMap("sem2Oral", subMaxMinMap, sem1DailyObs_text[k].getText(),
 									sem1Obt_text[k].getText(), sem1Oral_text[k].getText(), sem1Assign_text[k].getText(),
@@ -4797,6 +4800,7 @@ public class MarksAllotmentNew extends JFrame {
 							if (!sem2Assign_text[k].getText().equalsIgnoreCase(subMaxMinMap.get("sem2_assign"))) {
 								updateMarksEntryList.add(subName_label[k].getText() + "_SASS");
 								updateMarksEntryList.add(subName_label[k].getText() + "_STOT");
+								sem2AssignCt_text[k].setText(sem2Assign_text[k].getText());
 							}
 							updateMaxMinMap("sem2Assign", subMaxMinMap, sem1DailyObs_text[k].getText(),
 									sem1Obt_text[k].getText(), sem1Oral_text[k].getText(), sem1Assign_text[k].getText(),
@@ -4860,6 +4864,7 @@ public class MarksAllotmentNew extends JFrame {
 							if (!sem2Write_text[k].getText().equalsIgnoreCase(subMaxMinMap.get("sem2_write"))) {
 								updateMarksEntryList.add(subName_label[k].getText() + "_SWRI");
 								updateMarksEntryList.add(subName_label[k].getText() + "_STOT");
+								sem2WriteCt_text[k].setText(sem2Write_text[k].getText());
 							}
 							updateMaxMinMap("sem2Write", subMaxMinMap, sem1DailyObs_text[k].getText(),
 									sem1Obt_text[k].getText(), sem1Oral_text[k].getText(), sem1Assign_text[k].getText(),
@@ -4920,9 +4925,10 @@ public class MarksAllotmentNew extends JFrame {
 						public void focusLost(FocusEvent arg0) {
 							LinkedHashMap<String, String> subMaxMinMap = new LinkedHashMap<String, String>();
 							subMaxMinMap = (LinkedHashMap) subjectMap.get(subName_label[k].getText().toString());
-							if (!sem2PractCt_text[k].getText().equalsIgnoreCase(subMaxMinMap.get("sem2_pract_ct"))) {
+							if (!sem2Pract_text[k].getText().equalsIgnoreCase(subMaxMinMap.get("sem2_pract"))) {
 								updateMarksEntryList.add(subName_label[k].getText() + "_SPRA");
 								updateMarksEntryList.add(subName_label[k].getText() + "_STOT");
+								sem2PractCt_text[k].setText(sem2Pract_text[k].getText());
 							}
 							updateMaxMinMap("sem2PractCt", subMaxMinMap, sem1DailyObs_text[k].getText(),
 									sem1Obt_text[k].getText(), sem1Oral_text[k].getText(), sem1Assign_text[k].getText(),
@@ -4982,9 +4988,10 @@ public class MarksAllotmentNew extends JFrame {
 						public void focusLost(FocusEvent arg0) {
 							LinkedHashMap<String, String> subMaxMinMap = new LinkedHashMap<String, String>();
 							subMaxMinMap = (LinkedHashMap) subjectMap.get(subName_label[k].getText().toString());
-							if (!sem2ActCt_text[k].getText().equalsIgnoreCase(subMaxMinMap.get("sem2_act_ct"))) {
+							if (!sem2Act_text[k].getText().equalsIgnoreCase(subMaxMinMap.get("sem2_act"))) {
 								updateMarksEntryList.add(subName_label[k].getText() + "_SACT");
 								updateMarksEntryList.add(subName_label[k].getText() + "_STOT");
+								sem2ActCt_text[k].setText(sem2Act_text[k].getText());
 							}
 							updateMaxMinMap("sem2ActCt", subMaxMinMap, sem1DailyObs_text[k].getText(),
 									sem1Obt_text[k].getText(), sem1Oral_text[k].getText(), sem1Assign_text[k].getText(),
@@ -5045,10 +5052,11 @@ public class MarksAllotmentNew extends JFrame {
 						public void focusLost(FocusEvent arg0) {
 							LinkedHashMap<String, String> subMaxMinMap = new LinkedHashMap<String, String>();
 							subMaxMinMap = (LinkedHashMap) subjectMap.get(subName_label[k].getText().toString());
-							if (!sem2ProjectCt_text[k].getText()
-									.equalsIgnoreCase(subMaxMinMap.get("sem2_project_ct"))) {
+							if (!sem2Project_text[k].getText()
+									.equalsIgnoreCase(subMaxMinMap.get("sem2_project"))) {
 								updateMarksEntryList.add(subName_label[k].getText() + "_SPRO");
 								updateMarksEntryList.add(subName_label[k].getText() + "_STOT");
+								sem2ProjectCt_text[k].setText(sem2Project_text[k].getText());
 							}
 							updateMaxMinMap("sem2ProjectCt", subMaxMinMap, sem1DailyObs_text[k].getText(),
 									sem1Obt_text[k].getText(), sem1Oral_text[k].getText(), sem1Assign_text[k].getText(),
@@ -5112,6 +5120,7 @@ public class MarksAllotmentNew extends JFrame {
 							if (!sem2Other_text[k].getText().equalsIgnoreCase(subMaxMinMap.get("sem2_other"))) {
 								updateMarksEntryList.add(subName_label[k].getText() + "_SOTH");
 								updateMarksEntryList.add(subName_label[k].getText() + "_STOT");
+								sem2OtherCt_text[k].setText(sem2Other_text[k].getText());
 							}
 							updateMaxMinMap("sem2Other", subMaxMinMap, sem1DailyObs_text[k].getText(),
 									sem1Obt_text[k].getText(), sem1Oral_text[k].getText(), sem1Assign_text[k].getText(),
@@ -5175,6 +5184,7 @@ public class MarksAllotmentNew extends JFrame {
 							if (!sem2Oral1_text[k].getText().equalsIgnoreCase(subMaxMinMap.get("sem2_oral1"))) {
 								updateMarksEntryList.add(subName_label[k].getText() + "_SORA1");
 								updateMarksEntryList.add(subName_label[k].getText() + "_STOT");
+								sem2Oral1Ct_text[k].setText(sem2Oral1_text[k].getText());
 							}
 							updateMaxMinMap("sem2Oral1", subMaxMinMap, sem1DailyObs_text[k].getText(),
 									sem1Obt_text[k].getText(), sem1Oral_text[k].getText(), sem1Assign_text[k].getText(),
@@ -5238,6 +5248,7 @@ public class MarksAllotmentNew extends JFrame {
 							if (!sem2Pract1_text[k].getText().equalsIgnoreCase(subMaxMinMap.get("sem2_pract1"))) {
 								updateMarksEntryList.add(subName_label[k].getText() + "_SPRA1");
 								updateMarksEntryList.add(subName_label[k].getText() + "_STOT");
+								sem2Pract1Ct_text[k].setText(sem2Pract1_text[k].getText());
 							}
 							updateMaxMinMap("sem2Pract1", subMaxMinMap, sem1DailyObs_text[k].getText(),
 									sem1Obt_text[k].getText(), sem1Oral_text[k].getText(), sem1Assign_text[k].getText(),
@@ -5301,6 +5312,7 @@ public class MarksAllotmentNew extends JFrame {
 							if (!sem2Write1_text[k].getText().equalsIgnoreCase(subMaxMinMap.get("sem2_write1"))) {
 								updateMarksEntryList.add(subName_label[k].getText() + "_SWRI1");
 								updateMarksEntryList.add(subName_label[k].getText() + "_STOT");
+								sem2Write1Ct_text[k].setText(sem2Write1_text[k].getText());
 							}
 							updateMaxMinMap("sem2Write1", subMaxMinMap, sem1DailyObs_text[k].getText(),
 									sem1Obt_text[k].getText(), sem1Oral_text[k].getText(), sem1Assign_text[k].getText(),
@@ -5364,6 +5376,7 @@ public class MarksAllotmentNew extends JFrame {
 							if (!sem2Listen_text[k].getText().equalsIgnoreCase(subMaxMinMap.get("sem2_listen"))) {
 								updateMarksEntryList.add(subName_label[k].getText() + "_SLIS");
 								updateMarksEntryList.add(subName_label[k].getText() + "_STOT");
+								sem2ListenCt_text[k].setText(sem2Listen_text[k].getText());
 							}
 							updateMaxMinMap("sem2Listen", subMaxMinMap, sem1DailyObs_text[k].getText(),
 									sem1Obt_text[k].getText(), sem1Oral_text[k].getText(), sem1Assign_text[k].getText(),
@@ -5427,6 +5440,7 @@ public class MarksAllotmentNew extends JFrame {
 							if (!sem2Speak_text[k].getText().equalsIgnoreCase(subMaxMinMap.get("sem2_speak"))) {
 								updateMarksEntryList.add(subName_label[k].getText() + "_SSPE");
 								updateMarksEntryList.add(subName_label[k].getText() + "_STOT");
+								sem2SpeakCt_text[k].setText(sem2Speak_text[k].getText());
 							}
 							updateMaxMinMap("sem2Speak", subMaxMinMap, sem1DailyObs_text[k].getText(),
 									sem1Obt_text[k].getText(), sem1Oral_text[k].getText(), sem1Assign_text[k].getText(),
@@ -5490,6 +5504,7 @@ public class MarksAllotmentNew extends JFrame {
 							if (!sem2IntTotal_text[k].getText().equalsIgnoreCase(subMaxMinMap.get("sem2_intot"))) {
 								updateMarksEntryList.add(subName_label[k].getText() + "_SITOT");
 								updateMarksEntryList.add(subName_label[k].getText() + "_STOT");
+								sem2IntTotalCt_text[k].setText(sem2IntTotal_text[k].getText());
 							}
 
 							if (!sem2IntTotal_text[k].getText().equalsIgnoreCase(subMaxMinMap.get("sem2_intot"))) {

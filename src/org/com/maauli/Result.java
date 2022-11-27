@@ -1733,7 +1733,7 @@ public class Result extends JFrame {
 					l = j + 50;
 
 					if(examClass.equalsIgnoreCase("Final") && !stdClass.equalsIgnoreCase("IX") && !stdClass.equalsIgnoreCase("X") && 
-							!stdClass.equalsIgnoreCase("XI") && !stdClass.equalsIgnoreCase("XII")){
+							!stdClass.equalsIgnoreCase("XI") && !stdClass.equalsIgnoreCase("XII") && !stdClass.equalsIgnoreCase("JR KG") && !stdClass.equalsIgnoreCase("SR KG")){
 						//As numbering starts from Zero
 						if(i % 2 == 0){
 							str = studentSem1Array[sem1Index].toString();
@@ -1797,7 +1797,7 @@ public class Result extends JFrame {
 					dataPanel.add(pipe_label11);
 					
 					if(examClass.equalsIgnoreCase("Final") && !stdClass.equalsIgnoreCase("IX") && !stdClass.equalsIgnoreCase("X") && 
-							!stdClass.equalsIgnoreCase("XI") && !stdClass.equalsIgnoreCase("XII")){
+							!stdClass.equalsIgnoreCase("XI") && !stdClass.equalsIgnoreCase("XII") && !stdClass.equalsIgnoreCase("JR KG") && !stdClass.equalsIgnoreCase("SR KG")){
 						//As numbering starts from Zero
 						if(i % 2 == 0){
 							dataPanel.add(sr_radio[i]);
@@ -1919,8 +1919,8 @@ public class Result extends JFrame {
 					String dispAbsentMarks = "";
 					for (int n = 0; n < subjectTitleList.size(); n++) {
 						dispResult = temp[p];
-						if(!stdClass.equalsIgnoreCase("IX") && !stdClass.equalsIgnoreCase("X") && 
-								!stdClass.equalsIgnoreCase("XI") && !stdClass.equalsIgnoreCase("XII")){
+						if(!stdClass.equalsIgnoreCase("IX") && !stdClass.equalsIgnoreCase("X") && !stdClass.equalsIgnoreCase("XI")
+								&& !stdClass.equalsIgnoreCase("XII") && !stdClass.equalsIgnoreCase("JR KG") && !stdClass.equalsIgnoreCase("SR KG")){
 							if(dispResult.contains("~")){
 								dispMarks = dispResult.substring(0, dispResult.indexOf("~"));
 							}
@@ -2023,9 +2023,9 @@ public class Result extends JFrame {
 									int q = s;
 									boolean radio_selected = false;
 									
-									if(examClass.equalsIgnoreCase("Final") && !stdClass.equalsIgnoreCase("IX") && 
-											!stdClass.equalsIgnoreCase("X") && !stdClass.equalsIgnoreCase("XI") && 
-											!stdClass.equalsIgnoreCase("XII")){
+									if(examClass.equalsIgnoreCase("Final") && !stdClass.equalsIgnoreCase("IX") && !stdClass.equalsIgnoreCase("X")
+											&& !stdClass.equalsIgnoreCase("XI") && !stdClass.equalsIgnoreCase("XII")
+											&& !stdClass.equalsIgnoreCase("JR KG") && !stdClass.equalsIgnoreCase("SR KG")){
 										q = q + q;
 									}
 		
@@ -2145,7 +2145,7 @@ public class Result extends JFrame {
 							    f.setVisible(true);
 							    f.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 							    
-								if(stdInt >= 9){
+								if(stdInt <= 0 || stdInt >= 9){
 									grStudentMap = dbValidate.printResultWithMarksList(sessionData, academicYearClass, stdClass, divClass, examClass, 
 											section, lastNameClass, firstNameClass, fatherNameClass, leftDataMap);
 									subjectTitleList = dbValidate.findSubjectTitleList(sessionData, stdClass, "", academicYearClass);
@@ -2222,7 +2222,7 @@ public class Result extends JFrame {
 						try {
 							if(dbValidate.connectDatabase(sessionData)){
 								
-								if(stdInt >= 9){
+								if(stdInt <= 0 || stdInt >= 9){
 									grStudentMap = dbValidate.printResultWithMarksList(sessionData, academicYearClass, stdClass, divClass, examClass, 
 											section, lastNameClass, firstNameClass, fatherNameClass, leftDataMap);
 								}
@@ -2255,8 +2255,8 @@ public class Result extends JFrame {
 									commonObj.showMessageDialog("failed to get max marks for subjects.");
 								}
 							    	
-								if(stdClass.equalsIgnoreCase("IX") || stdClass.equalsIgnoreCase("X") || 
-									stdClass.equalsIgnoreCase("XI") || stdClass.equalsIgnoreCase("XII")){
+								if(stdClass.equalsIgnoreCase("IX") || stdClass.equalsIgnoreCase("X") || stdClass.equalsIgnoreCase("XI")
+										|| stdClass.equalsIgnoreCase("XII") || stdClass.equalsIgnoreCase("JR KG") || stdClass.equalsIgnoreCase("SR KG")){
 									ResultMarksPDF resultMarksPDF = new ResultMarksPDF(sessionData, section, academicYearClass, grStudentSelectedMap, 
 											subjectTitleList,examClass, stdClass, divClass, note, maxMarksMapOrder, gradeMarksMapOrder);
 								}

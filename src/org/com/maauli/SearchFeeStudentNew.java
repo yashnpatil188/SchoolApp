@@ -158,6 +158,7 @@ public class SearchFeeStudentNew extends JFrame {
     private static String subFrequencyClass = "";
     private static LinkedHashMap<String, LinkedHashMap<String, String>> searchStudentMap = new LinkedHashMap<String, LinkedHashMap<String, String>>();
     private static LinkedHashMap<String, LinkedHashMap<String, String>> selectedStudentMap;
+    private static LinkedHashMap<String, String> freePayingData;
     private static LinkedHashMap<String, LinkedHashMap<String, String>> feesPaymentMap; 
     private static LinkedHashMap<String, LinkedHashMap<String, String>> feesHeadMapClass = new LinkedHashMap<String, LinkedHashMap<String, String>>();
     private static LinkedHashMap<String, LinkedHashMap<String, String>> studentFeeDetailsMap;
@@ -277,6 +278,8 @@ public class SearchFeeStudentNew extends JFrame {
 				if(!searchStudentMap.isEmpty()){
 					scrollHeight = (searchStudentMap.size() - 6) * 30; // to adjust the perfect scroll height
 				}
+				
+				freePayingData = dbValidate.getFreeStudentData(sessionData1, academic, retStd, retDiv, section);
 //				dbValidate.deleteDuplicateData(sessionData1, academicYear, stdClass, divClass, "fees_data_mandatory", "STD_1", "DIV_1");
 			}
 		} catch (Exception e1) {
@@ -1577,6 +1580,9 @@ public class SearchFeeStudentNew extends JFrame {
 				student_radio[k].setBorder(null);
 				student_radio[k].setToolTipText(stdDivFromMap);
 				student_radio[k].setBounds(itemWidth-10, j+5, 12, 12);
+				if(freePayingData.get(grNoMap).toString().equalsIgnoreCase("Free")) {
+					student_radio[k].setEnabled(false);
+	    		}
 				if(!frequencyClass.equalsIgnoreCase("Part Pay") && !stdClass.equalsIgnoreCase("") 
 						&& !studentPartialFeeMap.containsKey(grNoMap)){
 					dataPanel.add(student_radio[k]);
@@ -1636,8 +1642,17 @@ public class SearchFeeStudentNew extends JFrame {
 	    		pay_buttons[k] = new JButton("Pay");
 	    		pay_buttons[k].setFont(new Font("Book Antiqua", Font.BOLD, 16));
 	    		pay_buttons[k].setBounds(itemWidth, j, 90, 25);
+	    		if(freePayingData.get(grNoMap).toString().equalsIgnoreCase("Free")) {
+	    			pay_buttons[k].setText("Free");
+	    			pay_buttons[k].setEnabled(false);
+	    		}
 	    		
 	    		mode_combo[k] = new JComboBox(modeList);
+	    		if(freePayingData.get(grNoMap).toString().equalsIgnoreCase("Free")) {
+	    			mode_combo[k].addItem("Free");
+	    			mode_combo[k].setSelectedItem("Free");
+	            	mode_combo[k].setEnabled(false);
+	    		}
 	            mode_combo[k].setBorder(null);
 	            mode_combo[k].setFont(new Font("Book Antiqua", Font.BOLD, 16));
 	            mode_combo[k].setBounds(itemWidth, j, 90, 25);
