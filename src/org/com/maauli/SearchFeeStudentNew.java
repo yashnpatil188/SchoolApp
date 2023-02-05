@@ -36,6 +36,7 @@ import javax.swing.ScrollPaneConstants;
 import javax.swing.SwingUtilities;
 
 import org.apache.log4j.Logger;
+import org.apache.poi.util.SystemOutLogger;
 import org.com.accesser.DBValidate;
 import org.com.accesser.SessionData;
 
@@ -1148,7 +1149,7 @@ public class SearchFeeStudentNew extends JFrame {
 	 					div_combo.setEnabled(true);
 					}
 					
-					bottombandPanel.validate();
+					bottombandPanel.revalidate();
 					bottombandPanel.repaint();
 				}
  			}
@@ -1580,7 +1581,7 @@ public class SearchFeeStudentNew extends JFrame {
 				student_radio[k].setBorder(null);
 				student_radio[k].setToolTipText(stdDivFromMap);
 				student_radio[k].setBounds(itemWidth-10, j+5, 12, 12);
-				if(freePayingData.get(grNoMap).toString().equalsIgnoreCase("Free")) {
+				if(freePayingData.get(grNoMap) != null && freePayingData.get(grNoMap).toString().equalsIgnoreCase("Free")) {
 					student_radio[k].setEnabled(false);
 	    		}
 				if(!frequencyClass.equalsIgnoreCase("Part Pay") && !stdClass.equalsIgnoreCase("") 
@@ -1642,13 +1643,13 @@ public class SearchFeeStudentNew extends JFrame {
 	    		pay_buttons[k] = new JButton("Pay");
 	    		pay_buttons[k].setFont(new Font("Book Antiqua", Font.BOLD, 16));
 	    		pay_buttons[k].setBounds(itemWidth, j, 90, 25);
-	    		if(freePayingData.get(grNoMap).toString().equalsIgnoreCase("Free")) {
+	    		if(freePayingData.get(grNoMap) != null && freePayingData.get(grNoMap).toString().equalsIgnoreCase("Free")) {
 	    			pay_buttons[k].setText("Free");
 	    			pay_buttons[k].setEnabled(false);
 	    		}
 	    		
 	    		mode_combo[k] = new JComboBox(modeList);
-	    		if(freePayingData.get(grNoMap).toString().equalsIgnoreCase("Free")) {
+	    		if(freePayingData.get(grNoMap) != null && freePayingData.get(grNoMap).toString().equalsIgnoreCase("Free")) {
 	    			mode_combo[k].addItem("Free");
 	    			mode_combo[k].setSelectedItem("Free");
 	            	mode_combo[k].setEnabled(false);

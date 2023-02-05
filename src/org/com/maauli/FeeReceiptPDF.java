@@ -73,7 +73,7 @@ public class FeeReceiptPDF {
 		float tableSpacingBefore = -205.0f;
 		String concession = "", penalty = "", total = "", remark2 = "", fee_receipt_copy= "", copyText = " ", academicText=" ",
 				feesForText = " ", nameText = " ", stdText = " ", divText = " ", rollText = " ", AmountWordText = " ", balance = "",
-				balanceMessage = "";
+				balanceMessage = "", collegeStream = "";
 		String[] fee_receipt_copy_array;
 		try {
 			if(feesHeadMap != null) {
@@ -94,6 +94,9 @@ public class FeeReceiptPDF {
 	        fee_receipt_copy = bundle.getString("FEE_RECEIPT_COPY");
 	        fee_receipt_copy_array = fee_receipt_copy.split(",");
 	        
+	        if(sessionData.getAppType().equalsIgnoreCase("College")) {
+	        	collegeStream = " ("+sessionData.getSectionName()+")";
+	        }
 	        if(fee_receipt_copy_array.length == 3) {
 	        	academicText ="                       Acedamic Year : "+academic
 						+ "                                                         Acedamic Year : "+academic 
@@ -496,7 +499,7 @@ public class FeeReceiptPDF {
 				paragraphk.setSpacingBefore(-16);
 
 				if(fee_receipt_copy_array.length >= 1) {
-					stdText = "Std.: "+grDetailMap.get("std");
+					stdText = "Std.: "+grDetailMap.get("std") + collegeStream;
 				}
 				Chunk chunk41 = new Chunk(stdText);
 				Font font41 = FontFactory.getFont("TIMES_ROMAN");
@@ -511,7 +514,7 @@ public class FeeReceiptPDF {
 
 				stdText = " ";
 				if(fee_receipt_copy_array.length >= 2) {
-					stdText = "Std.: "+grDetailMap.get("std");
+					stdText = "Std.: "+grDetailMap.get("std") + collegeStream;
 				}
 				Chunk chunkl = new Chunk("																																																																																																																																									"
 						+ "	"+stdText);
@@ -527,7 +530,7 @@ public class FeeReceiptPDF {
 
 				stdText = " ";
 				if(fee_receipt_copy_array.length >= 3) {
-					stdText = "Std.: "+grDetailMap.get("std");
+					stdText = "Std.: "+grDetailMap.get("std") + collegeStream;
 				}
 				Chunk chunkm = new Chunk("																																																																																																																																																																																																																																																																																			"
 						+ "		"+stdText);

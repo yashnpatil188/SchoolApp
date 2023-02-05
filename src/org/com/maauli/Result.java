@@ -2222,7 +2222,11 @@ public class Result extends JFrame {
 						try {
 							if(dbValidate.connectDatabase(sessionData)){
 								
-								if(stdInt <= 0 || stdInt >= 9){
+								if(stdInt >= 9){
+									grStudentMap = dbValidate.printResultWithMarksList(sessionData, academicYearClass, stdClass, divClass, examClass, 
+											section, lastNameClass, firstNameClass, fatherNameClass, leftDataMap);
+								}
+								else if(stdInt <= 0){
 									grStudentMap = dbValidate.printResultWithMarksList(sessionData, academicYearClass, stdClass, divClass, examClass, 
 											section, lastNameClass, firstNameClass, fatherNameClass, leftDataMap);
 								}
@@ -2256,9 +2260,13 @@ public class Result extends JFrame {
 								}
 							    	
 								if(stdClass.equalsIgnoreCase("IX") || stdClass.equalsIgnoreCase("X") || stdClass.equalsIgnoreCase("XI")
-										|| stdClass.equalsIgnoreCase("XII") || stdClass.equalsIgnoreCase("JR KG") || stdClass.equalsIgnoreCase("SR KG")){
+										|| stdClass.equalsIgnoreCase("XII")){
 									ResultMarksPDF resultMarksPDF = new ResultMarksPDF(sessionData, section, academicYearClass, grStudentSelectedMap, 
 											subjectTitleList,examClass, stdClass, divClass, note, maxMarksMapOrder, gradeMarksMapOrder);
+								}
+								else if(stdClass.equalsIgnoreCase("JR KG") || stdClass.equalsIgnoreCase("SR KG")){
+									ResultPPRMarksPDF resultPPRMarksPDF = new ResultPPRMarksPDF(sessionData, section, academicYearClass, grStudentSelectedMap, 
+											subjectTitleList, examClass, stdClass, divClass, note, maxMarksMapOrder, gradeMarksMapOrder);
 								}
 								else{
 									ResultGradePDF resultGradePDF = new ResultGradePDF(sessionData, section, academicYearClass, grStudentSelectedMap, 

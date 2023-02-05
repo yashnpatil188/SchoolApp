@@ -173,7 +173,7 @@ public class FeesReport extends JFrame {
     private static String fromDateClass = "";
     private static String toDateClass = "";
     private static String receiptShortName = "";
-    private static String feeCategory = "";
+    private static String feeCategory = "", smsFooter = "";
     
     /*
 	 * A private Constructor prevents any other class from instantiating.
@@ -254,6 +254,7 @@ public class FeesReport extends JFrame {
         app_header_2_fontSize = Integer.parseInt(bundle.getString("APP_HEADER_2_FONTSIZE_"+sessionData.getAppType()));
     	app_header_2_widthSpace = Integer.parseInt(bundle.getString("APP_HEADER_2_WIDTHSPACE_"+sessionData.getAppType()));
     	app_header_2_heightSpace = Integer.parseInt(bundle.getString("APP_HEADER_2_HEIGHTSPACE_"+sessionData.getAppType()));
+    	smsFooter = bundle.getString("SMS_"+sessionData.getAppType()+"_FOOTER");
     	frequencyList =  bundle.getString("SEARCH_FREQUENCY");
     	reportType = bundle.getString("FEE_REPORT_TYPE");
     	
@@ -972,7 +973,7 @@ public class FeesReport extends JFrame {
 							smsType = "SMS_FEE_ADMIN";
 							dbValidate.connectDatabase(sessionData);
 							totalAmount = dbValidate.getFeesCollection(sessionData, optionSelect, fromDate, toDate, std, div, academic);
-							smsText = "Fees Report\n"+period + " fees collection amount is Rs."+totalAmount;
+							smsText = "Fees Report\n"+period + " fees collection amount is Rs."+totalAmount+" By "+smsFooter;
 							if(isValid) {
 								String smsResponse = commonObj.sendHspSms(sessionData, passGrList, foundStudentMap, smsText, section, "", 
 										academicYearClass, "", "", "", smsType);
@@ -1030,7 +1031,7 @@ public class FeesReport extends JFrame {
 								if(!div.equalsIgnoreCase("All") && !div.equalsIgnoreCase("")) {
 									smsCondition = smsCondition + " DIV="+div+"";
 								}
-								smsText = "Fees Report\n" + smsSchoolStr + smsCondition +" total fees collection is Rs. "+totalAmount+ " from date "+fromDate+ " to "+toDate;
+								smsText = "Fees Report\n" + smsSchoolStr + smsCondition +" total fees collection is Rs. "+totalAmount+ " from date "+fromDate+ " to "+toDate+" By "+smsFooter;
 								if(isValid) {
 									String smsResponse = commonObj.sendHspStaffFeeSms(sessionData, passGrList, foundStudentMap, smsText, section, "", 
 											academicYearClass, std, div, "", smsType);

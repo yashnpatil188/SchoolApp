@@ -103,7 +103,7 @@ public class Common {
 	}
 
 	private enum Alphabet {
-		A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, W, X, Y, Z, AA, ET, A1, A2, A3, A4, Total, Grand_Total
+		A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, W, X, Y, Z, AA, ET, A1, A2, A3, A4, BLUE, GREEN, RED, YELLOW, Total, Grand_Total
 	}
 
 	private enum MonthList {
@@ -1026,14 +1026,26 @@ public class Common {
 		case A4:
 			alphaToInteger = 42;
 			break;
-		case Total:
+		case BLUE:
 			alphaToInteger = 43;
+			break;
+		case GREEN:
+			alphaToInteger = 44;
+			break;
+		case RED:
+			alphaToInteger = 45;
+			break;
+		case YELLOW:
+			alphaToInteger = 46;
+			break;
+		case Total:
+			alphaToInteger = 47;
 			break;
 		case Grand_Total:
 			alphaToInteger = 999;
 			break;
 		default:
-			alphaToInteger = 44;
+			alphaToInteger = 48;
 			break;
 		}
 
@@ -1782,7 +1794,26 @@ public class Common {
 	
 	public String getGradeFromPercent(double percentageObtained, String std) {
 
-		if (!std.equalsIgnoreCase("IX") && !std.equalsIgnoreCase("X") && !std.equalsIgnoreCase("XI")
+		if (std.equalsIgnoreCase("JR KG") || std.equalsIgnoreCase("SR KG")) {
+			if (percentageObtained >= 91) {
+				return "A-1";
+			} else if (percentageObtained >= 81 && percentageObtained < 91) {
+				return "A-2";
+			} else if (percentageObtained >= 71 && percentageObtained < 81) {
+				return "B-1";
+			} else if (percentageObtained >= 61 && percentageObtained < 71) {
+				return "B-2";
+			} else if (percentageObtained >= 51 && percentageObtained < 61) {
+				return "C-1";
+			} else if (percentageObtained >= 41 && percentageObtained < 51) {
+				return "C-2";
+			} else if (percentageObtained >= 33 && percentageObtained < 41) {
+				return "D";
+			} else if (percentageObtained < 33) {
+				return "E";
+			}
+		}
+		else if (!std.equalsIgnoreCase("IX") && !std.equalsIgnoreCase("X") && !std.equalsIgnoreCase("XI")
 				&& !std.equalsIgnoreCase("XII")) {
 			if (percentageObtained >= 91) {
 				return "A-1";
@@ -1803,7 +1834,8 @@ public class Common {
 			} else if (percentageObtained < 21) {
 				return "E-2";
 			}
-		} else {
+		} 
+		else {
 			if (percentageObtained >= 60) {
 				return "A";
 			} else if (percentageObtained >= 50 && percentageObtained < 60) {
@@ -3808,22 +3840,26 @@ public class Common {
 						while (j.hasNext()) {
 							Map.Entry me = (Map.Entry) j.next();
 							if (smsType.equalsIgnoreCase("Schedule SMS")) {
-								response = sResult1.substring(sResult1.indexOf("responseCode") + 15,
-										sResult1.indexOf(",") - 2);
-								if (response.contains("Submitted") || response.contains("SUBMITTED")) {
-									response = "SUBMITTED";
-								}
-								msgId = sResult1.substring(sResult1.indexOf("msgid") + 8, sResult1.lastIndexOf("}") - 1);
 								status = "Scheduled";
-							} else {
+							}
+							else {
+								status = response;
+							}
+							
+							if(!sResult1.contains("Sender Name Invalid")) {
 								response = sResult1.substring(sResult1.indexOf("responseCode") + 15,
 										sResult1.indexOf(",") - 2);
 								if (response.contains("Submitted") || response.contains("SUBMITTED")) {
 									response = "SUBMITTED";
 								}
-								status = response;
 								msgId = sResult1.substring(sResult1.indexOf("msgid") + 8, sResult1.lastIndexOf("}") - 1);
 							}
+							else {
+								response = "Sender Name Invalid";
+								status = "Failed";
+							}
+							
+							
 							String name = (((LinkedHashMap<?, ?>) foundStudent.get(me.getKey().toString())).get("name"))
 									.toString();
 							String rollNo = (((LinkedHashMap<?, ?>) foundStudent.get(me.getKey().toString()))
@@ -3836,22 +3872,26 @@ public class Common {
 					}
 					else{
 						if (smsType.equalsIgnoreCase("Schedule SMS")) {
-							response = sResult1.substring(sResult1.indexOf("responseCode") + 15,
-									sResult1.indexOf(",") - 2);
-							if (response.contains("Submitted") || response.contains("SUBMITTED")) {
-								response = "SUBMITTED";
-							}
-							msgId = sResult1.substring(sResult1.indexOf("msgid") + 8, sResult1.lastIndexOf("}") - 1);
 							status = "Scheduled";
-						} else {
+						}
+						else {
+							status = response;
+						}
+						
+						
+						if(!sResult1.contains("Sender Name Invalid")) {
 							response = sResult1.substring(sResult1.indexOf("responseCode") + 15,
 									sResult1.indexOf(",") - 2);
 							if (response.contains("Submitted") || response.contains("SUBMITTED")) {
 								response = "SUBMITTED";
 							}
-							status = response;
 							msgId = sResult1.substring(sResult1.indexOf("msgid") + 8, sResult1.lastIndexOf("}") - 1);
 						}
+						else {
+							response = "Sender Name Invalid";
+							status = "Failed";
+						}
+						
 						dbValidate.insertSmsData(sessionData, "", "", "", academic,
 								phonenumbers, smsText, sms_sender, "", type, status, response, msgId,
 								section, scheduleTime, apiKey, smsType, "admin", "", moduleName);

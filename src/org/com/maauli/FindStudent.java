@@ -664,11 +664,12 @@ public class FindStudent extends JFrame {
 				
 				try{
 					String stdSel = (String) admittedStd_combo.getSelectedItem();
+					String academicSel = (String) academicYear_combo.getSelectedItem();
 					if(!stdSel.equalsIgnoreCase("All") && !stdSel.equalsIgnoreCase("Select") && findStudentDB.connectDatabase(sessionData)){
 						admittedDiv_combo.removeAllItems();
 						admittedDiv_combo.addItem("Select");
 						String divAvailabe = findStudentDB.getDistinctDiv(sessionData, stdSel, section, 
-								"PRESENT_DIV", "PRESENT_STD", "class_allotment","");
+								"PRESENT_DIV", "PRESENT_STD", "class_allotment",academicSel);
 						
 						for (String retval: divAvailabe.split(",")) {
 							admittedDiv_combo.addItem(retval);

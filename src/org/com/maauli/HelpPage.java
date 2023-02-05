@@ -278,6 +278,60 @@ public class HelpPage {
         });
 		
 		height = height + 45;
+		JButton delDupOptAllotButton = new JButton("Duplicate Optional Allotment");
+		delDupOptAllotButton.setFont(new Font("Book Antiqua", Font.BOLD, 12));
+		delDupOptAllotButton.setBounds(width, height, 200, 35);
+        panel.add(delDupOptAllotButton);
+        
+        JLabel delDupOptAllotLabel = new JLabel("Click when duplicate record appears in Optional Allotment");
+        delDupOptAllotLabel.setFont(new Font("Book Antiqua", Font.BOLD, 18));
+        delDupOptAllotLabel.setBounds(260, height, 900, 40);
+		panel.add(delDupOptAllotLabel);
+
+		delDupOptAllotButton.addActionListener(new ActionListener() {
+
+            public void actionPerformed(ActionEvent e) {
+				
+            	try {
+            		if (dbValidate.connectDatabase(sessionData)) {
+            			dbValidate.deleteDuplicateTableData(sessionData, "OPTIONAL_ALLOTMENT");
+	            		JOptionPane.showMessageDialog(null, "Success");
+    				}
+            	}
+            	catch(Exception e1) {
+            		commonObj.logException(e1);
+            	}
+            }
+        });
+		
+		height = height + 45;
+		JButton delDupClassAllotButton = new JButton("Duplicate Class Allotment");
+		delDupClassAllotButton.setFont(new Font("Book Antiqua", Font.BOLD, 12));
+		delDupClassAllotButton.setBounds(width, height, 200, 35);
+        panel.add(delDupClassAllotButton);
+        
+        JLabel delDupClassAllotLabel = new JLabel("Click when duplicate data in Class Allotment or Leaving Certificate");
+        delDupClassAllotLabel.setFont(new Font("Book Antiqua", Font.BOLD, 18));
+        delDupClassAllotLabel.setBounds(260, height, 900, 40);
+		panel.add(delDupClassAllotLabel);
+
+		delDupClassAllotButton.addActionListener(new ActionListener() {
+
+            public void actionPerformed(ActionEvent e) {
+				
+            	try {
+            		if (dbValidate.connectDatabase(sessionData)) {
+    	            	dbValidate.deleteDuplicateTableData(sessionData, "CLASS_ALLOTMENT");
+	            		JOptionPane.showMessageDialog(null, "Success");
+    				}
+            	}
+            	catch(Exception e1) {
+            		commonObj.logException(e1);
+            	}
+            }
+        });
+		
+		height = height + 45;
 		JButton subInvalidButton = new JButton("Subject invalid characters");
 		subInvalidButton.setFont(new Font("Book Antiqua", Font.BOLD, 12));
 		subInvalidButton.setBounds(width, height, 200, 35);

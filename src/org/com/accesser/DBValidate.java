@@ -9059,7 +9059,7 @@ public class DBValidate {
 
 		logger.info("=========findGeneralWise Query============");
 		String findQuery = "";
-		String stdDb = "";
+		String stdDb = "", stdForStrength= "";
 		String divDb = "";
 		String maleDB = "";
 		String femaleDB = "";
@@ -9133,6 +9133,13 @@ public class DBValidate {
 
 			while (resultSet.next()) {
 				stdDb = resultSet.getString("PRESENT_STD") == null ? " " : (resultSet.getString("PRESENT_STD").trim());
+				stdForStrength = stdDb;
+				if(stdForStrength.equalsIgnoreCase("JR KG")) {
+					stdForStrength = "LOWER_KG";
+				}
+				else if(stdForStrength.equalsIgnoreCase("SR KG")) {
+					stdForStrength = "UPPER_KG";
+				}
 				divDb = resultSet.getString("PRESENT_DIV") == null ? " " : (resultSet.getString("PRESENT_DIV").trim());
 				maleDB = resultSet.getString("BOYS") == null ? " " : (resultSet.getString("BOYS").trim());
 				femaleDB = resultSet.getString("GIRLS") == null ? " " : (resultSet.getString("GIRLS").trim());
@@ -9144,13 +9151,21 @@ public class DBValidate {
 					maleTotal = maleTotal + Integer.parseInt(maleDB);
 					femaleTotal = femaleTotal + Integer.parseInt(femaleDB);
 //					catDataList.add(stdDb + " Total |" + maleDB + "|" + femaleDB + "|" + totalDB);
-					stdDivInInt = cm.RomanToInteger(stdDb) + "" + cm.AlphabetToInteger("Total");
-					sortRoman.put(Integer.parseInt(stdDivInInt),
+					stdDivInInt = cm.RomanToInteger(stdForStrength) + "" + cm.AlphabetToInteger("Total");
+					int stdDivIntValue = Integer.parseInt(stdDivInInt);
+					if(stdDivIntValue < 0) {
+						stdDivIntValue = stdDivIntValue * (-1);
+					}
+					sortRoman.put(stdDivIntValue,
 							stdDb + " Total |" + maleDB + "|" + femaleDB + "|" + totalDB);
 //					catDataList.add("Grand Total |" + maleTotal + "|" + femaleTotal + "|" + grandTotal);
 //					stdDivInInt = cm.RomanToInteger(stdDb) +""+ cm.AlphabetToInteger("Grand_Total");
 					stdDivInInt = cm.RomanToInteger(stdDb) + "" + cm.AlphabetToInteger("Grand_Total");
-					sortRoman.put(Integer.parseInt(stdDivInInt),
+					stdDivIntValue = Integer.parseInt(stdDivInInt);
+					if(stdDivIntValue < 0) {
+						stdDivIntValue = stdDivIntValue * (-1);
+					}
+					sortRoman.put(stdDivIntValue,
 							"Grand Total |" + maleTotal + "|" + femaleTotal + "|" + grandTotal);
 				} else if (i < (rowcount - 2)) {
 					if (divDb.trim().equalsIgnoreCase("")) {
@@ -9159,8 +9174,12 @@ public class DBValidate {
 						maleTotal = maleTotal + Integer.parseInt(maleDB);
 						femaleTotal = femaleTotal + Integer.parseInt(femaleDB);
 					}
-					stdDivInInt = cm.RomanToInteger(stdDb) + "" + cm.AlphabetToInteger(divDb);
-					sortRoman.put(Integer.parseInt(stdDivInInt),
+					stdDivInInt = cm.RomanToInteger(stdForStrength) + "" + cm.AlphabetToInteger(divDb);
+					int stdDivIntValue = Integer.parseInt(stdDivInInt);
+					if(stdDivIntValue < 0) {
+						stdDivIntValue = stdDivIntValue * (-1);
+					}
+					sortRoman.put(stdDivIntValue,
 							stdDb + " " + divDb + "|" + maleDB + "|" + femaleDB + "|" + totalDB);
 //					catDataList.add(stdDb +" "+ divDb + "|" + maleDB + "|" + femaleDB + "|" + totalDB);
 				}
@@ -16929,11 +16948,14 @@ public class DBValidate {
 			String stdColumn, String tableName, String academic) {
 
 		logger.info("======inside getDistinctDiv======");
-		String retDiv = "";
+		String retDiv = "", condition = "";
 		try {
+			if(!academic.equalsIgnoreCase("") && !academic.equalsIgnoreCase("All") && !academic.equalsIgnoreCase("Select")) {
+				condition = " AND ACADEMIC_YEAR='" + academic + "'";
+			}
 			String query = "SELECT DISTINCT " + divColumn + " FROM " + sessionData1.getDBName() + "." + tableName
-					+ " WHERE SECTION_NM='" + section + "' AND " + stdColumn + "='" + std + "' ORDER BY " + divColumn
-					+ " ASC";
+					+ " WHERE SECTION_NM='" + section + "' AND " + stdColumn + "='" + std + "' "+ condition
+					+ "ORDER BY " + divColumn + " ASC";
 			logger.info(query);
 			statement = connection.createStatement();
 			resultSet = statement.executeQuery(query);
@@ -20618,51 +20640,51 @@ public class DBValidate {
 			if (payFrequency.equalsIgnoreCase("Monthly") || payFrequency.equalsIgnoreCase("Occasionally")) {
 				if (!columnList.contains(fee_name.toUpperCase() + "_JAN"))
 					coulmnNames = coulmnNames + "," + fee_name.toUpperCase() + "_JAN double UNSIGNED DEFAULT NULL,"
-							+ fee_name.toUpperCase() + "_JAN_DATE DATETIME ON UPDATE CURRENT_TIMESTAMP,"
+							+ fee_name.toUpperCase() + "_JAN_DATE DATETIME,"
 							+ fee_name.toUpperCase() + "_JAN_BANK  TEXT";
 				if (!columnList.contains(fee_name.toUpperCase() + "_FEB"))
 					coulmnNames = coulmnNames + "," + fee_name.toUpperCase() + "_FEB double UNSIGNED DEFAULT NULL,"
-							+ fee_name.toUpperCase() + "_FEB_DATE DATETIME ON UPDATE CURRENT_TIMESTAMP,"
+							+ fee_name.toUpperCase() + "_FEB_DATE DATETIME,"
 							+ fee_name.toUpperCase() + "_FEB_BANK  TEXT";
 				if (!columnList.contains(fee_name.toUpperCase() + "_MAR"))
 					coulmnNames = coulmnNames + "," + fee_name.toUpperCase() + "_MAR double UNSIGNED DEFAULT NULL,"
-							+ fee_name.toUpperCase() + "_MAR_DATE DATETIME ON UPDATE CURRENT_TIMESTAMP,"
+							+ fee_name.toUpperCase() + "_MAR_DATE DATETIME,"
 							+ fee_name.toUpperCase() + "_MAR_BANK  TEXT";
 				if (!columnList.contains(fee_name.toUpperCase() + "_APR"))
 					coulmnNames = coulmnNames + "," + fee_name.toUpperCase() + "_APR double UNSIGNED DEFAULT NULL,"
-							+ fee_name.toUpperCase() + "_APR_DATE DATETIME ON UPDATE CURRENT_TIMESTAMP,"
+							+ fee_name.toUpperCase() + "_APR_DATE DATETIME,"
 							+ fee_name.toUpperCase() + "_APR_BANK  TEXT";
 				if (!columnList.contains(fee_name.toUpperCase() + "_MAY"))
 					coulmnNames = coulmnNames + "," + fee_name.toUpperCase() + "_MAY double UNSIGNED DEFAULT NULL,"
-							+ fee_name.toUpperCase() + "_MAY_DATE DATETIME ON UPDATE CURRENT_TIMESTAMP,"
+							+ fee_name.toUpperCase() + "_MAY_DATE DATETIME,"
 							+ fee_name.toUpperCase() + "_MAY_BANK  TEXT";
 				if (!columnList.contains(fee_name.toUpperCase() + "_JUN"))
 					coulmnNames = coulmnNames + "," + fee_name.toUpperCase() + "_JUN double UNSIGNED DEFAULT NULL,"
-							+ fee_name.toUpperCase() + "_JUN_DATE DATETIME ON UPDATE CURRENT_TIMESTAMP,"
+							+ fee_name.toUpperCase() + "_JUN_DATE DATETIME,"
 							+ fee_name.toUpperCase() + "_JUN_BANK  TEXT";
 				if (!columnList.contains(fee_name.toUpperCase() + "_JUL"))
 					coulmnNames = coulmnNames + "," + fee_name.toUpperCase() + "_JUL double UNSIGNED DEFAULT NULL,"
-							+ fee_name.toUpperCase() + "_JUL_DATE DATETIME ON UPDATE CURRENT_TIMESTAMP,"
+							+ fee_name.toUpperCase() + "_JUL_DATE DATETIME,"
 							+ fee_name.toUpperCase() + "_JUL_BANK  TEXT";
 				if (!columnList.contains(fee_name.toUpperCase() + "_AUG"))
 					coulmnNames = coulmnNames + "," + fee_name.toUpperCase() + "_AUG double UNSIGNED DEFAULT NULL,"
-							+ fee_name.toUpperCase() + "_AUG_DATE DATETIME ON UPDATE CURRENT_TIMESTAMP,"
+							+ fee_name.toUpperCase() + "_AUG_DATE DATETIME,"
 							+ fee_name.toUpperCase() + "_AUG_BANK  TEXT";
 				if (!columnList.contains(fee_name.toUpperCase() + "_SEP"))
 					coulmnNames = coulmnNames + "," + fee_name.toUpperCase() + "_SEP double UNSIGNED DEFAULT NULL,"
-							+ fee_name.toUpperCase() + "_SEP_DATE DATETIME ON UPDATE CURRENT_TIMESTAMP,"
+							+ fee_name.toUpperCase() + "_SEP_DATE DATETIME,"
 							+ fee_name.toUpperCase() + "_SEP_BANK  TEXT";
 				if (!columnList.contains(fee_name.toUpperCase() + "_OCT"))
 					coulmnNames = coulmnNames + "," + fee_name.toUpperCase() + "_OCT double UNSIGNED DEFAULT NULL,"
-							+ fee_name.toUpperCase() + "_OCT_DATE DATETIME ON UPDATE CURRENT_TIMESTAMP,"
+							+ fee_name.toUpperCase() + "_OCT_DATE DATETIME,"
 							+ fee_name.toUpperCase() + "_OCT_BANK  TEXT";
 				if (!columnList.contains(fee_name.toUpperCase() + "_NOV"))
 					coulmnNames = coulmnNames + "," + fee_name.toUpperCase() + "_NOV double UNSIGNED DEFAULT NULL,"
-							+ fee_name.toUpperCase() + "_NOV_DATE DATETIME ON UPDATE CURRENT_TIMESTAMP,"
+							+ fee_name.toUpperCase() + "_NOV_DATE DATETIME,"
 							+ fee_name.toUpperCase() + "_NOV_BANK  TEXT";
 				if (!columnList.contains(fee_name.toUpperCase() + "_DEC"))
 					coulmnNames = coulmnNames + "," + fee_name.toUpperCase() + "_DEC double UNSIGNED DEFAULT NULL,"
-							+ fee_name.toUpperCase() + "_DEC_DATE DATETIME ON UPDATE CURRENT_TIMESTAMP,"
+							+ fee_name.toUpperCase() + "_DEC_DATE DATETIME,"
 							+ fee_name.toUpperCase() + "_DEC_BANK  TEXT";
 
 				coulmnNames = coulmnNames.substring(1);
@@ -20670,25 +20692,25 @@ public class DBValidate {
 				if (!columnList.contains(fee_name.toUpperCase() + "_" + cm.intgerToMonth(startMonth + "")))
 					coulmnNames = coulmnNames + "," + fee_name.toUpperCase() + "_" + cm.intgerToMonth(startMonth + "")
 							+ " double UNSIGNED DEFAULT NULL," + fee_name.toUpperCase() + "_"
-							+ cm.intgerToMonth(startMonth + "") + "_DATE DATETIME ON UPDATE CURRENT_TIMESTAMP,"
+							+ cm.intgerToMonth(startMonth + "") + "_DATE DATETIME,"
 							+ fee_name.toUpperCase() + "_" + cm.intgerToMonth(startMonth + "") + "_BANK  TEXT";
 				if (!columnList.contains(fee_name.toUpperCase() + "_" + cm.intgerToMonth((startMonth + 3) + "")))
 					coulmnNames = coulmnNames + "," + fee_name.toUpperCase() + "_"
 							+ cm.intgerToMonth((startMonth + 3) + "") + " double UNSIGNED DEFAULT NULL,"
 							+ fee_name.toUpperCase() + "_" + cm.intgerToMonth((startMonth + 3) + "")
-							+ "_DATE DATETIME ON UPDATE CURRENT_TIMESTAMP," + fee_name.toUpperCase() + "_"
+							+ "_DATE DATETIME," + fee_name.toUpperCase() + "_"
 							+ cm.intgerToMonth((startMonth + 3) + "") + "_BANK  TEXT";
 				if (!columnList.contains(fee_name.toUpperCase() + "_" + cm.intgerToMonth((startMonth + 6) + "")))
 					coulmnNames = coulmnNames + "," + fee_name.toUpperCase() + "_"
 							+ cm.intgerToMonth((startMonth + 6) + "") + " double UNSIGNED DEFAULT NULL,"
 							+ fee_name.toUpperCase() + "_" + cm.intgerToMonth((startMonth + 6) + "")
-							+ "_DATE DATETIME ON UPDATE CURRENT_TIMESTAMP," + fee_name.toUpperCase() + "_"
+							+ "_DATE DATETIME," + fee_name.toUpperCase() + "_"
 							+ cm.intgerToMonth((startMonth + 6) + "") + "_BANK  TEXT";
 				if (!columnList.contains(fee_name.toUpperCase() + "_" + cm.intgerToMonth((startMonth + 9) + "")))
 					coulmnNames = coulmnNames + "," + fee_name.toUpperCase() + "_"
 							+ cm.intgerToMonth((startMonth + 9) + "") + " double UNSIGNED DEFAULT NULL,"
 							+ fee_name.toUpperCase() + "_" + cm.intgerToMonth((startMonth + 9) + "")
-							+ "_DATE DATETIME ON UPDATE CURRENT_TIMESTAMP," + fee_name.toUpperCase() + "_"
+							+ "_DATE DATETIME," + fee_name.toUpperCase() + "_"
 							+ cm.intgerToMonth((startMonth + 9) + "") + "_BANK  TEXT";
 
 				coulmnNames = coulmnNames.substring(1);
@@ -20696,13 +20718,13 @@ public class DBValidate {
 				if (!columnList.contains(fee_name.toUpperCase() + "_" + cm.intgerToMonth(startMonth + "")))
 					coulmnNames = coulmnNames + "," + fee_name.toUpperCase() + "_" + cm.intgerToMonth(startMonth + "")
 							+ " double UNSIGNED DEFAULT NULL," + fee_name.toUpperCase() + "_"
-							+ cm.intgerToMonth(startMonth + "") + "_DATE DATETIME ON UPDATE CURRENT_TIMESTAMP,"
+							+ cm.intgerToMonth(startMonth + "") + "_DATE DATETIME,"
 							+ fee_name.toUpperCase() + "_" + cm.intgerToMonth(startMonth + "") + "_BANK  TEXT";
 				if (!columnList.contains(fee_name.toUpperCase() + "_" + cm.intgerToMonth((startMonth + 6) + "")))
 					coulmnNames = coulmnNames + "," + fee_name.toUpperCase() + "_"
 							+ cm.intgerToMonth((startMonth + 6) + "") + " double UNSIGNED DEFAULT NULL,"
 							+ fee_name.toUpperCase() + "_" + cm.intgerToMonth((startMonth + 6) + "")
-							+ "_DATE DATETIME ON UPDATE CURRENT_TIMESTAMP," + fee_name.toUpperCase() + "_"
+							+ "_DATE DATETIME," + fee_name.toUpperCase() + "_"
 							+ cm.intgerToMonth((startMonth + 6) + "") + "_BANK  TEXT";
 
 				coulmnNames = coulmnNames.substring(1);
@@ -20710,7 +20732,7 @@ public class DBValidate {
 				if (!columnList.contains(fee_name.toUpperCase() + "_" + cm.intgerToMonth(startMonth + "")))
 					coulmnNames = fee_name.toUpperCase() + "_" + cm.intgerToMonth(startMonth + "")
 							+ " double UNSIGNED DEFAULT NULL," + fee_name.toUpperCase() + "_"
-							+ cm.intgerToMonth(startMonth + "") + "_DATE DATETIME ON UPDATE CURRENT_TIMESTAMP,"
+							+ cm.intgerToMonth(startMonth + "") + "_DATE DATETIME,"
 							+ fee_name.toUpperCase() + "_" + cm.intgerToMonth(startMonth + "") + "_BANK  TEXT";
 			}
 
@@ -21208,7 +21230,7 @@ public class DBValidate {
 				grNo = me.getKey().toString();
 				grList = grList + ",'" + grNo + "'";
 				studentDetailMap = selectedStudentMap.get(grNo);
-				f.setTitle("Updated fee for " + m + " student");
+				f.setTitle("Update fee for " + m + " student");
 
 				rollNo = ((LinkedHashMap<?, ?>) selectedStudentMap.get(me.getKey())).get("rollNo").toString();
 				name = ((LinkedHashMap<?, ?>) selectedStudentMap.get(me.getKey())).get("name").toString();
@@ -21275,26 +21297,29 @@ public class DBValidate {
 									/ cm.frequencyToInteger(frequency);
 						}
 
-						for (int n = 0; n < optionalList.length; n++) {
-							if (optionalList[n].contains(feesType + "^") && subFee.equalsIgnoreCase("")) {
-								subFee = optionalList[n].substring(optionalList[n].indexOf("^") + 1);
-								isOptional = true;
-								if (!subFee.equalsIgnoreCase("")) {
-									feesHeadMapTmp.get(feesType).put("amount",
-											((LinkedHashMap<?, ?>) multiFeeHeadMap.get(subFee)).get("amount")
-													.toString());
-									multiOptAmt = Double.parseDouble(((LinkedHashMap<?, ?>) multiFeeHeadMap.get(subFee))
-											.get("amount").toString()) / monthMap.size();
-									totalAmountTmp = totalAmountTmp - optionalAmt
-											+ (Double.parseDouble(((LinkedHashMap<?, ?>) multiFeeHeadMap.get(subFee))
-													.get("amount").toString())) / cm.frequencyToInteger(frequency);
-									optionalAmt = Double.parseDouble(((LinkedHashMap<?, ?>) multiFeeHeadMap.get(subFee))
-											.get("amount").toString());
-									subFee = " (" + subFee + ")";
+						if(optionalList != null) {
+							for (int n = 0; n < optionalList.length; n++) {
+								if (optionalList[n].contains(feesType + "^") && subFee.equalsIgnoreCase("")) {
+									subFee = optionalList[n].substring(optionalList[n].indexOf("^") + 1);
+									isOptional = true;
+									if (!subFee.equalsIgnoreCase("")) {
+										feesHeadMapTmp.get(feesType).put("amount",
+												((LinkedHashMap<?, ?>) multiFeeHeadMap.get(subFee)).get("amount")
+														.toString());
+										multiOptAmt = Double.parseDouble(((LinkedHashMap<?, ?>) multiFeeHeadMap.get(subFee))
+												.get("amount").toString()) / monthMap.size();
+										totalAmountTmp = totalAmountTmp - optionalAmt
+												+ (Double.parseDouble(((LinkedHashMap<?, ?>) multiFeeHeadMap.get(subFee))
+														.get("amount").toString())) / cm.frequencyToInteger(frequency);
+										optionalAmt = Double.parseDouble(((LinkedHashMap<?, ?>) multiFeeHeadMap.get(subFee))
+												.get("amount").toString());
+										subFee = " (" + subFee + ")";
+									}
+									break;
 								}
-								break;
 							}
 						}
+						
 						monthMap = (LinkedHashMap) meFees.getValue();
 
 						if (optional.equalsIgnoreCase("No") || (optional.equalsIgnoreCase("Yes") && isOptional)) {
@@ -22360,10 +22385,10 @@ public class DBValidate {
 			}
 			if (!feesHeadColumn.equalsIgnoreCase("")) {
 				feesHeadColumn = feesHeadColumn.substring(0, feesHeadColumn.lastIndexOf("+"));
-				sumQuery = "SELECT CONCESSION_AMOUNT,GR_NO," + feesHeadColumn + " AS FEES_SUM FROM "
+				sumQuery = "SELECT GR_NO,CONCESSION_AMOUNT," + feesHeadColumn + " AS FEES_SUM FROM "
 						+ sessionData.getDBName() + ".FEES_DATA_MANDATORY WHERE STD_1='" + std + "' and DIV_1='" + div
 						+ "' and ACADEMIC_YEAR='" + academic + "' " + "and SECTION_NM='" + sessionData.getSectionName()
-						+ "' GROUP BY GR_NO";
+						+ "' GROUP BY GR_NO,CONCESSION_AMOUNT";
 				statement = connection.createStatement();
 				resultSet = statement.executeQuery(sumQuery);
 
@@ -22521,7 +22546,7 @@ public class DBValidate {
 
 							feesDate = resultSetFeesData.getString(cm.replaceCommaApostrophy(feesHead) + "_"
 									+ cm.intgerToMonth((startMonth + i) + "") + "_DATE");
-							if (cm.isDateBetween(fromDateStr, toDateStr, feesDate)) {
+							if (feesDate != null && cm.isDateBetween(fromDateStr, toDateStr, feesDate)) {
 								feesHeadAmount = resultSetFeesData
 										.getDouble(feesHead + "_" + cm.intgerToMonth((startMonth + i) + ""));
 								feeData = resultSetFeesData.getString(cm.replaceCommaApostrophy(feesHead) + "_"
@@ -22557,7 +22582,7 @@ public class DBValidate {
 						for (int i = 0; i < 12; i += 3) {
 							feesDate = resultSetFeesData.getString(cm.replaceCommaApostrophy(feesHead) + "_"
 									+ cm.intgerToMonth((startMonth + i) + "") + "_DATE");
-							if (cm.isDateBetween(fromDateStr, toDateStr, feesDate)) {
+							if (feesDate != null && cm.isDateBetween(fromDateStr, toDateStr, feesDate)) {
 								feesHeadAmount = resultSetFeesData
 										.getDouble(feesHead + "_" + cm.intgerToMonth((startMonth + i) + ""));
 								feeData = resultSetFeesData.getString(cm.replaceCommaApostrophy(feesHead) + "_"
@@ -22592,7 +22617,7 @@ public class DBValidate {
 						for (int i = 0; i < 12; i += 6) {
 							feesDate = resultSetFeesData.getString(cm.replaceCommaApostrophy(feesHead) + "_"
 									+ cm.intgerToMonth((startMonth + i) + "") + "_DATE");
-							if (cm.isDateBetween(fromDateStr, toDateStr, feesDate)) {
+							if (feesDate != null && cm.isDateBetween(fromDateStr, toDateStr, feesDate)) {
 								feesHeadAmount = resultSetFeesData
 										.getDouble(feesHead + "_" + cm.intgerToMonth((startMonth + i) + ""));
 								feeData = resultSetFeesData.getString(cm.replaceCommaApostrophy(feesHead) + "_"
@@ -22626,7 +22651,7 @@ public class DBValidate {
 					} else if (frequencyInt == 1) {
 						feesDate = resultSetFeesData.getString(cm.replaceCommaApostrophy(feesHead) + "_"
 								+ cm.intgerToMonth(startMonth + "") + "_DATE");
-						if (cm.isDateBetween(fromDateStr, toDateStr, feesDate)) {
+						if (feesDate != null && cm.isDateBetween(fromDateStr, toDateStr, feesDate)) {
 							feesHeadAmount = resultSetFeesData
 									.getDouble(feesHead + "_" + cm.intgerToMonth(startMonth + ""));
 							feeData = resultSetFeesData.getString(cm.replaceCommaApostrophy(feesHead) + "_"
@@ -23797,7 +23822,8 @@ public class DBValidate {
 
 				LinkedHashMap concessionMap = new LinkedHashMap();
 				grNoDb = resultSetData.getString("GR_NO");
-				if (freePayingData.get(grNoDb).toString().equalsIgnoreCase("Free")) {
+				
+				if (freePayingData.get(grNoDb) == null || freePayingData.get(grNoDb).toString().equalsIgnoreCase("Free")) {
 					continue;
 				}
 				if (studentOptMap.get(grNoDb) != null) {
@@ -24282,7 +24308,7 @@ public class DBValidate {
 		try {
 			String findQuery = "select * from " + sessionData.getDBName() + "." + tableName + " where " + stdColumnName
 					+ "='" + std + "' " + "and ACADEMIC_YEAR='" + academicYear + "' and section_nm='"
-					+ sessionData.getSectionName() + "' and " + "GR_NO IN (SELECT GR_NO FROM SCHOOL." + tableName
+					+ sessionData.getSectionName() + "' and " + "GR_NO IN (SELECT GR_NO FROM " + sessionData.getDBName() + "." + tableName
 					+ " where ACADEMIC_YEAR = '" + academicYear + "' AND " + "" + stdColumnName + " = '" + std
 					+ "' AND SECTION_NM = '" + sessionData.getSectionName() + "' "
 					+ "GROUP BY GR_NO HAVING COUNT(GR_NO) > 1) order by CREATED_DATE DESC";
@@ -26282,6 +26308,96 @@ public class DBValidate {
 			logger.error("alterColumnLength => " + e);
 		}
 	}
+	
+	public void deleteDuplicateTableData(SessionData sessionData, String tableName) {
+		int screenWidth = cm.screeWidth();
+		int screenHeight = cm.screeHeight();
+		int mainCentre = (screenWidth - 150) / 2;
+		String gr_no = "", roll_no = "", academic_year = "", std = "", div = "", optional_subject = "", created_date, 
+				created_by = "", modified_date = "", modified_by = "", section_name = "", suid = "";
+
+		List columnList = new ArrayList();
+		LinkedHashMap tableMap = new LinkedHashMap();
+
+		JFrame f = new JFrame("Delete "+tableName+" data in progress. Don't Close");
+		f.setBounds(screenWidth / 2 - 150, screenHeight / 2, 90, 25);
+		f.setSize(500, 0);
+		f.setResizable(false);
+		f.setVisible(true);
+		f.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+
+		try {
+			String coulmnDb = "";
+			String coulmnStr = "";
+			int orderStr = 0;
+			String findColumnQuery = "SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS " + "WHERE TABLE_SCHEMA='"
+					+ sessionData.getDBName() + "' AND TABLE_NAME = '"+tableName+"'";
+
+			statement = connection.createStatement();
+			resultSet = statement.executeQuery(findColumnQuery);
+
+			while (resultSet.next()) {
+				coulmnDb = resultSet.getString("COLUMN_NAME");
+				coulmnStr = coulmnStr + "," + coulmnDb;
+				columnList.add(coulmnDb);
+			}
+
+			coulmnStr = coulmnStr.substring(1);
+
+			String insertQuery = "INSERT INTO " + sessionData.getDBName() + "." + tableName+ " (" + coulmnStr
+					+ ") Values ";
+
+			String findQuery = "SELECT DISTINCT " + coulmnStr + " FROM " + sessionData.getDBName() + "."
+					+ tableName;
+			statement = connection.createStatement();
+			resultSet = statement.executeQuery(findQuery);
+
+			connection.setAutoCommit(true);
+			PreparedStatement pstm = null;
+			String sql = "TRUNCATE TABLE " + sessionData.getDBName() + "."+tableName;
+			pstm = (PreparedStatement) connection.prepareStatement(sql);
+			pstm.execute();
+
+			while (resultSet.next()) {
+
+				gr_no = resultSet.getString("GR_NO");
+				academic_year = resultSet.getString("ACADEMIC_YEAR");
+				std = resultSet.getString("PRESENT_STD");
+				div = resultSet.getString("PRESENT_DIV");
+				section_name = resultSet.getString("SECTION_NM");
+				suid = resultSet.getString("SUID");
+
+				if (tableMap.containsKey(gr_no + academic_year + std + div + section_name + suid)) {
+					continue;
+				}
+				tableMap.put(gr_no + academic_year + std + div + section_name + suid, "");
+
+				insertQuery = insertQuery + "(";
+				for (int j = 0; j < columnList.size(); j++) {
+					if (!columnList.get(j).toString().equalsIgnoreCase("MODIFIED_DATE") && !columnList.get(j).toString().equalsIgnoreCase("DATE_ADMITTED")) {
+						insertQuery = insertQuery + "'" + resultSet.getString(columnList.get(j).toString()) + "'" + ",";
+					} else if(resultSet.getDate(columnList.get(j).toString()) != null){
+						insertQuery = insertQuery + "NULL" + ",";
+					} else {
+//						insertQuery = insertQuery + "null" + ",";
+						insertQuery = insertQuery + resultSet.getDate(columnList.get(j).toString()) + ",";
+					}
+				}
+
+				insertQuery = insertQuery.substring(0, insertQuery.length() - 1);
+				insertQuery = insertQuery + "),";
+			}
+			insertQuery = insertQuery.substring(0, insertQuery.length() - 1);
+			statement = connection.createStatement();
+			statement.executeUpdate(insertQuery);
+
+			JOptionPane.showMessageDialog(null, "Duplicate " + tableName + " data deleted...");
+			f.setVisible(false);
+		} catch (Exception e) {
+			f.setVisible(false);
+			logger.error("alterColumnLength => " + e);
+		}
+	}
 
 	public void deleteSubjectInvalidChar(SessionData sessionData) {
 		int screenWidth = cm.screeWidth();
@@ -27651,6 +27767,24 @@ public class DBValidate {
 			}
 //	        }
 		} catch (Exception e) {
+		}
+	}
+	
+	public void UpdateDivLengthinTable(SessionData sessionData) {
+		try {
+			String modifyDivVarcharSizeColumn = "ALTER TABLE "+sessionData.getDBName()+".MARKS_ENTRY MODIFY COLUMN DIV_1 VARCHAR(10),MODIFY COLUMN STD_1 VARCHAR(10)";
+			statement = connection.createStatement();
+			statement.executeUpdate(modifyDivVarcharSizeColumn);
+		} catch (Exception e) {
+			logger.warn("failed to modify Div varchar size Column query in MARKS_ENTRY table >>> " + e);
+		}
+		
+		try {
+			String modifyDivVarcharSizeColumn = "ALTER TABLE "+sessionData.getDBName()+".RESULT_DATA MODIFY COLUMN DIV_1 VARCHAR(10),MODIFY COLUMN STD_1 VARCHAR(10)";
+			statement = connection.createStatement();
+			statement.executeUpdate(modifyDivVarcharSizeColumn);
+		} catch (Exception e) {
+			logger.warn("failed to modify Div varchar size Column query in RESULT_DATA table >>> " + e);
 		}
 	}
 }

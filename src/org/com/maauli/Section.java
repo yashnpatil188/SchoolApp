@@ -154,6 +154,7 @@ public class Section
             	
             	if(dbValidate.connectDatabase(sessionData)){
             		dbValidate.insertColumnForEvaluation(sessionData);
+            		dbValidate.UpdateDivLengthinTable(sessionData);
     	            deleteFlag = dbValidate.deleteFormData(sessionData, user_name, "LEAVING CERTIFICATE", user_role, section);
     	            dbValidate.closeDatabase(sessionData);
             	}

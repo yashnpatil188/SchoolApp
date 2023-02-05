@@ -88,6 +88,9 @@ public class BulkUploadSms {
 				for (int i = 2; i <= sheet.getLastRowNum(); i++) {
 					try {
 						row = sheet.getRow(i);
+						if(row.getCell(0) == null || row.getCell(1) == null || row.getCell(2) == null) {
+							break;
+						}
 						name = row.getCell(0).getStringCellValue().toString().trim().toUpperCase();
 						phone = formatter.formatCellValue(row.getCell(1));
 						message = formatter.formatCellValue(row.getCell(2));
