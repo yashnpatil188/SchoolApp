@@ -41,9 +41,12 @@ import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 import javax.swing.plaf.basic.BasicComboBoxRenderer;
 
 import org.apache.log4j.Logger;
+import org.apache.poi.util.SystemOutLogger;
 import org.com.accesser.DBValidate;
 import org.com.accesser.SessionData;
 import org.jdatepicker.impl.JDatePanelImpl;
@@ -203,6 +206,7 @@ public class SmsPage extends JFrame {
     static boolean fee_visible_flag = true;
 
 	private static LinkedHashMap foundStudentMap;
+	private static LinkedHashMap<String, LinkedHashMap<String, String>> smsTemplateIdMap = new LinkedHashMap<String, LinkedHashMap<String, String>>();
 
 	public SmsPage(SessionData sessionData1, String retGr_no, String retStd, String retDiv, String retLastName,
 			String retFirstName, String retFatherName, LinkedHashMap retStudentMap, boolean retSelected,
@@ -647,10 +651,10 @@ public class SmsPage extends JFrame {
 
 		smsHomeButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				frame.setVisible(false);
-            	LinkedHashMap findStudentMap = new LinkedHashMap();
-				new SmsPage(sessionData, "", "", "", "", "", "", findStudentMap, false, "", "", "", "", "",
-						"", section, "", user_name, user_role,"","","");
+//				frame.setVisible(false);
+//            	LinkedHashMap findStudentMap = new LinkedHashMap();
+//				new SmsPage(sessionData, "", "", "", "", "", "", findStudentMap, false, "", "", "", "", "",
+//						"", section, "", user_name, user_role,"","","");
 			}
 		});
 		
@@ -665,6 +669,21 @@ public class SmsPage extends JFrame {
 			public void actionPerformed(ActionEvent e) {
 				frame.setVisible(false);
 				new CreateSMSStaff(sessionData, "", section);
+
+			}
+		});
+		
+		width = width + 150;
+		JButton smsTemplateButton = new JButton("SMS Template");
+		smsTemplateButton.setFont(new Font("Book Antiqua", Font.PLAIN, 18));
+		smsTemplateButton.setBounds(width, 50, 170, 24);
+		topbandPanel.add(smsTemplateButton);
+
+		smsTemplateButton.addActionListener(new ActionListener() {
+
+			public void actionPerformed(ActionEvent e) {
+				frame.setVisible(false);
+				new CreateSMSTemplate(sessionData, "", section);
 
 			}
 		});
@@ -1775,15 +1794,6 @@ public class SmsPage extends JFrame {
 						lastName = "";
 						firstName = "";
 						fatherName = "";
-	
-//						if (std.equalsIgnoreCase("") || std.equalsIgnoreCase("Select")) {
-//							validateFields = false;
-//							JOptionPane.showMessageDialog(null, "Please select Std");
-//						} else if ((std.equalsIgnoreCase("") || std.equalsIgnoreCase("Select")) && !div.equalsIgnoreCase("")
-//								&& !div.equalsIgnoreCase("Select")) {
-//							validateFields = false;
-//							JOptionPane.showMessageDialog(null, "Please select Std");
-//						}
 					} else if (!year_radioSelected && !smsType.equalsIgnoreCase("Update")) {
 						validateFields = false;
 						JOptionPane.showMessageDialog(null, "Please select any one option");
@@ -2031,13 +2041,13 @@ public class SmsPage extends JFrame {
 			
 			JLabel date_label = new JLabel("Date Sent/Schedule");
 			date_label.setFont(new Font("Book Antiqua", Font.BOLD, 16));
-			date_label.setBounds(940, 00, 150, 50);
+			date_label.setBounds(940, 00, 300, 50);
 			dataPanel.add(date_label);
 
 			JLabel line_label = new JLabel(
 					"--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------");
 			line_label.setFont(new Font("Book Antiqua", Font.BOLD, 16));
-			line_label.setBounds(30, 13, 1100, 50);
+			line_label.setBounds(30, 13, 1200, 50);
 			dataPanel.add(line_label);
 
 			if (listSize > 0) {
@@ -2171,6 +2181,7 @@ public class SmsPage extends JFrame {
 						status[i].setEnabled(false);
 					}
 					String sms = message.replace("newLine", "<br>");
+					sms = commonObj.revertCommaApostrophy(sms);
 					status[i].setToolTipText("<html><p width=\"200\">" +sms+"</p></html>");
 					status[i].setFont(new Font("Book Antiqua", Font.BOLD, 16));
 					status[i].setBounds(770, j + 12, 150, 20);
@@ -2226,13 +2237,13 @@ public class SmsPage extends JFrame {
 					
 					date_labels[i] = new JLabel(smsDate);
 					date_labels[i].setFont(new Font("Book Antiqua", Font.BOLD, 16));
-					date_labels[i].setBounds(950, j + 12, 150, 20);
+					date_labels[i].setBounds(950, j + 12, 400, 20);
 					dataPanel.add(date_labels[i]);
 					
 					line_labels[i] = new JLabel(
 							"--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------");
 					line_labels[i].setFont(new Font("Book Antiqua", Font.BOLD, 16));
-					line_labels[i].setBounds(30, j + 10, 1100, 50);
+					line_labels[i].setBounds(30, j + 10, 1200, 50);
 					dataPanel.add(line_labels[i]);
 
 					// //////sr radio action//////////////
@@ -2299,98 +2310,164 @@ public class SmsPage extends JFrame {
 					sms_label.setBounds(40, l + 10, 150, 50);
 					dataPanel.add(sms_label);
 	
+					String smsTemplateStr = "Please Select Template";
+					try {
+						if(dbValidate.connectDatabase(sessionData)){
+							smsTemplateStr = smsTemplateStr +"|"+ dbValidate.getSMSTemplateStr(sessionData);
+							smsTemplateIdMap = dbValidate.getSMSTemplateIdMap(sessionData);
+						}
+					} catch (Exception e1) {
+			            logger.error("Exception while getting sms template details ==>>>" + e1);
+			        }
+					
+					String[] smsTemplateList = smsTemplateStr.split("\\|");
+					final JComboBox smsTemplate_combo = new JComboBox(smsTemplateList);
+					smsTemplate_combo.setFont(new Font("Book Antiqua", Font.PLAIN, 16));
+					smsTemplate_combo.setBounds(140, l + 25, 900, 25);
+					smsTemplate_combo.setSelectedItem(smsTypeClass);
+					dataPanel.add(smsTemplate_combo);
+					
 					final JTextArea sms_textArea = new JTextArea();
 					if(true) {
-						sms_textArea.setFont(new Font("FreeSans", Font.BOLD, 16));//Shivaji02
+						sms_textArea.setFont(new Font("FreeSans", Font.PLAIN, 16));//Shivaji02
 					}
 					else {
-						sms_textArea.setFont(new Font("Book Antiqua", Font.BOLD, 16));
+						sms_textArea.setFont(new Font("Book Antiqua", Font.PLAIN, 16));
 					}
-	//				sms_textArea.setBounds(130, l + 20, 900, 100);
 					sms_textArea.setLineWrap(true);
 					sms_textArea.setVisible(true);
 					JScrollPane scroll = new JScrollPane(sms_textArea);
-					scroll.setBounds(170, l + 20, 900, 100);
-					scroll.setSize( 900, 100 );
+					scroll.setBounds(140, l + 60, 900, 60);
+					scroll.setSize( 900, 60 );
 					dataPanel.add(scroll);
-					
+										
 					JLabel char_label = new JLabel("Characters: ");
 					char_label.setFont(new Font("Book Antiqua", Font.BOLD, 16));
-					char_label.setBounds(40, l + 70, 150, 50);
+					char_label.setBounds(40, l + 110, 150, 50);
 					dataPanel.add(char_label);
 					
 					final JLabel charLength_label = new JLabel("0");
 					charLength_label.setFont(new Font("Book Antiqua", Font.BOLD, 16));
-					charLength_label.setBounds(130, l + 70, 150, 50);
+					charLength_label.setBounds(135, l + 110, 150, 50);
 					dataPanel.add(charLength_label);
 					
 					JLabel noOfSms_label = new JLabel("No of SMS: ");
 					noOfSms_label.setFont(new Font("Book Antiqua", Font.BOLD, 16));
-					noOfSms_label.setBounds(40, l + 90, 150, 50);
+					noOfSms_label.setBounds(40, l + 130, 150, 50);
 					dataPanel.add(noOfSms_label);
 					
 					final JLabel smsCount_label = new JLabel("0");
 					smsCount_label.setFont(new Font("Book Antiqua", Font.BOLD, 16));
-					smsCount_label.setBounds(130, l + 90, 150, 50);
+					smsCount_label.setBounds(130, l + 130, 150, 50);
 					dataPanel.add(smsCount_label);
 					
-					sms_textArea.addKeyListener(new KeyAdapter() {
-						String noOfCharacters = "";
-						double smsDouble = 0.0;
-						int smsLength = 0;
-						public void keyReleased(KeyEvent e) {
-							int noOfSms = 0;
-							noOfCharacters = sms_textArea.getText();
-							smsLength = noOfCharacters.length();
-							//160 147 152
-							charLength_label.setText(""+noOfCharacters.length());
-							if(smsLength > 0 && smsLength <= 160)
-							{
-								noOfSms = 1;
-								smsCount_label.setText(""+noOfSms);
-								smsLength = smsLength - 160;
+					smsTemplate_combo.addActionListener(new ActionListener() {
+
+						public void actionPerformed(ActionEvent e) {
+
+							try{
+								String smsTemplateSel = (String) smsTemplate_combo.getSelectedItem();
+								sms_textArea.removeAll();
+								sms_textArea.setText(((LinkedHashMap<?, ?>) smsTemplateIdMap.get(smsTemplateSel)).get("messageBody").toString());
+								
+								if(!smsTemplateSel.equalsIgnoreCase("Please Select Template")) {
+									String noOfCharacters = "";
+									double smsDouble = 0.0;
+									int smsLength = 0;
+									
+									int noOfSms = 0;
+									noOfCharacters = sms_textArea.getText();
+									smsLength = noOfCharacters.length();
+									//160 147 152
+									charLength_label.setText(""+noOfCharacters.length());
+									if(smsLength > 0 && smsLength <= 160)
+									{
+										noOfSms = 1;
+										smsCount_label.setText(""+noOfSms);
+										smsLength = smsLength - 160;
+									}
+									else if(smsLength > 160){
+										noOfSms = 1;
+									}
+									smsLength = smsLength - 160;
+									
+									if(smsLength > 0 && smsLength <= 147)
+									{
+										noOfSms = 2;
+										smsCount_label.setText(""+noOfSms);
+										smsLength = smsLength - 147;
+									}
+									else if(smsLength > 147){
+										noOfSms = 2;
+									}
+									smsLength = smsLength - 147;
+									if(smsLength > 0){
+										smsDouble = smsLength / 152.0;
+										noOfSms = noOfSms + (int) Math.ceil(smsDouble);
+										smsCount_label.setText(""+noOfSms);
+									}
+								}
+							} catch (Exception e1) {
+								logger.info("Exception insertFormData ===>>>" + e1);
+							} finally {
+								dbValidate.closeDatabase(sessionData);
 							}
-							else if(smsLength > 160){
-								noOfSms = 1;
-							}
-							smsLength = smsLength - 160;
-							
-							if(smsLength > 0 && smsLength <= 147)
-							{
-								noOfSms = 2;
-								smsCount_label.setText(""+noOfSms);
-								smsLength = smsLength - 147;
-							}
-							else if(smsLength > 147){
-								noOfSms = 2;
-							}
-							smsLength = smsLength - 147;
-							if(smsLength > 0){
-//								smsDouble = smsLength / 147.0;
-//								noOfSms = noOfSms + (int) Math.ceil(smsDouble);
-//								smsLength = smsLength - 147;
-//								if(smsLength > 0){
-									smsDouble = smsLength / 152.0;
-									noOfSms = noOfSms + (int) Math.ceil(smsDouble);
-									smsCount_label.setText(""+noOfSms);
-//								}
-							}
+
 						}
 					});
 					
+//					sms_textArea.addFocusListener(new java.awt.event.FocusAdapter() {
+//						String noOfCharacters = "";
+//						double smsDouble = 0.0;
+//						int smsLength = 0;
+//						public void keyReleased(KeyEvent e) {
+//							int noOfSms = 0;
+//							noOfCharacters = sms_textArea.getText();
+//							smsLength = noOfCharacters.length();
+//							//160 147 152
+//							charLength_label.setText(""+noOfCharacters.length());
+//							if(smsLength > 0 && smsLength <= 160)
+//							{
+//								noOfSms = 1;
+//								smsCount_label.setText(""+noOfSms);
+//								smsLength = smsLength - 160;
+//							}
+//							else if(smsLength > 160){
+//								noOfSms = 1;
+//							}
+//							smsLength = smsLength - 160;
+//							
+//							if(smsLength > 0 && smsLength <= 147)
+//							{
+//								noOfSms = 2;
+//								smsCount_label.setText(""+noOfSms);
+//								smsLength = smsLength - 147;
+//							}
+//							else if(smsLength > 147){
+//								noOfSms = 2;
+//							}
+//							smsLength = smsLength - 147;
+//							if(smsLength > 0){
+//								smsDouble = smsLength / 152.0;
+//								noOfSms = noOfSms + (int) Math.ceil(smsDouble);
+//								smsCount_label.setText(""+noOfSms);
+//							}
+//						}
+//					});
+					
 					final JRadioButton enableSave_radio = new JRadioButton();
-					enableSave_radio.setBounds(40, l + 140, 20, 25);
+					enableSave_radio.setBounds(40, l + 180, 20, 25);
 					dataPanel.add(enableSave_radio);
 					
 					JLabel enableSave_label = new JLabel("Please click to enable "+smsTypeClass+" option");
 					enableSave_label.setForeground(Color.RED);
 					enableSave_label.setFont(new Font("Book Antiqua", Font.BOLD, 16));
-					enableSave_label.setBounds(75, l + 140, 600, 25);
+					enableSave_label.setBounds(75, l + 180, 600, 25);
 					dataPanel.add(enableSave_label);
 					
 					final JButton sendSmsButton = new JButton("Send");
 					sendSmsButton.setFont(new Font("Book Antiqua", Font.BOLD, 16));
-					sendSmsButton.setBounds(mainCentre + 50, l + 140, 130, 25);
+					sendSmsButton.setBounds(mainCentre + 50, l + 180, 130, 25);
 					dataPanel.add(sendSmsButton);
 					sendSmsButton.setEnabled(false);
 					// ///////print data ends///////////////////////
@@ -2470,19 +2547,16 @@ public class SmsPage extends JFrame {
 							boolean flagLeaving = true;
 							String smsStr = "sent";
 							Date today = new Date();
+							String smsTemplate = (String) smsTemplate_combo.getSelectedItem();
 							String smsText = sms_textArea.getText();
+							String smsTempId = ((LinkedHashMap<?, ?>) smsTemplateIdMap.get(smsTemplate)).get("templateId").toString();
 							List<String> passGrList = new ArrayList();
-							logger.info("setSelected = " + setSelected);
-							logger.info("passGrList 123 = " + passGrList.size());
-							logger.info("allGrList 123 = " + allGrList.size());
 	
 							if (!setSelected && entrytCnt == 0) {
 								allGrList.clear();
 								passGrList = allGrList;
-								logger.info("passGrList before 1 = " + passGrList.size());
 							}
 							passGrList = allGrList;
-							logger.info("passGrList before 3 = " + passGrList.size());
 							
 							if(smsText.length() > 159){
 								double smsDouble = smsText.length() / 159.0;
@@ -2505,7 +2579,7 @@ public class SmsPage extends JFrame {
 							} else if (flagLeaving) {
 								try {
 									//use sendBhashSms method for bhashsms & sendHspSms for hsp sms
-									String smsResponse = commonObj.sendHspSms(sessionData, passGrList, foundStudentMap, smsText, section, smsTypeClass, 
+									String smsResponse = commonObj.sendHspSms(sessionData, passGrList, foundStudentMap, smsText, smsTempId, section, smsTypeClass, 
 											academicYearClass, stdClass, divClass, dateTimeClass, "");
 									if(!smsResponse.contains("connecting")){
 										smsResponse = "SMS "+smsStr+" successfully...";

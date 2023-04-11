@@ -1187,12 +1187,16 @@ public class Reports extends JFrame {
 								marksSemDataMap = dbValidate.getMarksheetGradewise(sessionData, std, div, academicSel,
 										section, exam, findSubMap, maxSubMarks, studentOptSubAllotMap, grStudentMap);
 								listSize = marksSemDataMap.size();
-								if (stdInt < 9) {
+								if (stdInt > 0 && stdInt < 9) {
 									new MarksGradeSheet_PDF(sessionData, exam, subjectTitle, std, div, academicSel,
 											marksSemDataMap, studentOptSubAllotMap, maxSubMarks, grStudentMap,
 											null);//leftDataMap set as null as IV all students created LC
-								} else {
+								} else if(stdInt >= 9){
 									new MarksSheet_IX_PDF(sessionData, exam, subjectTitle, std, div, academicSel,
+											marksSemDataMap, studentOptSubAllotMap, maxSubMarks, grStudentMap,
+											null);//leftDataMap set as null as IV all students created LC
+								} else {
+									new MarksSheet_PPR_PDF(sessionData, exam, subjectTitle, std, div, academicSel,
 											marksSemDataMap, studentOptSubAllotMap, maxSubMarks, grStudentMap,
 											null);//leftDataMap set as null as IV all students created LC
 								}

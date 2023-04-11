@@ -49,6 +49,8 @@ public class ResultPPRMarksPDF {
 		String spaceAfterSubjects = "";
 		String resultHeaderSpace = "4", resultAcademicHeaderSpace = "120", resultStampSpace = "-85";
 		String semester = "";
+		int stdHeaderColSpan = 1;
+		int nameHeaderColSpan = 6;
 		boolean fileOpenFlag = false;
     	secName = bundle.getString(sec.toUpperCase()+"_SEC");
     	String headMaster = bundle.getString(sessionData.getDBName().toUpperCase()+"_PDF_FOOTER");
@@ -235,8 +237,12 @@ public class ResultPPRMarksPDF {
 				PdfPTable table=new PdfPTable(12);
 				table.setWidthPercentage(100);
 
+				if(stdInt < 0) {
+					stdHeaderColSpan = 2;
+					nameHeaderColSpan = 5;
+				}
                  PdfPCell cell = new PdfPCell (new Paragraph ("Std.Div.", FontFactory.getFont(FontFactory.TIMES_BOLD, 12)));
-			      cell.setColspan (1);
+			      cell.setColspan (stdHeaderColSpan);
 			      cell.setHorizontalAlignment (Element.ALIGN_CENTER);
 			      cell.setPaddingBottom(5.0f);
 			      table.addCell(cell);
@@ -256,7 +262,7 @@ public class ResultPPRMarksPDF {
 			      }
 			      
 			      PdfPCell cell3 = new PdfPCell (new Paragraph ("Name", FontFactory.getFont(FontFactory.TIMES_BOLD, 12)));
-			      cell3.setColspan (6 + filterTableCount);
+			      cell3.setColspan (nameHeaderColSpan + filterTableCount);
 			      cell3.setHorizontalAlignment (Element.ALIGN_CENTER);
 			      table.addCell(cell3);
 			      
@@ -269,7 +275,7 @@ public class ResultPPRMarksPDF {
 			      }
 			      
 			      PdfPCell cell5 = new PdfPCell (new Paragraph (std+"-"+div, FontFactory.getFont(FontFactory.TIMES_ROMAN, 12)));
-			      cell5.setColspan (1);
+			      cell5.setColspan (stdHeaderColSpan);
 			      cell5.setHorizontalAlignment (Element.ALIGN_CENTER);
 			      cell5.setPaddingBottom(5.0f);
 			      table.addCell(cell5);
@@ -292,7 +298,7 @@ public class ResultPPRMarksPDF {
 			      
 			      PdfPCell cell8 = new PdfPCell (new Paragraph (" "+
 							studentData.get("lastName")+" "+studentData.get("firstName")+" "+studentData.get("fatherName")+"                          ", FontFactory.getFont(FontFactory.TIMES_ROMAN, 12)));
-			      cell8.setColspan (6 + filterTableCount);
+			      cell8.setColspan (nameHeaderColSpan + filterTableCount);
 			      cell8.setHorizontalAlignment (Element.ALIGN_CENTER);
 			      cell8.setPaddingBottom(5.0f);
 			      table.addCell(cell8);
@@ -323,19 +329,20 @@ public class ResultPPRMarksPDF {
 			      cell12.setHorizontalAlignment (Element.ALIGN_CENTER);
 			      table.addCell(cell12);
 			      
-			      PdfPCell cell13 = new PdfPCell (new Paragraph ("PASSING", FontFactory.getFont(FontFactory.TIMES_BOLD, 12)));
+			      PdfPCell cell13 = new PdfPCell (new Paragraph ("SEM I", FontFactory.getFont(FontFactory.TIMES_BOLD, 12)));
 			      cell13.setColspan (2);
 			      cell13.setHorizontalAlignment (Element.ALIGN_CENTER);
 			      table.addCell(cell13);
 			      
 			     
 			      
-			      PdfPCell cell14 = new PdfPCell (new Paragraph ("OBTAINED", FontFactory.getFont(FontFactory.TIMES_BOLD, 12)));
+			      PdfPCell cell14 = new PdfPCell (new Paragraph ("SEM II", FontFactory.getFont(FontFactory.TIMES_BOLD, 12)));
 			      cell14.setColspan (2);
 			      cell14.setHorizontalAlignment (Element.ALIGN_CENTER);
 			      table.addCell(cell14);
 			      
-			      String subjectMarksObtained = "";
+			      String subjectMarksObtainedSem1 = "";
+			      String subjectMarksObtainedSem2 = "";
 			      String subjectName = "";
 			      String subjectList = "\n";
 			      String maxMarksList = "\n";
@@ -348,9 +355,10 @@ public class ResultPPRMarksPDF {
 			      String optionalHeader = "";
 			      optionalHeader = "Optional Subjects";
 			      maxMarksGradeList = maxMarksGradeList + "\n \n";
-			      minMarksGradeList = minMarksGradeList + "\n \n";
-			      marksGradeList = marksGradeList + "\n \n";
-			      String dispMarks = "";
+			      minMarksGradeList = minMarksGradeList + "\n \n \n \n";
+			      marksGradeList = marksGradeList + "\n \n \n";
+			      String dispMarksSem1 = "";
+			      String dispMarksSem2 = "";
 			      String dispPassStatus = "";
 			      String dispReason = "";
 			      String dispAbsentMarks = "";
@@ -360,6 +368,8 @@ public class ResultPPRMarksPDF {
 			      double maxIndividualMarks = 0;
 			      double minIndividualMarks = 0;
 			      double minTotalMarks = 0;
+			      double obtainedSem1TotalMarks = 0;
+			      double obtainedSem2TotalMarks = 0;
 			      int noOfGradeSubjects = 0;
 			      
 			      Paragraph marksSubjectPara = new Paragraph ();
@@ -374,32 +384,79 @@ public class ResultPPRMarksPDF {
 			      double avgDivisor = 0.0;
 					for (String item : subjectTitleList) {
 						if(!item.trim().equalsIgnoreCase("")){
-							subjectMarksObtained = studentData.get(item+"_"+semester).toString().equalsIgnoreCase("NA") ? "" : studentData.get(item+"_"+semester).toString();
-							if(subjectMarksObtained.startsWith("NA") || subjectMarksObtained.equalsIgnoreCase("NA") || subjectMarksObtained.trim().equalsIgnoreCase("")){
+							subjectMarksObtainedSem1 = studentData.get(item+"_SEM1").toString().equalsIgnoreCase("NA") ? "" : studentData.get(item+"_SEM1").toString();
+							if(subjectMarksObtainedSem1.startsWith("NA") || subjectMarksObtainedSem1.equalsIgnoreCase("NA") || subjectMarksObtainedSem1.trim().equalsIgnoreCase("")){
 								continue;
 							}
 							else{
-								if(subjectMarksObtained.contains("~")){
-									avgDivisor = Double.parseDouble(subjectMarksObtained.substring(subjectMarksObtained.indexOf("~")+1, subjectMarksObtained.indexOf("#")));
+								if(subjectMarksObtainedSem1.contains("~")){
+									avgDivisor = Double.parseDouble(subjectMarksObtainedSem1.substring(subjectMarksObtainedSem1.indexOf("~")+1, subjectMarksObtainedSem1.indexOf("#")));
 								}
-								if(!subjectMarksObtained.equalsIgnoreCase("NA") && !commonObj.validateNumber(subjectMarksObtained) && 
-										subjectMarksObtained.contains("(")){
-									dispMarks = subjectMarksObtained.substring(0, subjectMarksObtained.indexOf("("));
-									if(dispMarks.contains("+") && !exam.equalsIgnoreCase("Final")){
-										dispMarks = dispMarks.substring(0, dispMarks.indexOf("+"));
+								if(!subjectMarksObtainedSem1.equalsIgnoreCase("NA") && !commonObj.validateNumber(subjectMarksObtainedSem1) && 
+										subjectMarksObtainedSem1.contains("(")){
+									dispMarksSem1 = subjectMarksObtainedSem1.substring(0, subjectMarksObtainedSem1.indexOf("("));
+									if(dispMarksSem1.contains("+") && !exam.equalsIgnoreCase("Final")){
+										dispMarksSem1 = dispMarksSem1.substring(0, dispMarksSem1.indexOf("+"));
 									}
-									dispPassStatus = subjectMarksObtained.substring(subjectMarksObtained.indexOf("(")+1, subjectMarksObtained.indexOf("#"));
-									dispReason = subjectMarksObtained.substring(subjectMarksObtained.indexOf("#")+1, subjectMarksObtained.indexOf("@"));
-									dispAbsentMarks = subjectMarksObtained.substring(subjectMarksObtained.indexOf("@")+1, subjectMarksObtained.indexOf(")"));
+									dispPassStatus = subjectMarksObtainedSem1.substring(subjectMarksObtainedSem1.indexOf("(")+1, subjectMarksObtainedSem1.indexOf("#"));
+									dispReason = subjectMarksObtainedSem1.substring(subjectMarksObtainedSem1.indexOf("#")+1, subjectMarksObtainedSem1.indexOf("@"));
+									dispAbsentMarks = subjectMarksObtainedSem1.substring(subjectMarksObtainedSem1.indexOf("@")+1, subjectMarksObtainedSem1.indexOf(")"));
 									if(dispReason.equalsIgnoreCase("MG")){
-										dispMarks = dispMarks + " (MG)";
+										dispMarksSem1 = dispMarksSem1 + " (MG)";
 									}
 									else if(dispPassStatus.equalsIgnoreCase("F")){
-										dispMarks = dispMarks + " (F)";
+										dispMarksSem1 = dispMarksSem1 + " (F)";
 									}
 								}
 								else{
-									dispMarks = subjectMarksObtained;
+									dispMarksSem1 = subjectMarksObtainedSem1;
+								}
+								
+								if(!dispMarksSem1.contains("+") && !dispMarksSem1.contains("#") && !dispMarksSem1.contains("(") && !dispMarksSem1.contains("-")) {
+									obtainedSem1TotalMarks = obtainedSem1TotalMarks + Double.parseDouble(dispMarksSem1);
+								}
+								else if(dispPassStatus.equalsIgnoreCase("F") && gradeMarksMapOrder.get(item).toString().equalsIgnoreCase("Marks")){
+									obtainedSem1TotalMarks = obtainedSem1TotalMarks + Double.parseDouble(dispMarksSem1.substring(0, dispMarksSem1.indexOf("(")));
+								}
+								else if(dispMarksSem1.contains("+") ){
+									dispMarksSem1 = dispMarksSem1.substring(0, dispMarksSem1.indexOf("+"));
+								}
+							}
+							
+							if(!exam.equalsIgnoreCase("Semester 1")) {
+								subjectMarksObtainedSem2 = studentData.get(item+"_SEM2").toString().equalsIgnoreCase("NA") ? "" : studentData.get(item+"_SEM2").toString();
+								if(subjectMarksObtainedSem2.startsWith("NA") || subjectMarksObtainedSem2.equalsIgnoreCase("NA") || subjectMarksObtainedSem2.trim().equalsIgnoreCase("")){
+									continue;
+								}
+								else{
+									if(subjectMarksObtainedSem2.contains("~")){
+										avgDivisor = Double.parseDouble(subjectMarksObtainedSem2.substring(subjectMarksObtainedSem2.indexOf("~")+1, subjectMarksObtainedSem2.indexOf("#")));
+									}
+									if(!subjectMarksObtainedSem2.equalsIgnoreCase("NA") && !commonObj.validateNumber(subjectMarksObtainedSem2) && 
+											subjectMarksObtainedSem2.contains("(")){
+										dispMarksSem2 = subjectMarksObtainedSem2.substring(0, subjectMarksObtainedSem2.indexOf("("));
+										if(dispMarksSem2.contains("+") && !exam.equalsIgnoreCase("Final")){
+											dispMarksSem2 = dispMarksSem2.substring(0, dispMarksSem2.indexOf("+"));
+										}
+										dispPassStatus = subjectMarksObtainedSem2.substring(subjectMarksObtainedSem2.indexOf("(")+1, subjectMarksObtainedSem2.indexOf("#"));
+										dispReason = subjectMarksObtainedSem2.substring(subjectMarksObtainedSem2.indexOf("#")+1, subjectMarksObtainedSem2.indexOf("@"));
+										dispAbsentMarks = subjectMarksObtainedSem2.substring(subjectMarksObtainedSem2.indexOf("@")+1, subjectMarksObtainedSem2.indexOf(")"));
+										if(dispReason.equalsIgnoreCase("MG")){
+											dispMarksSem2 = dispMarksSem2 + " (MG)";
+										}
+										else if(dispPassStatus.equalsIgnoreCase("F")){
+											dispMarksSem2 = dispMarksSem2 + " (F)";
+										}
+									}
+									else {
+										dispMarksSem2 = subjectMarksObtainedSem2;
+									}
+									if(!dispMarksSem2.contains("+") && !dispMarksSem2.contains("#") && !dispMarksSem2.contains("(") && !commonObj.validateAlphabets(dispMarksSem2)) {
+										obtainedSem2TotalMarks = obtainedSem2TotalMarks + Double.parseDouble(dispMarksSem2);
+									}
+									else if(dispMarksSem2.contains("+")){
+										dispMarksSem2 = dispMarksSem2.substring(0, dispMarksSem2.indexOf("+"));
+									}
 								}
 							}
 							
@@ -419,8 +476,8 @@ public class ResultPPRMarksPDF {
 								maxMarksList = maxMarksList + "\n       "+(int) maxIndividualMarks+"\n";
 								minIndividualMarks = commonObj.roundEven(maxIndividualMarks*0.35);
 								minTotalMarks = minTotalMarks + minIndividualMarks;
-								minMarksList = minMarksList + "\n       "+(int) minIndividualMarks+"\n";
-								marksList = marksList + "\n    "+dispMarks+"\n";
+								minMarksList = minMarksList + "\n       "+dispMarksSem1+"\n";
+								marksList = marksList + "\n    "+dispMarksSem2+"\n";
 								subjectTitleMatched.add(item);
 							}
 							else{
@@ -432,8 +489,8 @@ public class ResultPPRMarksPDF {
 //								subjectGradeList = subjectGradeList + "          "+commonObj.FirstWordCap(subjectName).replace("_", " ")+"\n";
 								subjectGradeList = subjectGradeList + "          "+subjectName.replace("_", " ")+"\n";
 								maxMarksGradeList = maxMarksGradeList + "\n \n";
-								minMarksGradeList = minMarksGradeList + "\n \n";
-								marksGradeList = marksGradeList + "\n    "+dispMarks+"\n";
+								minMarksGradeList = minMarksGradeList + "\n       "+dispMarksSem1+"\n";
+								marksGradeList = marksGradeList + "\n    "+dispMarksSem2+"\n";
 								gradeMarksSpace = gradeMarksSpace + 10.0f;
 								subjectTitleMatchedGrade.add(item);
 								noOfGradeSubjects = noOfGradeSubjects + 1;
@@ -462,6 +519,7 @@ public class ResultPPRMarksPDF {
 						}
 					}
 					
+				  subjectList = subjectList + "\n \n";
 				  Chunk chunk1 = new Chunk();
 				  chunk1.append(subjectList);
 				  Font font1 = FontFactory.getFont("TIMES_ROMAN");
@@ -594,21 +652,24 @@ public class ResultPPRMarksPDF {
 			      cell59.setPaddingBottom(5.0f);
 			      table.addCell(cell59);
 			      
-			      PdfPCell cell60 = new PdfPCell (new Paragraph (studentData.get("semTotal").toString(), FontFactory.getFont(FontFactory.TIMES_BOLD, 12)));
+			      PdfPCell cell60 = new PdfPCell (new Paragraph (studentData.get("sem1Total").toString(), FontFactory.getFont(FontFactory.TIMES_BOLD, 12)));
 			      cell60.setColspan (2);
 			      cell60.setHorizontalAlignment (Element.ALIGN_CENTER);
 			      cell60.setPaddingBottom(5.0f);
 			      table.addCell(cell60);
 			      
-			      PdfPCell cell61 = new PdfPCell (new Paragraph ((int)minTotalMarks+"", FontFactory.getFont(FontFactory.TIMES_BOLD, 12)));
+			      PdfPCell cell61 = new PdfPCell (new Paragraph ((int)obtainedSem1TotalMarks+"", FontFactory.getFont(FontFactory.TIMES_BOLD, 12)));
 			      cell61.setColspan (2);
 			      cell61.setHorizontalAlignment (Element.ALIGN_CENTER);
 			      cell61.setPaddingBottom(5.0f);
 			      table.addCell(cell61);
 			      
 			      String obtainedTotalMarks = studentData.get("semMarksObtained").toString();
-			      
-			      PdfPCell cell62 = new PdfPCell (new Paragraph ("       "+obtainedTotalMarks, FontFactory.getFont(FontFactory.TIMES_BOLD, 12)));
+			      String obtainedSem2TotalMarksStr = (int)obtainedSem2TotalMarks + "";
+			      if(!exam.equalsIgnoreCase("Semester 2") && obtainedSem2TotalMarksStr.equalsIgnoreCase("0")) {
+			    	  obtainedSem2TotalMarksStr = "";
+			      }
+			      PdfPCell cell62 = new PdfPCell (new Paragraph ("       "+obtainedSem2TotalMarksStr, FontFactory.getFont(FontFactory.TIMES_BOLD, 12)));
 			      cell62.setColspan (2);
 			      cell62.setVerticalAlignment (Element.ALIGN_MIDDLE);
 			      cell62.setPaddingBottom(5.0f);
@@ -647,8 +708,12 @@ public class ResultPPRMarksPDF {
 			      }
 					
 					double percentage = 0.0;
-					if(!studentData.get("semPercent").toString().equalsIgnoreCase("NA")) {
-						percentage = Double.parseDouble(studentData.get("semPercent").toString());
+					if(!studentData.get("sem1Percent").toString().equalsIgnoreCase("NA") && exam.equalsIgnoreCase("Semester 1")) {
+						percentage = Double.parseDouble(studentData.get("sem1Percent").toString());
+					}
+					else if(!studentData.get("sem2Percent").toString().equalsIgnoreCase("NA") 
+							&& (exam.equalsIgnoreCase("Semester 2") || exam.equalsIgnoreCase("Final"))) {
+						percentage = Double.parseDouble(studentData.get("sem2Percent").toString());
 					}
 					Chunk chunk101a;
 					if(!filterFieldsMap.containsKey("percentage")){

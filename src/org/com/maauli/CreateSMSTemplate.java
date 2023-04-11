@@ -28,13 +28,14 @@ import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 import javax.swing.JScrollPane;
 import javax.swing.JSeparator;
+import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.ScrollPaneConstants;
 import org.apache.log4j.Logger;
 import org.com.accesser.DBValidate;
 import org.com.accesser.SessionData;
 
-public class CreateSMSStaff extends JFrame {
+public class CreateSMSTemplate extends JFrame {
 
 	private static final long serialVersionUID = 1L;
 
@@ -80,7 +81,7 @@ public class CreateSMSStaff extends JFrame {
     
     static ResourceBundle bundle = ResourceBundle.getBundle("org.com.accesser.school");
 
-    static Logger logger = Logger.getLogger(CreateSMSStaff.class.getName());
+    static Logger logger = Logger.getLogger(CreateSMSTemplate.class.getName());
     
     static Common commonObj = new Common();
 
@@ -139,18 +140,18 @@ public class CreateSMSStaff extends JFrame {
     static String divClass = "";
     static double totalAmount = 0;
     static String tableOrderStatus = "";
-    static LinkedHashMap<String, LinkedHashMap<String, String>> staffDetailMap = new LinkedHashMap<String, LinkedHashMap<String, String>>();
+    static LinkedHashMap<String, LinkedHashMap<String, String>> smsTemplateDetailMap = new LinkedHashMap<String, LinkedHashMap<String, String>>();
     static LinkedHashMap<String, LinkedHashMap<String, String>> headerMap = new LinkedHashMap<String, LinkedHashMap<String, String>>();
     static LinkedHashMap<String, String> shortCategoryMap = new LinkedHashMap<String, String>();
     static String referenceNoClass = "";
     static int scrollHeight = 0;
     static String todayDate = "";
-    static String saveStatus = "";
+    static String saveStatus = "", senderName = "";
     
-    public CreateSMSStaff(SessionData sessionData1, String academicYear, String sec) {
+    public CreateSMSTemplate(SessionData sessionData1, String academicYear, String sec) {
 
     	System.gc();
-    	staffDetailMap.clear();
+    	smsTemplateDetailMap.clear();
     	headerMap.clear();
     	headerStr = "Select";
     	saveStatus = "";
@@ -209,6 +210,7 @@ public class CreateSMSStaff extends JFrame {
         scppr_required = bundle.getString("SCPPR_REQUIRED");
         show_founder = bundle.getString("SHOW_FOUNDER");
         show_donatedby = bundle.getString("SHOW_DONATEDBY");
+        senderName = bundle.getString("SMS_"+sessionData.getAppType()+"_SENDER");
         todayDate = commonObj.getCurrentDate();
         
         if(academicYearClass.trim().equalsIgnoreCase("")){
@@ -217,10 +219,8 @@ public class CreateSMSStaff extends JFrame {
         
         try {
 			if(dbValidate.connectDatabase(sessionData)){
-				if(!academicYearClass.isEmpty()){
-					staffDetailMap = dbValidate.getStaffSMSData(sessionData1, academicYearClass);
-					scrollHeight = (staffDetailMap.size() - 6) * 30; // to adjust the perfect scroll height
-				}
+				smsTemplateDetailMap = dbValidate.getSMSTemplateData(sessionData1);
+				scrollHeight = (smsTemplateDetailMap.size() - 6) * 30; // to adjust the perfect scroll height
 			}
 		} catch (Exception e1) {
             logger.error("Exception while getting table order ==>>>" + e1);
@@ -546,21 +546,22 @@ public class CreateSMSStaff extends JFrame {
 		width = width + 150;
 		JButton staffEntryButton = new JButton("Staff Entry");
 		staffEntryButton.setFont(new Font("Book Antiqua", Font.PLAIN, 18));
-		staffEntryButton.setBackground(Color.GREEN);
 		staffEntryButton.setBounds(width, 50, 140, 24);
 		topbandPanel.add(staffEntryButton);
 
 		staffEntryButton.addActionListener(new ActionListener() {
 
 			public void actionPerformed(ActionEvent e) {
-//				frame.setVisible(false);
-//				new CreateSMSStaff(sessionData, "", section);
+				frame.setVisible(false);
+				new CreateSMSStaff(sessionData, "", section);
+
 			}
 		});
 		
 		width = width + 150;
 		JButton smsTemplateButton = new JButton("SMS Template");
 		smsTemplateButton.setFont(new Font("Book Antiqua", Font.PLAIN, 18));
+		smsTemplateButton.setBackground(Color.GREEN);
 		smsTemplateButton.setBounds(width, 50, 170, 24);
 		topbandPanel.add(smsTemplateButton);
 
@@ -568,7 +569,7 @@ public class CreateSMSStaff extends JFrame {
 
 			public void actionPerformed(ActionEvent e) {
 				frame.setVisible(false);
-				new CreateSMSTemplate(sessionData, "", section);
+				new CreateSMSTemplate(sessionData, academicYearClass, section);
 
 			}
 		});
@@ -597,43 +598,7 @@ public class CreateSMSStaff extends JFrame {
         
         int tabHeight = 150;
         
-        int bottomBandItemHeight = 50;
-        
-        // /////////////ACADEMIV YEAR //////////////
-        JLabel academic_label = new JLabel("Academic Year :");
-        academic_label.setFont(new Font("Book Antiqua", Font.BOLD, 16));
-        academic_label.setBounds(40, 30, 150, 50);
-        bottombandPanel.add(academic_label);
-
-        String yearList = commonObj.getAcademicYear(todayDate)+","+commonObj.getNextYear(todayDate);
-        String academicYearList[] = yearList.split(",");
-//        String academicYearList[] = {academicYearClass};
-        final JComboBox academicYear_combo = new JComboBox(academicYearList);
-        academicYear_combo.setFont(new Font("Book Antiqua", Font.BOLD, 16));
-        academicYear_combo.setSelectedItem(academicYearClass);
-        academicYear_combo.setBounds(170, 42, 160, 25);
-        academicYear_combo.setEnabled(true);
-        bottombandPanel.add(academicYear_combo);
-        
-        JButton submitButton = new JButton("Submit");
-        submitButton.setFont(new Font("Book Antiqua", Font.BOLD, 16));
-        submitButton.setBounds(360, 42, 90, 25);
-        bottombandPanel.add(submitButton);
-        
-        bottomBandItemHeight = bottomBandItemHeight + 30;
-        JSeparator jSeparator1  = new JSeparator();
-        jSeparator1.setFont(new Font("Book Antiqua", Font.BOLD, 18));
-        jSeparator1.setBounds(40, bottomBandItemHeight, (screenWidth - 200), 50);
-        bottombandPanel.add(jSeparator1);
-        
-        submitButton.addActionListener(new ActionListener() {
-
-			public void actionPerformed(ActionEvent e) {
-				String academicSel = academicYear_combo.getSelectedItem().toString();
-				frame.setVisible(false);
-				new CreateSMSStaff(sessionData, academicSel, section);
-			}
-		});
+        int bottomBandItemHeight = 40;
         
         ///////////////start Details for adding order////////////
         int itemWidth = 40;
@@ -641,141 +606,108 @@ public class CreateSMSStaff extends JFrame {
         div = div + ",All";
         String[] stdList = std.split(",");
         String[] divList = div.split(",");
-        final JTextField staffNameText = new JTextField();
-        final JTextField contactText = new JTextField();
+        
         String[] designationCategoryList = designationCategory.split(",");
-        final JComboBox designationCombo = new JComboBox(designationCategoryList);
         final JTextField feeCatOtherText = new JTextField("Other");
         String smsOptionList[] = { "Enable", "Disable" };
-        final JComboBox divCombo = new JComboBox(divList);
-        final JComboBox smsCombo = new JComboBox(smsOptionList);
-        final JComboBox stdCombo = new JComboBox(stdList);
         JButton addButton = new JButton("Add");
         
-        bottomBandItemHeight = bottomBandItemHeight + 10;
-        if(!academicYearClass.equalsIgnoreCase("")){
-        	JLabel staffNameLabel = new JLabel("Staff Name : ");
-        	staffNameLabel.setFont(new Font("Book Antiqua", Font.BOLD, 16));
-        	staffNameLabel.setBounds(itemWidth, bottomBandItemHeight, 200, 50);
-            bottombandPanel.add(staffNameLabel);
-            
-            itemWidth = itemWidth + 105;
-            staffNameText.setFont(new Font("Book Antiqua", Font.BOLD, 16));
-            staffNameText.setBounds(itemWidth, bottomBandItemHeight + 10, 200, 25);
-            bottombandPanel.add(staffNameText);
-            
-            itemWidth = itemWidth + 220;
-            JLabel designationLabel = new JLabel("Designation : ");
-            designationLabel.setFont(new Font("Book Antiqua", Font.BOLD, 16));
-            designationLabel.setBounds(itemWidth, bottomBandItemHeight, 200, 50);
-            bottombandPanel.add(designationLabel);
-            
-            itemWidth = itemWidth + 130;
-            designationCombo.setFont(new Font("Book Antiqua", Font.BOLD, 16));
-            designationCombo.setBounds(itemWidth, bottomBandItemHeight + 10, 220, 25);
-            bottombandPanel.add(designationCombo);
-            
-            itemWidth = itemWidth + 240;
-            JLabel contactLabel = new JLabel("Contact No. : ");
-            contactLabel.setFont(new Font("Book Antiqua", Font.BOLD, 16));
-            contactLabel.setBounds(itemWidth, bottomBandItemHeight, 200, 50);
-            bottombandPanel.add(contactLabel);
-            
-            itemWidth = itemWidth + 105;
-            contactText.setFont(new Font("Book Antiqua", Font.BOLD, 16));
-            contactText.setBounds(itemWidth, bottomBandItemHeight + 10, 200, 25);
-            bottombandPanel.add(contactText);
-    		
-            itemWidth = 40;
-            bottomBandItemHeight = bottomBandItemHeight + 40;
-            JLabel stdLabel = new JLabel("Std : ");
-            stdLabel.setFont(new Font("Book Antiqua", Font.BOLD, 16));
-            stdLabel.setBounds(itemWidth, bottomBandItemHeight, 200, 50);
-            bottombandPanel.add(stdLabel);
-            
-            itemWidth = itemWidth + 60;
-            stdCombo.setFont(new Font("Book Antiqua", Font.BOLD, 16));
-            stdCombo.setBounds(itemWidth, bottomBandItemHeight + 10, 90, 25);
-            bottombandPanel.add(stdCombo);
-            
-            itemWidth = itemWidth + 130;
-            JLabel divLabel = new JLabel("Div : ");
-            divLabel.setFont(new Font("Book Antiqua", Font.BOLD, 16));
-            divLabel.setBounds(itemWidth, bottomBandItemHeight, 200, 50);
-            bottombandPanel.add(divLabel);
-            
-            itemWidth = itemWidth + 60;
-            divCombo.setFont(new Font("Book Antiqua", Font.BOLD, 16));
-            divCombo.setBounds(itemWidth, bottomBandItemHeight + 10, 100, 25);
-            bottombandPanel.add(divCombo);
-            
-            itemWidth = itemWidth + 130;
-            JLabel smsLabel = new JLabel("SMS : ");
-            smsLabel.setFont(new Font("Book Antiqua", Font.BOLD, 16));
-            smsLabel.setBounds(itemWidth, bottomBandItemHeight, 200, 50);
-            bottombandPanel.add(smsLabel);
-            
-            itemWidth = itemWidth + 60;
-            smsCombo.setFont(new Font("Book Antiqua", Font.BOLD, 16));
-            smsCombo.setBounds(itemWidth, bottomBandItemHeight + 10, 150, 25);
-            bottombandPanel.add(smsCombo);
-            
-            itemWidth = itemWidth + 180;
-    		addButton.setFont(new Font("Book Antiqua", Font.BOLD, 25));
-    		addButton.setBounds(itemWidth, bottomBandItemHeight+10, 100, 25);
-            bottombandPanel.add(addButton);
-            
-            bottomBandItemHeight = bottomBandItemHeight + 40;
-            JSeparator jSeparator2  = new JSeparator();
-            jSeparator2.setFont(new Font("Book Antiqua", Font.BOLD, 18));
-            jSeparator2.setBounds(40, bottomBandItemHeight, (screenWidth - 200), 50);
-            bottombandPanel.add(jSeparator2);
-            
-            
-        }
+    	JLabel senderNameLabel = new JLabel("Sender Name : ");
+    	senderNameLabel.setFont(new Font("Book Antiqua", Font.BOLD, 16));
+    	senderNameLabel.setBounds(itemWidth, bottomBandItemHeight, 200, 50);
+        bottombandPanel.add(senderNameLabel);
+        
+        itemWidth = itemWidth + 120;
+        JLabel senderNameText = new JLabel(senderName);
+        senderNameText.setFont(new Font("Book Antiqua", Font.BOLD, 16));
+        senderNameText.setBounds(itemWidth, bottomBandItemHeight, 200, 50);
+        bottombandPanel.add(senderNameText);
+        
+        itemWidth = itemWidth + 150;
+        JLabel templateIdLabel = new JLabel("Template Id : ");
+        templateIdLabel.setFont(new Font("Book Antiqua", Font.BOLD, 16));
+        templateIdLabel.setBounds(itemWidth, bottomBandItemHeight, 200, 50);
+        bottombandPanel.add(templateIdLabel);
+        
+        itemWidth = itemWidth + 120;
+        final JTextField templateIdText = new JTextField();
+        templateIdText.setFont(new Font("Book Antiqua", Font.BOLD, 16));
+        templateIdText.setBounds(itemWidth, bottomBandItemHeight + 10, 240, 25);
+        bottombandPanel.add(templateIdText);
+        
+        itemWidth = itemWidth + 260;
+        JLabel templateNameLabel = new JLabel("Template Name : ");
+        templateNameLabel.setFont(new Font("Book Antiqua", Font.BOLD, 16));
+        templateNameLabel.setBounds(itemWidth, bottomBandItemHeight, 200, 50);
+        bottombandPanel.add(templateNameLabel);
+        
+        itemWidth = itemWidth + 150;
+        final JTextField templateNameText = new JTextField();
+        templateNameText.setFont(new Font("Book Antiqua", Font.BOLD, 16));
+        templateNameText.setBounds(itemWidth, bottomBandItemHeight + 10, 240, 25);
+        bottombandPanel.add(templateNameText);
+		
+        itemWidth = 40;
+        bottomBandItemHeight = bottomBandItemHeight + 40;
+        JLabel messageBodyLabel = new JLabel("Message Body : ");
+        messageBodyLabel.setFont(new Font("Book Antiqua", Font.BOLD, 16));
+        messageBodyLabel.setBounds(itemWidth, bottomBandItemHeight, 200, 50);
+        bottombandPanel.add(messageBodyLabel);
+        
+        itemWidth = itemWidth + 140;
+        final JTextArea messageBodyText = new JTextArea();
+        messageBodyText.setFont(new Font("Book Antiqua", Font.BOLD, 16));
+        messageBodyText.setLineWrap(true);
+        messageBodyText.setWrapStyleWord(true);
+        
+        //messageBodyText scroll area
+        JScrollPane scroll = new JScrollPane(messageBodyText);
+        scroll.setBounds(itemWidth, bottomBandItemHeight + 10, 800, 80);  
+        scroll.setVerticalScrollBarPolicy(javax.swing.ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED);
+        bottombandPanel.add(scroll);
+        
+        itemWidth = itemWidth + 800;
+		addButton.setFont(new Font("Book Antiqua", Font.BOLD, 25));
+		addButton.setBounds(itemWidth, bottomBandItemHeight+10, 100, 25);
+        bottombandPanel.add(addButton);
+        
+        bottomBandItemHeight = bottomBandItemHeight + 100;
+        JSeparator jSeparator2  = new JSeparator();
+        jSeparator2.setFont(new Font("Book Antiqua", Font.BOLD, 18));
+        jSeparator2.setBounds(40, bottomBandItemHeight, (screenWidth - 200), 50);
+        bottombandPanel.add(jSeparator2);
+
         
         /////start order headers////////////////
-        itemWidth = 40;
-        JLabel srNo = new JLabel("Sr No.");
-        srNo.setFont(new Font("Book Antiqua", Font.BOLD, 16));
-        srNo.setBounds(itemWidth, bottomBandItemHeight, 120, 50);
-        bottombandPanel.add(srNo);
+        itemWidth = 50;
+        JLabel senderLabel = new JLabel("Sender Name");
+        senderLabel.setFont(new Font("Book Antiqua", Font.BOLD, 14));
+        senderLabel.setBounds(itemWidth, bottomBandItemHeight, 120, 50);
+        bottombandPanel.add(senderLabel);
         
-        itemWidth = itemWidth + 90;
-        JLabel staffNameLabel = new JLabel("Staff Name");
-        staffNameLabel.setFont(new Font("Book Antiqua", Font.BOLD, 16));
-        staffNameLabel.setBounds(itemWidth, bottomBandItemHeight, 120, 50);
-        bottombandPanel.add(staffNameLabel);
+        itemWidth = itemWidth + 160;
+        JLabel tempIdLabel = new JLabel("Template ID");
+        tempIdLabel.setFont(new Font("Book Antiqua", Font.BOLD, 14));
+        tempIdLabel.setBounds(itemWidth, bottomBandItemHeight, 200, 50);
+        bottombandPanel.add(tempIdLabel);
         
         itemWidth = itemWidth + 220;
-        JLabel designationLabel = new JLabel("Designation");
-        designationLabel.setFont(new Font("Book Antiqua", Font.BOLD, 16));
-        designationLabel.setBounds(itemWidth, bottomBandItemHeight, 600, 50);
-        bottombandPanel.add(designationLabel);
+        JLabel tempName = new JLabel("Template Name");
+        tempName.setFont(new Font("Book Antiqua", Font.BOLD, 14));
+        tempName.setBounds(itemWidth, bottomBandItemHeight, 600, 50);
+        bottombandPanel.add(tempName);
         
-        itemWidth = itemWidth + 180;
-        JLabel contactLabel = new JLabel("Contact");
-        contactLabel.setFont(new Font("Book Antiqua", Font.BOLD, 16));
-        contactLabel.setBounds(itemWidth, bottomBandItemHeight, 120, 50);
-        bottombandPanel.add(contactLabel);
+        itemWidth = itemWidth + 220;
+        JLabel messageLabel = new JLabel("Message Body");
+        messageLabel.setFont(new Font("Book Antiqua", Font.BOLD, 14));
+        messageLabel.setBounds(itemWidth, bottomBandItemHeight, 150, 50);
+        bottombandPanel.add(messageLabel);
         
-        itemWidth = itemWidth + 130;
-        JLabel stdLabel = new JLabel("Std");
-        stdLabel.setFont(new Font("Book Antiqua", Font.BOLD, 16));
-        stdLabel.setBounds(itemWidth, bottomBandItemHeight, 120, 50);
-        bottombandPanel.add(stdLabel);
-        
-        itemWidth = itemWidth + 70;
-        JLabel divLabel = new JLabel("Div");
-        divLabel.setFont(new Font("Book Antiqua", Font.BOLD, 16));
-        divLabel.setBounds(itemWidth, bottomBandItemHeight, 120, 50);
-        bottombandPanel.add(divLabel);
-        
-        itemWidth = itemWidth + 80;
-        JLabel smsLabel = new JLabel("SMS Enabled");
-        smsLabel.setFont(new Font("Book Antiqua", Font.BOLD, 14));
-        smsLabel.setBounds(itemWidth, bottomBandItemHeight, 150, 50);
-        bottombandPanel.add(smsLabel);
+//        itemWidth = itemWidth + 500;
+//        JLabel statusLabel = new JLabel("Template Enabled");
+//        statusLabel.setFont(new Font("Book Antiqua", Font.BOLD, 14));
+//        statusLabel.setBounds(itemWidth, bottomBandItemHeight, 150, 50);
+//        bottombandPanel.add(statusLabel);
         
         /////end order headers///////////////
         /////////////order panel/////////////
@@ -801,104 +733,60 @@ public class CreateSMSStaff extends JFrame {
         dataPanel.setAutoscrolls(true);
         dataPanel.setLayout(null);
         
-        if (!staffDetailMap.isEmpty()) {
-	        final JLabel[] srNo_labels = new JLabel[staffDetailMap.size()];
-	        final JLabel[] orderNo_labels = new JLabel[staffDetailMap.size()];
-	        final JTextField[] staffName_text = new JTextField[staffDetailMap.size()];
-	        final JComboBox[] designation_combo = new JComboBox[staffDetailMap.size()];
-	        final JTextField[] contact_text = new JTextField[staffDetailMap.size()];
-	        final JComboBox[] std_combo = new JComboBox[staffDetailMap.size()];
-	        final JComboBox[] div_combo = new JComboBox[staffDetailMap.size()];
-	        final JComboBox[] sms_combo = new JComboBox[staffDetailMap.size()];
-	        final JButton[] edit_buttons = new JButton[staffDetailMap.size()];
-	        final JButton[] save_buttons = new JButton[staffDetailMap.size()];
-	        final JButton[] delete_buttons = new JButton[staffDetailMap.size()];
-	        final JSeparator[] jSeparators  = new JSeparator[staffDetailMap.size()];
+        if (!smsTemplateDetailMap.isEmpty()) {
+	        final JLabel[] sender_labels = new JLabel[smsTemplateDetailMap.size()];
+	        final JLabel[] tempId_labels = new JLabel[smsTemplateDetailMap.size()];
+	        final JLabel[] tempName_labels = new JLabel[smsTemplateDetailMap.size()];
+	        final JTextArea[] messageBodyArea = new JTextArea[smsTemplateDetailMap.size()];
+	        final JScrollPane[] scrollText = new JScrollPane[smsTemplateDetailMap.size()];
+	        final JTextField[] contact_text = new JTextField[smsTemplateDetailMap.size()];
+	        final JButton[] edit_buttons = new JButton[smsTemplateDetailMap.size()];
+	        final JButton[] save_buttons = new JButton[smsTemplateDetailMap.size()];
+	        final JButton[] delete_buttons = new JButton[smsTemplateDetailMap.size()];
+	        final JSeparator[] jSeparators  = new JSeparator[smsTemplateDetailMap.size()];
 	        String shortName = "";
 //	        String[] designationCategoryList2 = designationCategory.substring(0,designationCategory.lastIndexOf(",")).split(",");
 	        String staffName = "", contact = "";
 	        
 	        int k = 0;
 	        int j = 5;
-	        Set set = staffDetailMap.entrySet();
+	        Set set = smsTemplateDetailMap.entrySet();
 			Iterator i = set.iterator();
 			while(i.hasNext()) {
 				Map.Entry me = (Map.Entry)i.next();
 				
 				itemWidth = 20;
-	        	srNo_labels[k] = new JLabel((k+1)+"");
-	        	srNo_labels[k].setFont(new Font("Book Antiqua", Font.BOLD, 16));
-	        	srNo_labels[k].setBounds(itemWidth, j, 120, 25);
-	        	dataPanel.add(srNo_labels[k]);
+				sender_labels[k] = new JLabel(((LinkedHashMap<?, ?>) smsTemplateDetailMap.get(me.getKey())).get("senderName").toString());
+				sender_labels[k].setFont(new Font("Book Antiqua", Font.PLAIN, 16));
+				sender_labels[k].setBounds(itemWidth, j, 200, 25);
+	        	dataPanel.add(sender_labels[k]);
 	        	
-	        	orderNo_labels[k] = new JLabel(((LinkedHashMap<?, ?>) staffDetailMap.get(me.getKey())).get("staffName").toString());
-	        	dataPanel.add(orderNo_labels[k]);
-	    		
-	        	itemWidth = itemWidth + 50;
-	        	staffName = commonObj.revertCommaApostrophy(me.getKey().toString().replace("$$", "."));
-	        	staffName_text[k] = new JTextField(staffName);
-	        	staffName_text[k].setFont(new Font("Book Antiqua", Font.BOLD, 16));
-	        	staffName_text[k].setToolTipText(staffName);
-	        	staffName_text[k].setBounds(itemWidth, j, 200, 25);
-	        	staffName_text[k].enable(false);
-	    		dataPanel.add(staffName_text[k]);
-	    		
-	    		itemWidth = itemWidth + 220;
-	    		designation_combo[k] = new JComboBox(designationCategoryList);
-	    		designation_combo[k].setSelectedItem(((LinkedHashMap<?, ?>) staffDetailMap.get(me.getKey())).get("designation").toString());
-	    		designation_combo[k].setFont(new Font("Book Antiqua", Font.BOLD, 16));
-	    		designation_combo[k].setBounds(itemWidth, j, 170, 25);
-	    		designation_combo[k].setEnabled(false);
-	    		dataPanel.add(designation_combo[k]);
-	    		
-	    		itemWidth = itemWidth + 180;
-	    		contact = ((LinkedHashMap<?, ?>) staffDetailMap.get(me.getKey())).get("contact").toString();
-	    		contact_text[k] = new JTextField(contact);
-	    		contact_text[k].setFont(new Font("Book Antiqua", Font.BOLD, 16));
-	    		contact_text[k].setToolTipText(staffName);
-	    		contact_text[k].setBounds(itemWidth, j, 120, 25);
-	    		contact_text[k].enable(false);
-	    		dataPanel.add(contact_text[k]);
-	    		
-	    		itemWidth = itemWidth + 140;
-	    		std_combo[k] = new JComboBox(stdList);
-	    		std_combo[k].setSelectedItem(((LinkedHashMap<?, ?>) staffDetailMap.get(me.getKey())).get("std").toString());
-	    		std_combo[k].setFont(new Font("Book Antiqua", Font.BOLD, 16));
-	    		std_combo[k].setBounds(itemWidth, j, 80, 25);
-	    		std_combo[k].setEnabled(false);
-	    		dataPanel.add(std_combo[k]);
-	    		
-	    		itemWidth = itemWidth + 80;
-	    		div_combo[k] = new JComboBox(divList);
-	    		div_combo[k].setSelectedItem(((LinkedHashMap<?, ?>) staffDetailMap.get(me.getKey())).get("div").toString());
-	    		div_combo[k].setToolTipText(shortName);
-	    		div_combo[k].setFont(new Font("Book Antiqua", Font.BOLD, 16));
-	    		div_combo[k].setBounds(itemWidth, j, 80, 25);
-	    		div_combo[k].setEnabled(false);
-	    		dataPanel.add(div_combo[k]);
-	    		
-	    		itemWidth = itemWidth + 90;
-	    		sms_combo[k] = new JComboBox(smsOptionList);
-	    		sms_combo[k].setSelectedItem(((LinkedHashMap<?, ?>) staffDetailMap.get(me.getKey())).get("smsEnabled").toString());
-	    		sms_combo[k].setFont(new Font("Book Antiqua", Font.BOLD, 16));
-	    		sms_combo[k].setBounds(itemWidth, j, 120, 25);
-	    		sms_combo[k].setEnabled(false);
-	    		dataPanel.add(sms_combo[k]);
-	    		
-	    		itemWidth = itemWidth + 120;
-	    		edit_buttons[k] = new JButton("Edit");
-	    		edit_buttons[k].setFont(new Font("Book Antiqua", Font.BOLD, 16));
-	    		edit_buttons[k].setBounds(itemWidth, j, 70, 25);
-	    		dataPanel.add(edit_buttons[k]);
-	    		
-	    		itemWidth = itemWidth + 80;
-	    		save_buttons[k] = new JButton("Save");
-	    		save_buttons[k].setFont(new Font("Book Antiqua", Font.BOLD, 16));
-	    		save_buttons[k].setEnabled(false);
-	    		save_buttons[k].setBounds(itemWidth, j, 70, 25);
-	    		dataPanel.add(save_buttons[k]);
-	    		
-	    		itemWidth = itemWidth + 80;
+	        	itemWidth = itemWidth + 160;
+	        	tempId_labels[k] = new JLabel(((LinkedHashMap<?, ?>) smsTemplateDetailMap.get(me.getKey())).get("templateId").toString());
+	        	tempId_labels[k].setFont(new Font("Book Antiqua", Font.PLAIN, 16));
+	        	tempId_labels[k].setBounds(itemWidth, j, 200, 25);
+	        	dataPanel.add(tempId_labels[k]);
+	        	
+	        	itemWidth = itemWidth + 220;
+	        	tempName_labels[k] = new JLabel(((LinkedHashMap<?, ?>) smsTemplateDetailMap.get(me.getKey())).get("templateName").toString());
+	        	tempName_labels[k].setFont(new Font("Book Antiqua", Font.PLAIN, 16));
+	        	tempName_labels[k].setBounds(itemWidth, j, 200, 25);
+	        	dataPanel.add(tempName_labels[k]);
+	        	
+	        	itemWidth = itemWidth + 220;
+	        	messageBodyArea[k] = new JTextArea(((LinkedHashMap<?, ?>) smsTemplateDetailMap.get(me.getKey())).get("messageBody").toString());
+	        	messageBodyArea[k].setFont(new Font("Book Antiqua", Font.PLAIN, 16));
+	        	messageBodyArea[k].setLineWrap(true);
+	        	messageBodyArea[k].setWrapStyleWord(true);
+	        	messageBodyArea[k].enable(false);
+	        	
+	        	//messageBodyText scroll area
+	            scrollText[k] = new JScrollPane(messageBodyArea[k]);
+	            scrollText[k].setBounds(itemWidth, j, 300, 50);  
+	            scrollText[k].setVerticalScrollBarPolicy(javax.swing.ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED);
+	            dataPanel.add(scrollText[k]);
+	            
+	    		itemWidth = itemWidth + 330;
 	    		delete_buttons[k] = new JButton("Delete");
 	    		delete_buttons[k].setFont(new Font("Book Antiqua", Font.BOLD, 16));
 	    		delete_buttons[k].setBounds(itemWidth, j, 90, 25);
@@ -906,158 +794,70 @@ public class CreateSMSStaff extends JFrame {
 	    		
 	    		jSeparators[k] = new JSeparator();
 	    		jSeparators[k].setFont(new Font("Book Antiqua", Font.BOLD, 18));
-	    		jSeparators[k].setBounds(10, j + 28, (screenWidth - 220), 50);
+	    		jSeparators[k].setBounds(10, j + 50, (screenWidth - 220), 50);
 	    		dataPanel.add(jSeparators[k]);
 	    		
 	            final int m = k;
 	            
-	            designation_combo[k].addActionListener(new ActionListener() {
-
-					public void actionPerformed(ActionEvent e) {
-						try {
-							String receiptHead = div_combo[m].getSelectedItem().toString();
-			            	String designationCategory = designation_combo[m].getSelectedItem().toString();
-			            	
-							if(saveStatus.equalsIgnoreCase("edit")) {
-				            	if(shortCategoryMap.get(designationCategory) != null && !shortCategoryMap.get(designationCategory).equalsIgnoreCase("")) {
-				            		div_combo[m].setSelectedItem(shortCategoryMap.get(designationCategory));
-				            	}
-				            	else {
-				            		div_combo[m].setSelectedItem("Select");
-				            	}
-							}
-							else {
-								JOptionPane.showMessageDialog(null, "Please click edit button to change");
-							}
-						} catch (Exception e1) {
-							logger.info("Exception insert fee name ===>>>" + e1);
-						} finally {
-							dbValidate.closeDatabase(sessionData);
-						}
-					}
-				});
-	            
-	            div_combo[k].addActionListener(new ActionListener() {
-
-					public void actionPerformed(ActionEvent e) {
-						try {
-							String receiptHead = div_combo[m].getSelectedItem().toString();
-			            	String designationCategory = designation_combo[m].getSelectedItem().toString();
-			            	
-							if(saveStatus.equalsIgnoreCase("edit")) {
-				            	if(!receiptHead.equalsIgnoreCase("Select")) {
-				            		if(!shortCategoryMap.get(designationCategory).equalsIgnoreCase(receiptHead)) {
-				            			int reply = 0;
-				        				reply = JOptionPane.showConfirmDialog(null, "Would You Like to change \n Receipt head "+receiptHead+" for all "+designationCategory+" Fess Category for Std "+stdClass+"?", "Confirm validate", JOptionPane.YES_NO_OPTION);
-				        				
-				        				if(reply != JOptionPane.YES_OPTION){
-				        					div_combo[m].setSelectedItem(shortCategoryMap.get(designationCategory));
-				        				}
-				            		}
-				            	}
-							}
-							else {
-								div_combo[m].setSelectedItem(shortCategoryMap.get(designationCategory));
-								JOptionPane.showMessageDialog(null, "Please click edit button to change");
-							}
-						} catch (Exception e1) {
-							logger.info("Exception insert fee name ===>>>" + e1);
-						} finally {
-							dbValidate.closeDatabase(sessionData);
-						}
-					}
-				});
-	            
-	    		edit_buttons[k].addActionListener(new ActionListener() {
-
-					public void actionPerformed(ActionEvent e) {
-						try {
-							boolean isEditable = true;
-							String optional = sms_combo[m].getSelectedItem().toString();
-							String feesHead = staffName_text[m].getText();
-							
-							if(dbValidate.connectDatabase(sessionData)){
-								isEditable = dbValidate.isFeesEditable(sessionData, academicYearClass, stdClass, section, optional, feesHead);
-							}
-							
-							if(isEditable){
-								contact_text[m].enable(true);
-								contact_text[m].setEditable(true);
-								sms_combo[m].setEnabled(true);
-								edit_buttons[m].setEnabled(false);
-								save_buttons[m].setEnabled(true);
-								saveStatus = "edit";
-							}
-							else{
-								JOptionPane.showMessageDialog(null, "Cannot delete as fee data for "+feesHead+" exist");
-							}
-						} catch (Exception e1) {
-							commonObj.logException(e1);
-						} finally {
-							dbValidate.closeDatabase(sessionData);
-						}
-					}
-				});
-	    		
-	    		save_buttons[k].addActionListener(new ActionListener() {
-
-					public void actionPerformed(ActionEvent e) {
-						try {
-							
-							String orderNoSel = orderNo_labels[m].getText();
-							String staffNameSel = staffName_text[m].getText().trim();
-							String designationSel = designation_combo[m].getSelectedItem().toString();
-							String smsSel = sms_combo[m].getSelectedItem().toString();
-							String contactSel = contact_text[m].getText();
-							String divSel = div_combo[m].getSelectedItem().toString();
-							String stdSel = std_combo[m].getSelectedItem().toString();
-							
-							if(dbValidate.connectDatabase(sessionData)){
-								dbValidate.addSMSStaff(sessionData, staffNameSel, designationSel, contactSel, 
-										stdSel, divSel, smsSel, academicYearClass, true);
-							}
-							
-							staffName_text[m].setEditable(false);
-//							std_combo[m].setEditable(false);
-							edit_buttons[m].setEnabled(true);
-							save_buttons[m].setEnabled(false);
-							saveStatus = "save";
-							
-							frame.setVisible(false);
-							new CreateSMSStaff(sessionData, academicYearClass, section);
-						} catch (Exception e1) {
-							logger.info("Exception insert fee name ===>>>" + e1);
-						} finally {
-							dbValidate.closeDatabase(sessionData);
-						}
-					}
-				});
-	    		
+//	    		save_buttons[k].addActionListener(new ActionListener() {
+//
+//					public void actionPerformed(ActionEvent e) {
+//						try {
+//							
+//							String orderNoSel = tempId_labels[m].getText();
+//							String staffNameSel = staffName_text[m].getText().trim();
+//							String designationSel = designation_combo[m].getSelectedItem().toString();
+//							String smsSel = sms_combo[m].getSelectedItem().toString();
+//							String contactSel = contact_text[m].getText();
+//							String divSel = div_combo[m].getSelectedItem().toString();
+//							String stdSel = std_combo[m].getSelectedItem().toString();
+//							
+//							if(dbValidate.connectDatabase(sessionData)){
+//								dbValidate.addSMSStaff(sessionData, staffNameSel, designationSel, contactSel, 
+//										stdSel, divSel, smsSel, academicYearClass, true);
+//							}
+//							
+//							staffName_text[m].setEditable(false);
+////							std_combo[m].setEditable(false);
+//							edit_buttons[m].setEnabled(true);
+//							save_buttons[m].setEnabled(false);
+//							saveStatus = "save";
+//							
+//							frame.setVisible(false);
+//							new CreateSMSTemplate(sessionData, academicYearClass, section);
+//						} catch (Exception e1) {
+//							logger.info("Exception insert fee name ===>>>" + e1);
+//						} finally {
+//							dbValidate.closeDatabase(sessionData);
+//						}
+//					}
+//				});
+//	    		
 	    		delete_buttons[k].addActionListener(new ActionListener() {
 
 					public void actionPerformed(ActionEvent e) {
 						///delete fee name/////
 						try {
 							boolean isEditable = true;
-							String orderNoSel = orderNo_labels[m].getText();
-							String staffNameSel = staffName_text[m].getText().replace(".", "$$");
-							staffNameSel = commonObj.replaceCommaApostrophy(staffNameSel);
-							String designationSel = designation_combo[m].getSelectedItem().toString();
-							String smsSel = sms_combo[m].getSelectedItem().toString();
-							String contactSel = contact_text[m].getText();
-							String divSel = div_combo[m].getSelectedItem().toString();
-							String stdSel = std_combo[m].getSelectedItem().toString();
-							
+							String sender = sender_labels[m].getText();
+							String tempId = tempId_labels[m].getText();
+							String tempName = tempName_labels[m].getText();
+							String messageBody = messageBodyArea[m].getText();
 							
 							int reply = 0;
-							reply = JOptionPane.showConfirmDialog(null, "Would You Like to delete "+staffName_text[m].getText()+"?", "Confirm delete", JOptionPane.YES_NO_OPTION);
+							reply = JOptionPane.showConfirmDialog(null, "Would You Like to delete "+messageBody+"?", "Confirm delete", JOptionPane.YES_NO_OPTION);
+							
+							sender = commonObj.replaceCommaApostrophy(sender);
+							tempId = commonObj.replaceCommaApostrophy(tempId);
+							tempName = commonObj.replaceCommaApostrophy(tempName);
+							messageBody = commonObj.replaceCommaApostrophy(messageBody);
+							
 							
 							if(dbValidate.connectDatabase(sessionData) && reply == JOptionPane.YES_OPTION){
-								dbValidate.deleteStaffName(sessionData, staffNameSel, designationSel, contactSel, 
-										stdSel, divSel, smsSel, academicYearClass);
+								dbValidate.deleteSmsTemplate(sessionData, sender, tempId, tempName, messageBody);
 								
 								frame.setVisible(false);
-								new CreateSMSStaff(sessionData, academicYearClass, section);
+								new CreateSMSTemplate(sessionData, academicYearClass, section);
 							}
 						} catch (Exception e1) {
 							commonObj.logException(e1);
@@ -1067,7 +867,7 @@ public class CreateSMSStaff extends JFrame {
 					}
 				});
 	    		
-	    		j = j + 32;
+	    		j = j + 60;
 	    		k++;
 	        }
 			
@@ -1089,34 +889,16 @@ public class CreateSMSStaff extends JFrame {
         bottombandPanel.add(jsp, BorderLayout.SOUTH);
         ///////////////end order panel////////////
         
-        designationCombo.addActionListener(new ActionListener() {
-
-			public void actionPerformed(ActionEvent e) {
-            	String designation = designationCombo.getSelectedItem().toString();
-            	if(designationCategory.equalsIgnoreCase("Other")){
-            		feeCatOtherText.setEditable(true);
-            		feeCatOtherText.requestFocus();
-            		feeCatOtherText.selectAll();
-            	}
-            	else{
-            		feeCatOtherText.setEditable(false);
-            	}
-			}
-        });
-        
         ////addButton action///////////////////
         addButton.addKeyListener(new KeyAdapter(){
             public void keyReleased(KeyEvent e){
             int keyCode=e.getKeyCode();
             if(keyCode == 10){
-            	String academic = academicYear_combo.getSelectedItem().toString();
-            	String staffName = staffNameText.getText();
-            	String designation = designationCombo.getSelectedItem().toString();
-            	String contact = contactText.getText();
-            	String std = stdCombo.getSelectedItem().toString();
-            	String div = divCombo.getSelectedItem().toString();
-            	String sms = smsCombo.getSelectedItem().toString();
-            	addToStaff(sessionData, staffName, designation, contact, std, div, sms, academic);
+            	String senderName = senderNameText.getText();
+            	String templateId = templateIdText.getText();
+            	String templateName = templateNameText.getText();
+            	String messageBody = messageBodyText.getText();
+            	addToSmsTemplate(sessionData, senderName, templateId, templateName, messageBody);
               }
             }
         });
@@ -1124,24 +906,11 @@ public class CreateSMSStaff extends JFrame {
         addButton.addActionListener(new ActionListener() {
 
 			public void actionPerformed(ActionEvent e) {
-				String academic = academicYear_combo.getSelectedItem().toString();
-				String staffName = staffNameText.getText();
-            	String designation = designationCombo.getSelectedItem().toString();
-            	String contact = contactText.getText();
-            	String std = stdCombo.getSelectedItem().toString();
-            	String div = divCombo.getSelectedItem().toString();
-            	String sms = smsCombo.getSelectedItem().toString();	
-            	addToStaff(sessionData, staffName, designation, contact, std, div, sms, academic);
-			}
-        });
-        
-        stdCombo.addActionListener(new ActionListener() {
-
-			public void actionPerformed(ActionEvent e) {
-				String std = stdCombo.getSelectedItem().toString();
-				if(std.equalsIgnoreCase("All")){
-					divCombo.setSelectedItem("All");
-				}
+				String senderName = senderNameText.getText();
+            	String templateId = templateIdText.getText();
+            	String templateName = templateNameText.getText();
+            	String messageBody = messageBodyText.getText();
+            	addToSmsTemplate(sessionData, senderName, templateId, templateName, messageBody);
 			}
         });
         
@@ -1149,51 +918,40 @@ public class CreateSMSStaff extends JFrame {
         panel.add(mainPanel, BorderLayout.EAST);
     }
     
-    public static void addToStaff(SessionData sessionData, String staffName, String designation, String contact, 
-    		String std, String div, String sms, String academic){
+    public static void addToSmsTemplate(SessionData sessionData, String senderName, String templateId, String templateName, 
+    		String messageBody){
     	
     	boolean validateFields = true;
 		try {
-			if(staffName.trim().length() == 0) {
+			if(senderName.trim().length() <= 0 || templateId.trim().length() <= 0 || 
+					templateName.trim().length() <= 0 || messageBody.trim().length() <= 0) {
 				validateFields = false;
-				JOptionPane.showMessageDialog(null, "Staff Name cannot be empty");
+				JOptionPane.showMessageDialog(null, "All fields are mandatory");
 			}
-			else if (commonObj.checkComma(staffName) || commonObj.validateSpecial(staffName)) {
+			else if(senderName.trim().length() > 20) {
 				validateFields = false;
-				JOptionPane.showMessageDialog(null, "Staff Name can only contain alphabets or number");
+				JOptionPane.showMessageDialog(null, "Sender Name should not be more than 20 characters");
 			}
-			else if(staffName.trim().length() > 100) {
+			else if(templateId.trim().length() > 50) {
 				validateFields = false;
-				JOptionPane.showMessageDialog(null, "Staff Name cannot be greater than 100 characters");
+				JOptionPane.showMessageDialog(null, "Template Id should not be more than 50 characters");
 			}
-			else if(designation.trim().length() == 0) {
+			else if(templateName.trim().length() > 50) {
 				validateFields = false;
-				JOptionPane.showMessageDialog(null, "Designation cannot be empty");
+				JOptionPane.showMessageDialog(null, "Template name should not be more than 50 characters");
 			}
-			else if(designation.trim().length() > 100) {
+			else if(messageBody.trim().length() > 500) {
 				validateFields = false;
-				JOptionPane.showMessageDialog(null, "Designation cannot be greater than 100 characters");
-			}
-			else if(contact.trim().length() == 0) {
-				validateFields = false;
-				JOptionPane.showMessageDialog(null, "Contact cannot be empty");
-			}
-			else if(contact.trim().length() > 12) {
-				validateFields = false;
-				JOptionPane.showMessageDialog(null, "Contact be greater than 12 characters");
-			}
-			else if (!commonObj.validateOnlyNumber(contact)) {
-				validateFields = false;
-				JOptionPane.showMessageDialog(null, "Please enter valid contact details");
+				JOptionPane.showMessageDialog(null, "Message body should not be more than 500 characters");
 			}
 			
 			if(validateFields){
 				if(dbValidate.connectDatabase(sessionData)){
-					boolean addFlag = dbValidate.addSMSStaff(sessionData, staffName.toUpperCase(), designation, contact, std, div, sms, academic, false);
+					boolean addFlag = dbValidate.addSMSTemplate(sessionData, senderName, templateId, templateName, messageBody, false);
 					
 					if(addFlag == true){
 						frame.setVisible(false);
-						new CreateSMSStaff(sessionData, academicYearClass, section);
+						new CreateSMSTemplate(sessionData, academicYearClass, section);
 					}
 				}
 				

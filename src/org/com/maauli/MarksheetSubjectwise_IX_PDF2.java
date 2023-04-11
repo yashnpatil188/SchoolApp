@@ -25,7 +25,7 @@ import com.itextpdf.text.pdf.PdfWriter;
 import com.lowagie.text.DocumentException;
 import com.itextpdf.text.PageSize;
 
-public class MarksheetSubjectwise_IX_PDF {
+public class MarksheetSubjectwise_IX_PDF2 {
 
 	static String fileName = "";
 	static String fileAddress = "";
@@ -35,7 +35,7 @@ public class MarksheetSubjectwise_IX_PDF {
 	ResourceBundle bundle = ResourceBundle.getBundle("org.com.accesser.school");
 	static Logger logger = Logger.getLogger(BonafidePDF.class.getName());
 
-	public MarksheetSubjectwise_IX_PDF(SessionData sessionData, String exam, String subject, String std, String div,
+	public MarksheetSubjectwise_IX_PDF2(SessionData sessionData, String exam, String subject, String std, String div,
 			String academic, LinkedHashMap<String, LinkedHashMap<String, String>> marksSemDataMap,
 			LinkedHashMap<String, LinkedHashMap<String, String>> studentOptSubAllotMap,
 			LinkedHashMap<String, LinkedHashMap<String, String>> maxSubMarks,
@@ -99,9 +99,8 @@ public class MarksheetSubjectwise_IX_PDF {
 				divisor = 2;
 				if (marks_grade.equalsIgnoreCase("Grade")) {
 					noOfRecords = displayRows+"";
-					column = 22;
-				} else 
-					if(commonObj.is9thEvaluation(std, academic)){
+					column = 20;
+				} else if(commonObj.is9thEvaluation(std, academic)){
 					column = 21;
 				} else {
 					column = 19;
@@ -122,11 +121,9 @@ public class MarksheetSubjectwise_IX_PDF {
 				columnWidths = new float[] { 1.2f, 2.4f, 10f, 1.2f, 1.2f, 1.2f, 1.2f, 1.2f, 1.2f };
 			} else if (stdInt < 11) {
 				if (marks_grade.equalsIgnoreCase("Grade")) {
-					columnWidths = new float[] { 1.2f, 2.4f, 8.8f, 1.2f, 1.2f, 1.2f, 1.2f, 1.2f, 1.2f, 1.2f, 1.2f, 1.2f, 1.2f, 1.2f, 1.2f,
-							1.2f, 1.2f, 1.2f, 1.2f, 1.2f, 1.2f, 1.2f };
-					colMerge = 8;
-				} else 
-					if(commonObj.is9thEvaluation(std, academic)){
+					columnWidths = new float[] { 1.2f, 2.4f, 8.8f, 1f, 1f, 1f, 1.2f, 1f, 1f, 1.2f, 1f, 1f, 1f, 1.2f, 1f,
+							1f, 1.2f, 1.2f, 1.2f, 1.2f };
+				} else if(commonObj.is9thEvaluation(std, academic)){
 					columnWidths = new float[] { 1.2f, 2.4f, 10f, 1f, 1f, 1f, 1f, 1.2f, 1f, 1f, 1.2f, 1f, 1f, 1f, 1.2f, 1f,
 							1f, 1f, 1.2f, 1.2f, 1.2f };
 					colMerge = 8;
@@ -1592,9 +1589,6 @@ public class MarksheetSubjectwise_IX_PDF {
 								}
 							}
 						}
-//						else {
-//							average = Math.round(subTotal_AB/divisor)+"";
-//						}
 					}
 
 					grade = grMap.get(subject + "_FINAL").toString();

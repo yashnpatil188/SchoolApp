@@ -835,6 +835,7 @@ public class DBValidate {
 		LinkedHashMap<String, LinkedHashMap<String, String>> studentMap = new LinkedHashMap<String, LinkedHashMap<String, String>>();
 
 		try {
+			logger.info("=========insertNewFeeAllotStudents============");
 			String newStudentInFeesAllot = "SELECT GR_NO FROM " + sessionData.getDBName() + "." + "CLASS_ALLOTMENT "
 					+ "WHERE GR_NO NOT IN (SELECT GR_NO FROM " + sessionData.getDBName() + "."
 					+ "optional_fee_allotment " + "WHERE ACADEMIC_YEAR='" + academic + "' " + "AND SECTION_NM='"
@@ -2146,6 +2147,9 @@ public class DBValidate {
 				rollDB = resultSet.getString("ROLL_NO") == null ? "1" : (resultSet.getString("ROLL_NO").trim());
 				studentDetailsMap.put("roll_no", rollDB);
 				nameDB = resultSet.getString("NAME") == null ? " " : (resultSet.getString("NAME").trim());
+				if(rollDB.equalsIgnoreCase("") && !nameDB.contains("|")){
+					nameDB = nameDB+"|"+nameDB;
+				}
 				studentDetailsMap.put("name", nameDB);
 				rollDB = resultSet.getString("ROLL_NO") == null ? "1" : (resultSet.getString("ROLL_NO").trim());
 				contact1DB = resultSet.getString("PHONE") == null ? " " : (resultSet.getString("PHONE").trim());
@@ -4328,6 +4332,7 @@ public class DBValidate {
 		LinkedHashMap<String, LinkedHashMap<String, String>> headerMap = new LinkedHashMap<String, LinkedHashMap<String, String>>();
 
 		try {
+			logger.info("======fetchMultipleHeadMap=====");
 			if (!feeHead.equalsIgnoreCase("")) {
 				condition = " AND FEES_NAME='" + feeHead + "'";
 			}
@@ -10580,10 +10585,12 @@ public class DBValidate {
 		String divDB = "";
 		String semester = "";
 		String semPercentDB = "";
+		String sem1PercentDB = "";
+		String sem2PercentDB = "";
 		String semProgressDB = "";
 		String semImproveDB = "";
 		String semResultDB = "";
-		String semTotal = "";
+		String semTotal = "", sem1Total = "", sem2Total = "";
 		String semMarksObtained = "";
 		String remark_0DB = "";
 		String remark_1DB = "";
@@ -10641,8 +10648,9 @@ public class DBValidate {
 			findQuery = "SELECT STD_1,DIV_1,SEM1_MARKS,SEM1_TOTAL,SEM2_MARKS,SEM2_TOTAL,FINAL_MARKS,FINAL_TOTAL,"
 					+ "REMARK_0,REMARK_1,CONDUCT,ATT_SEM1,ATT_SEM2,ATT_FINAL,EXTRA_1,"
 					+ "DATE_FORMAT(DOB, '%d/%m/%Y') AS BIRTH_DATE,RESULT_DATA.GR_NO,RESULT_DATA.ROLL_NO,RESULT_DATA.LAST_NAME,"
-					+ "RESULT_DATA.FIRST_NAME,RESULT_DATA.FATHER_NAME," + "RESULT_DATA." + semester
-					+ "_PERCENT,RESULT_DATA." + semester + "_PROGRESS,RESULT_DATA." + semester + "_IMPROVE,"
+					+ "RESULT_DATA.FIRST_NAME,RESULT_DATA.FATHER_NAME," + "RESULT_DATA." + semester+ "_PERCENT,"
+					+ "RESULT_DATA.SEM1_PERCENT,RESULT_DATA.SEM2_PERCENT,"
+					+ "RESULT_DATA." + semester + "_PROGRESS,RESULT_DATA." + semester + "_IMPROVE,"
 					+ "RESULT_DATA." + semester + "_RESULT" + subjectStr + " " + "FROM " + sessionData1.getDBName()
 					+ "." + "RESULT_DATA LEFT JOIN " + sessionData1.getDBName() + "." + "hs_general_register "
 					+ "ON RESULT_DATA.GR_NO = hs_general_register.GR_NO and RESULT_DATA.SECTION_NM = hs_general_register.SECTION_NM "
@@ -10683,6 +10691,12 @@ public class DBValidate {
 				semPercentDB = resultSet.getString(semester + "_PERCENT") == null ? "NA"
 						: (resultSet.getString(semester + "_PERCENT").trim());
 				studentResultMap.put("semPercent", semPercentDB);
+				sem1PercentDB = resultSet.getString("SEM1_PERCENT") == null ? "NA"
+						: (resultSet.getString("SEM1_PERCENT").trim());
+				studentResultMap.put("sem1Percent", sem1PercentDB);
+				sem2PercentDB = resultSet.getString("SEM2_PERCENT") == null ? "NA"
+						: (resultSet.getString("SEM2_PERCENT").trim());
+				studentResultMap.put("sem2Percent", sem2PercentDB);
 				semProgressDB = resultSet.getString(semester + "_PROGRESS") == null ? "NA"
 						: (resultSet.getString(semester + "_PROGRESS").trim());
 				studentResultMap.put("semProgress", semProgressDB);
@@ -10771,6 +10785,12 @@ public class DBValidate {
 				semTotal = resultSet.getString(semester + "_TOTAL") == null ? "-"
 						: (resultSet.getString(semester + "_TOTAL").trim());
 				studentResultMap.put("semTotal", semTotal);
+				sem1Total = resultSet.getString("SEM1_TOTAL") == null ? "-"
+						: (resultSet.getString("SEM1_TOTAL").trim());
+				studentResultMap.put("sem1Total", sem1Total);
+				sem2Total = resultSet.getString("SEM2_TOTAL") == null ? "-"
+						: (resultSet.getString("SEM2_TOTAL").trim());
+				studentResultMap.put("sem2Total", sem2Total);
 				semMarksObtained = resultSet.getString(semester + "_MARKS") == null ? "-"
 						: (resultSet.getString(semester + "_MARKS").trim());
 				studentResultMap.put("semMarksObtained", semMarksObtained);
@@ -10802,6 +10822,24 @@ public class DBValidate {
 								+ gradeDataSem2;
 					}
 					// studentResultMap.put(grNoDB, addToMap);
+//					resultDataList.add(addToMapForFinal);
+					gradeDataDB = "";
+				}
+				else if (semester.equalsIgnoreCase("FINAL") && (std.equalsIgnoreCase("JR KG") || std.equalsIgnoreCase("SR KG"))) {
+					addToMapForFinal = grNoDB;
+					for (int i = 0; i < subjectTitleList.size(); i++) {
+						subjectTitle = subjectTitleList.get(i).replace(" ", "_");
+						gradeDataSem1 = resultSet.getString(subjectTitle + "_SEM1") == null ? "NA"
+								: (resultSet.getString(subjectTitle + "_SEM1").trim());
+						studentResultMap.put(subjectTitle + "_SEM1", gradeDataSem1);
+						
+						gradeDataSem2 = resultSet.getString(subjectTitle + "_SEM2") == null ? "NA"
+								: (resultSet.getString(subjectTitle + "_SEM2").trim());
+						studentResultMap.put(subjectTitle + "_SEM2", gradeDataSem2);
+//						addToMapForFinal = addToMapForFinal + "|" + subjectTitle + "," + gradeDataSem1 + ","
+//								+ gradeDataSem2;
+					}
+//					 studentResultMap.put(grNoDB, addToMap);
 //					resultDataList.add(addToMapForFinal);
 					gradeDataDB = "";
 				} else if (semester.equalsIgnoreCase("SEM2")) {
@@ -11281,15 +11319,17 @@ public class DBValidate {
 				semResultDB = resultSet.getString(semProgress + "_RESULT") == null ? "NA"
 						: (resultSet.getString(semProgress + "_RESULT").trim());
 				studentResultMap.put("semResult", semResultDB);
-				/*
-				 * attSem1DB = resultSet.getString("ATT_SEM1") == null ? "NA" :
-				 * (resultSet.getString("ATT_SEM1").trim()); studentResultMap.put("ATT_SEM1",
-				 * attSem1DB); attSem2DB = resultSet.getString("ATT_SEM2") == null ? "NA" :
-				 * (resultSet.getString("ATT_SEM2").trim()); studentResultMap.put("ATT_SEM2",
-				 * attSem2DB); attFinalDB = resultSet.getString("ATT_FINAL") == null ? "NA" :
-				 * (resultSet.getString("ATT_FINAL").trim()); studentResultMap.put("ATT_FINAL",
-				 * attFinalDB);
-				 */
+			
+				attSem1DB = resultSet.getString("ATT_SEM1") == null ? "NA" :
+					(resultSet.getString("ATT_SEM1").trim()); studentResultMap.put("ATT_SEM1",attSem1DB); 
+				studentResultMap.put("ATT_SEM1", attSem1DB);
+				attSem2DB = resultSet.getString("ATT_SEM2") == null ? "NA" :
+					(resultSet.getString("ATT_SEM2").trim()); studentResultMap.put("ATT_SEM2",attSem2DB); 
+				studentResultMap.put("ATT_SEM2", attSem2DB);
+				attFinalDB = resultSet.getString("ATT_FINAL") == null ? "NA" :
+					(resultSet.getString("ATT_FINAL").trim()); studentResultMap.put("ATT_FINAL",attFinalDB);
+				studentResultMap.put("ATT_FINAL", attFinalDB);
+				 
 				/*
 				 * if (semester.equalsIgnoreCase("SEM1")) { attendanceDB =
 				 * resultSet.getString("ATT_SEM1") == null ? "0/0" :
@@ -11863,7 +11903,7 @@ public class DBValidate {
 				grNoDB = resultSet.getString("GR_NO") == null ? "NA" : (resultSet.getString("GR_NO").trim());
 				addToMap = grNoDB;
 				if (std.equalsIgnoreCase("IX") || std.equalsIgnoreCase("X") || std.equalsIgnoreCase("XI")
-						|| std.equalsIgnoreCase("XII")) {
+						|| std.equalsIgnoreCase("XII") || std.equalsIgnoreCase("JR KG") || std.equalsIgnoreCase("SR KG")) {
 					for (int i = 0; i < subjectTitleList.size(); i++) {
 						String marks1 = "";
 						String passStatus1 = "";
@@ -12796,7 +12836,7 @@ public class DBValidate {
 		String subjectAndMarksDB = "";
 		String prevSubjectTitle = "";
 		String prevSubjectName = "";
-		String grNo = "", suid = "";
+		String grNo = "", suid = "", promoteDiv = div;
 		int stdInt = cm.RomanToInteger(std);
 		String optionalSubject = "";
 		List<String> optionalSubjectList = new ArrayList<String>();
@@ -13237,7 +13277,7 @@ public class DBValidate {
 
 			if (ft_marksObtained.equalsIgnoreCase("")) {
 				if (subjectTitleDB.equalsIgnoreCase(prevSubjectTitle) && j == rowCount) {
-					subjectMarksRetrive = subjectMarksRetrive + " AS " + subjectTitleDB;
+					subjectMarksRetrive = subjectMarksRetrive + " AS " + subjectNameDB;
 				} else if (j == rowCount) {
 					subjectMarksRetrive = subjectMarksRetrive + " AS " + subjectTitleDB;
 				} else if (j != rowCount) {
@@ -13685,6 +13725,9 @@ public class DBValidate {
 								int stdPromoted = cm.RomanToInteger(std) + 1;
 								String romanPromotedStd = cm.IntegerToRoman("a" + stdPromoted);
 
+								if(std.equalsIgnoreCase("SR KG")) {
+									promoteDiv = "";
+								}
 								semesterPercent = Math.round((semesterMarks / totalMarks * 100) * 100.0) / 100.0;
 								String resultAndSubjects = cm.getResultSemester(studentMarksMapOrder, std, maxMarksMap,
 										optionalSubjectList, subjectOptionMap, marksBeforeGrace);
@@ -13710,7 +13753,7 @@ public class DBValidate {
 											mgStr = "on MG ";
 										}
 										semesterResult = "GP|GP & promoted " + mgStr + "to Std." + romanPromotedStd
-												+ "-" + div;
+												+ "-" + promoteDiv;
 									} else if (failCount == 0) {
 										semesterImprove = "NA";
 										String mgStr = "";
@@ -13718,14 +13761,14 @@ public class DBValidate {
 											mgStr = "on MG ";
 										}
 										semesterResult = "PASS|Passed & promoted " + mgStr + "to Std."
-												+ romanPromotedStd + "-" + div;
+												+ romanPromotedStd + "-" + promoteDiv;
 									} else if (failCount > 0 && graceCount == 0) {// only group pass
 										String mgStr = "";
 										if (mgFlag) {
 											mgStr = "on MG ";
 										}
 										semesterResult = "F" + failCount + "|GP with F" + failCount + " & Promoted "
-												+ mgStr + "to Std." + romanPromotedStd + "-" + div
+												+ mgStr + "to Std." + romanPromotedStd + "-" + promoteDiv
 												+ " with condonation";
 										semesterImprove = failedSubjects;
 										semesterProgress = "Poor";
@@ -13736,13 +13779,13 @@ public class DBValidate {
 											mgStr = "on MG ";
 										}
 										semesterResult = "F" + failCount + "|F" + failCount + " & Promoted " + mgStr
-												+ "to Std." + romanPromotedStd + "-" + div + " with condonation";
+												+ "to Std." + romanPromotedStd + "-" + promoteDiv + " with condonation";
 										semesterImprove = failedSubjects;
 										semesterProgress = "Poor";
 										graceInTotal = "+" + (int) totalMarksToPass;
 									} else if (failCount > 0 && graceCount > 0) {// for group and grace pass
 										semesterResult = "F" + failCount + "|GP with F" + failCount
-												+ " & Promoted to Std." + romanPromotedStd + "-" + div
+												+ " & Promoted to Std." + romanPromotedStd + "-" + promoteDiv
 												+ " with condonation";
 										semesterImprove = failedSubjects;
 										semesterProgress = "Poor";
@@ -14308,8 +14351,10 @@ public class DBValidate {
 										double marksObtained = 0;
 										double marksTotal = 0;
 										double absentForMarksComp = 0;
+										String optSubject = "";
 										try {
 											for (int l = 0; l < parts.length; l++) {
+												optSubject = parts[l];
 												String subDetails = resultSet.getString(parts[l]) == null ? " "
 														: (resultSet.getString(parts[l]).trim());
 												if (subDetails.contains("+")) {
@@ -14343,8 +14388,12 @@ public class DBValidate {
 											}
 										} catch (Exception e) {
 											cm.logException(e);
+											if (!subjectTitleError.equalsIgnoreCase("")) {
+												subjectTitleError = " \n Also check/edit for subject : " + subjectTitleError;
+											}
 											cm.showMessageDialog(
-													"Before creating result please enter data for marks allotment,student subject allotment,marks entry");
+													"Before creating result please enter data for marks allotment,student subject allotment,marks entry."
+															+ subjectTitleError +" -> "+optSubject);
 											f.setVisible(false);
 											return false;
 										}
@@ -15314,12 +15363,13 @@ public class DBValidate {
 		List<String> passGrList = new ArrayList();
 		LinkedHashMap foundStudentMap = new LinkedHashMap<>();
 		LinkedHashMap grMap = new LinkedHashMap<>();
-		String smsText = "", sms_attendance_flag = "";
+		String smsText = "", sms_attendance_flag = "", smsTemplateId = "";
 		String smsType = "Send Sms";
 
 		int udpdateCount = 0;
 		try {
 			smsTemplate = bundle.getString("SMS_ABSENT");
+			smsTemplateId = bundle.getString("SMS_ABSENT_TEMP_ID");
 			sms_attendance_flag = bundle.getString("SMS_ATTENDANCE_FLAG");
 
 			if (connectDatabase(sessionData)) {
@@ -15387,7 +15437,7 @@ public class DBValidate {
 						smsText = smsTemplate.replace("#name#", columnArray[2]);
 						smsText = smsText.replace("#date#", cm.getCurrentDate());
 
-						String smsResponse = cm.sendHspSms(sessionData, passGrList, foundStudentMap, smsText, section,
+						String smsResponse = cm.sendHspSms(sessionData, passGrList, foundStudentMap, smsText, smsTemplateId, section,
 								smsType, academic, std, div, "", "ATT");
 						if (!smsResponse.contains("connecting")) {
 							smsResponse = "SMS sent successfully...";
@@ -15411,9 +15461,9 @@ public class DBValidate {
 			String std, String div, boolean isUpdate, String section, String exam, String month) throws Exception {
 
 		logger.info("=======inside updateManualAttendance========");
-		String updateQuery = "";
+		String updateQuery = "", updateResultAttendance = "";
 		String grStr = "";
-		String columnName = "", totCol = "";
+		String columnName = "", totCol = "", resultCol = "";
 		String attendanceStatus = "", total = "";
 
 		int udpdateCount = 0;
@@ -15430,12 +15480,15 @@ public class DBValidate {
 				} else if (exam.equalsIgnoreCase("Semester 1")) {
 					columnName = "SEM1";
 					totCol = columnName + "_TOT";
+					resultCol = "ATT_" + columnName;
 				} else if (exam.equalsIgnoreCase("Semester 2")) {
 					columnName = "SEM2";
 					totCol = columnName + "_TOT";
+					resultCol = "ATT_" + columnName;
 				} else if (exam.equalsIgnoreCase("Final")) {
 					columnName = "FINAL";
 					totCol = columnName + "_TOT";
+					resultCol = "ATT_" + columnName;
 				}
 
 				for (int k = 0; k < studentArray.length; k++) {
@@ -15457,6 +15510,9 @@ public class DBValidate {
 
 					updateQuery = updateQuery + " WHEN '" + columnArray[1] + "' THEN '"
 							+ attendanceStatus.substring(0, attendanceStatus.indexOf("/")) + "'";
+					
+					updateResultAttendance = updateResultAttendance + " WHEN '" + columnArray[1] + "' THEN '" + attendanceStatus + "'";
+					
 					grStr = grStr + ",'" + columnArray[1] + "'";
 					if (k == 0) {
 						total = attendanceStatus.substring(attendanceStatus.indexOf("/") + 1);
@@ -15474,6 +15530,15 @@ public class DBValidate {
 						+ sessionData.getSectionName() + "'";
 				statement = connection.createStatement();
 				udpdateCount = udpdateCount + statement.executeUpdate(updateQuery);
+				
+				if(!exam.equalsIgnoreCase("Select")) {
+					updateResultAttendance = "UPDATE HS_GENERAL_REGISTER SET " + resultCol
+							+ " = CASE GR_NO " + updateResultAttendance;
+					updateResultAttendance = updateResultAttendance + " ELSE " + resultCol + " END WHERE GR_NO IN(" + grStr
+							+ ") AND ACADEMIC_YEAR = '" + academic + "' " + "and SECTION_NM='" + sessionData.getSectionName() + "'";
+					statement = connection.createStatement();
+					udpdateCount = udpdateCount + statement.executeUpdate(updateResultAttendance);
+				}
 			}
 			logger.info("StudentAttendance data updated successfully..." + udpdateCount);
 			return true;
@@ -19631,7 +19696,7 @@ public class DBValidate {
 	public boolean insertSmsData(SessionData sessionData, String gr, String std, String div, String academic,
 			String phone, String smsText, String sms_sender, String priority, String type, String status,
 			String response, String messageId, String section, String scheduleTime, String apiKey, String smsCategory,
-			String name, String rollNo, String moduleName) throws Exception {
+			String name, String rollNo, String moduleName, String templateId) throws Exception {
 
 		logger.info("========insertSmsData==========");
 		boolean insertFlag = false;
@@ -19649,27 +19714,35 @@ public class DBValidate {
 			statement = connection.createStatement();
 			logger.info(statement.executeUpdate(insertCoulmn));
 		} catch (Exception e) {
-			logger.warn("failed to modify varchar size Column query in SMS_DATA table >>> " + e);
+		}
+		
+		/// add column
+		try {
+			String insertCoulmn = "ALTER TABLE " + sessionData.getDBName() + "."
+					+ "SMS_DATA ADD (TEMPLATE_ID  VARCHAR(30))";
+			statement = connection.createStatement();
+			logger.info(statement.executeUpdate(insertCoulmn));
+		} catch (Exception e) {
 		}
 
 		try {
 			smsText = cm.replaceCommaApostrophy(smsText);
 			insertSmsData = "INSERT INTO " + sessionData.getDBName() + "." + "SMS_DATA "
 					+ "(GR_NO,PRESENT_STD,PRESENT_DIV,ACADEMIC_YEAR,PHONE,MESSAGE,SENDER,PRIORITY,TYPE,STATUS,RESPONSE,MESSAGE_ID,"
-					+ "API_KEY,SCHEDULED_DATE,CREATED_DATE,CREATED_BY,MODIFIED_DATE,MODIFIED_BY,SECTION_NM,NAME,ROLL_NO,MODULE_NAME) "
+					+ "API_KEY,SCHEDULED_DATE,CREATED_DATE,CREATED_BY,MODIFIED_DATE,MODIFIED_BY,SECTION_NM,NAME,ROLL_NO,MODULE_NAME,TEMPLATE_ID) "
 					+ "VALUES ('" + gr + "','" + std + "'," + "'" + div + "','" + academic.trim().toUpperCase() + "','"
 					+ phone + "','" + smsText + "'" + ",'" + sms_sender + "','" + priority + "','" + type + "','"
 					+ status + "','" + response + "','" + messageId + "','" + apiKey + "','" + smsSentDate.trim()
 					+ "',SYSDATE(),'" + sessionData.getUserName() + "'" + ",NULL,'','" + section + "','" + name + "','"
-					+ rollNo + "','" + moduleName + "')";
+					+ rollNo + "','" + moduleName + "','" + templateId + "')";
 
-			logger.info("insertSmsData query===>" + insertSmsData);
 			statement = connection.createStatement();
 			udpdateCount = statement.executeUpdate(insertSmsData);
 			if (udpdateCount > 0) {
 				insertFlag = true;
 			}
 		} catch (Exception e) {
+			logger.error("insertSmsData query===>" + insertSmsData);
 			cm.logException(e);
 		}
 		return insertFlag;
@@ -19892,6 +19965,9 @@ public class DBValidate {
 			int i = 1;
 			while (resultSet.next()) {
 				nameDB = resultSet.getString("NAME") == null ? " " : (resultSet.getString("NAME").trim());
+				if(nameDB.contains("|")) {
+					nameDB = nameDB.substring(0, nameDB.indexOf("|"));
+				}
 				contact1DB = resultSet.getString("PHONE") == null ? " " : (resultSet.getString("PHONE").trim());
 				sender = resultSet.getString("SENDER") == null ? " " : (resultSet.getString("SENDER").trim());
 				status = resultSet.getString("STATUS") == null ? " " : (resultSet.getString("STATUS").trim());
@@ -20504,76 +20580,82 @@ public class DBValidate {
 				}
 			}
 
-//			if (!validateFeeName) {
-//				if(isUpdate){
-//					addUpdate = "updated";
-//					insertFeeName = "Update "+sessionData.getDBName()+"."+"FEES_HEAD set "
-//							+ "FEES_NAME='"+feeName.trim().toUpperCase()+"',"
-//							+ "CATEGORY='"+feeCategory.trim()+"',"
-//							+ "AMOUNT="+amount.trim()+","
-//							+ "OPTIONAL='"+optional.trim()+"',"
-//							+ "FREQUENCY='"+payFrequency.trim()+"',"
-//							+ "MODIFIED_BY='"+createdBy.trim()+"',SHORT_NAME='"+shortName+"',"
-//							+ "MODIFIED_DATE=SYSDATE() where (SECTION_NM='"+section.toUpperCase()+"') "
-//							+ "AND ORDER_NO='"+orderNo+"' "
-//							+ "AND ACADEMIC_YEAR='"+academic+"' AND STD_1='"+std+"'";
-//					
-//					statement = connection.createStatement();
-//					statement.executeUpdate(insertFeeName);
-//					logger.info("Fee Name " + feeName.trim() + " "+addUpdate+" successfully...");
-//					std = "'"+std+"'";
-//					
-//				}
-//				else if(isAllSelected){
-//					std = "";
-//					allStd = allStd.replace("Select,", "");
-//					String[] stdList = allStd.split(",");
-//					for(int i = 0; i < stdList.length; i++){
-//						insertFeeName += "('" + academic.trim() + "','" + stdList[i].trim().toUpperCase() + "','" + feeName.trim().toUpperCase() + "'," + "'"
-//								+ feeCategory.trim() + "'," + amount.trim() + "," + "'"
-//								+ payFrequency.trim() + "','" + optional.trim() + "','"+section+"'," + 
-//								"SYSDATE(),'" + createdBy.trim() + "','"+shortName+"'),";
-//						std = "'"+stdList[i].trim().toUpperCase()+"'" +","+ std;
-//					}
-//					insertFeeName = insertFeeName.substring(0,  insertFeeName.length()-1);
-//					insertFeeName = "INSERT INTO "+sessionData.getDBName()+"."+"FEES_HEAD (ACADEMIC_YEAR,STD_1,FEES_NAME,CATEGORY,AMOUNT,"
-//							+ "FREQUENCY,OPTIONAL,SECTION_NM,CREATED_DATE,CREATED_BY,SHORT_NAME) VALUES "+insertFeeName;
-//					
-//					statement = connection.createStatement();
-//					statement.executeUpdate(insertFeeName);
-//					logger.info("Fee Name " + feeName.trim() + " "+addUpdate+" successfully for Std "+allStd);
-//					std = std.substring(0,  std.length()-1);;
-//				}
-//				else {
-//					insertFeeName = "INSERT INTO "+sessionData.getDBName()+"."+"FEES_HEAD " + "(ACADEMIC_YEAR,STD_1,FEES_NAME,CATEGORY,AMOUNT,"
-//							+ "FREQUENCY,OPTIONAL,SECTION_NM,CREATED_DATE,CREATED_BY,SHORT_NAME)  "
-//							+ "VALUES ('" + academic.trim() + "','" + std.trim().toUpperCase() + "','" + feeName.trim().toUpperCase() + "'," + "'"
-//							+ feeCategory.trim() + "'," + amount.trim() + "," + "'"
-//							+ payFrequency.trim() + "','" + optional.trim() + "','"+section+"'," + 
-//							"SYSDATE(),'" + createdBy.trim() + "','"+shortName+"')";
-//					
-//					logger.info("insertFeeName query===>" + insertFeeName);
-//					statement = connection.createStatement();
-//					statement.executeUpdate(insertFeeName);
-//					std = "'"+std+"'";
-//					logger.info("Fee Name " + feeName.trim() + " "+addUpdate+" successfully...");
-//				}
-//				
-//				String updateShortName = "Update "+sessionData.getDBName()+"."+"FEES_HEAD set "
-//						+ "MODIFIED_BY='"+createdBy.trim()+"',SHORT_NAME='"+shortName+"',"
-//						+ "MODIFIED_DATE=SYSDATE() where SECTION_NM='"+section.toUpperCase()+"' "
-//						+ "AND CATEGORY='"+feeCategory.trim()+"' "
-//						+ "AND ACADEMIC_YEAR='"+academic+"' AND STD_1 IN ("+std+")";
-//				statement = connection.createStatement();
-//				statement.executeUpdate(updateShortName);
-//				
-//				JOptionPane.showMessageDialog(null,
-//						"Fee Name " + cm.revertCommaApostrophy(feeName.trim().replace("$$", ".")) + " "+addUpdate+" successfully for std "+std);
-//				retFlag = true;
-//			} else {
-//				retFlag = false;
-//				JOptionPane.showMessageDialog(null, "Fee Name " + feeName + " already exist for STD " + std);
-//			}
+			return retFlag;
+		} catch (Exception e) {
+			cm.logException(e);
+			return false;
+		} finally {
+			closeDatabase(sessionData);
+		}
+	}
+	
+	// /////Add SMS Template details///////////////////////////////////
+	public boolean addSMSTemplate(SessionData sessionData, String senderName, String templateId, String templateName, 
+    		String messageBody, boolean isUpdate) throws Exception {
+
+		String createdBy = sessionData.getUserName();
+		boolean retFlag = false;
+		boolean validateStaffTemplate = true;
+
+		try {
+			connectDatabase(sessionData);
+
+			if (!isUpdate) {
+				try {
+					senderName = cm.replaceCommaApostrophy(senderName).trim();
+					templateId = cm.replaceCommaApostrophy(templateId).trim();
+					templateName = cm.replaceCommaApostrophy(templateName).trim();
+					messageBody = cm.replaceCommaApostrophy(messageBody).trim();
+					
+					String findSmsTemplateQuery = "SELECT DISTINCT MESSAGE_BODY " + "FROM " + sessionData.getDBName() + "."
+							+ "SMS_TEMPLATE WHERE SECTION_NM='"+ sessionData.getSectionName() + "' " + "AND "
+							+ "(STATUS IS NULL OR STATUS='Enable')";
+
+					statement = connection.createStatement();
+					resultSet = statement.executeQuery(findSmsTemplateQuery);
+					String messageBodyDB = "";
+					while (resultSet.next()) {
+						messageBodyDB = resultSet.getString("MESSAGE_BODY");
+						if (messageBodyDB.trim().equalsIgnoreCase(messageBody.trim())) {
+							validateStaffTemplate = false;
+							JOptionPane.showMessageDialog(null, "SMS template: " + messageBody + " already exist");
+							break;
+						}
+					}
+
+					// Proceed if sms template doesn't exist
+					if (validateStaffTemplate) {
+						String insertStaffName = "INSERT INTO " + sessionData.getDBName() + "."
+								+ "SMS_TEMPLATE (SENDER_NAME,TEMPLATE_ID,TEMPLATE_NAME,MESSAGE_BODY,STATUS,"
+								+ "SECTION_NM,CREATED_DATE,CREATED_BY) " + "VALUES ('" + senderName
+								+ "', '" + templateId + "', '" + templateName + "', '" + messageBody + "', 'Enable', " 
+								+ "'" + sessionData.getSectionName() + "', SYSDATE(), '"
+								+ sessionData.getUserName() + "')";
+						statement = connection.createStatement();
+						statement.executeUpdate(insertStaffName);
+					}
+					retFlag = true;
+
+				} catch (Exception e) {
+					cm.logException(e);
+					return retFlag;
+				}
+			} else {
+				try {
+					String updateSmsTemplate = "Update " + sessionData.getDBName() + "." + "SMS_TEMPLATE set STATUS='Disable', "
+							+ "MODIFIED_BY='" + createdBy.trim() + "'," + "MODIFIED_DATE=SYSDATE() where SECTION_NM='"
+							+ sessionData.getSectionName().toUpperCase() + "' " + "AND MESSAGE_BODY='"
+							+ messageBody + "' AND (STATUS IS NULL OR STATUS='Enable')";
+					statement = connection.createStatement();
+					statement.executeUpdate(updateSmsTemplate);
+
+					retFlag = true;
+
+				} catch (Exception e) {
+					cm.logException(e);
+					return retFlag;
+				}
+			}
 
 			return retFlag;
 		} catch (Exception e) {
@@ -20623,18 +20705,34 @@ public class DBValidate {
 					statement.executeUpdate(alterDateColumn);
 				} catch (Exception e) {
 					logger.warn(
-							"failed to modify column name " + alterDateColumn + " in FEES_REPORT_MANDATORY >> " + e);
+							"failed to modify column name " + alterDateColumn + " in FEES_DATA_MANDATORY >> " + e);
 				}
 			}
 
-//			try {
-//				alterDateColumn = "Alter Table "+sessionData1.getDBName()+"."+"fees_report_mandatory ALTER COLUMN MODIFIED_DATE DROP DEFAULT";
-//				statement = connection.createStatement();
-//				statement.executeUpdate(alterDateColumn);
-//			}
-//			catch(Exception e) {
-//				logger.warn("failed to modify column name MODIFIED_DATE in FEES_REPORT_MANDATORY >> "+e);
-//			}
+			try {
+				String getDataTypeQuery = "select column_name,data_type from information_schema.columns where "
+						+ "table_schema = '"+sessionData1.getDBName()+"' and table_name = 'fees_report_mandatory' "
+						+ "and column_name='MODIFIED_DATE'";
+
+				statement = connection.createStatement();
+				resultSet = statement.executeQuery(getDataTypeQuery);
+				String modifiedDateType = "";
+				while (resultSet.next()) {
+					modifiedDateType = resultSet.getString("DATA_TYPE");
+				}
+				
+				if(!modifiedDateType.equalsIgnoreCase("DATETIME")){
+					statement = connection.createStatement();
+					statement.executeUpdate("ALTER TABLE "+sessionData1.getDBName()+".fees_report_mandatory DROP COLUMN MODIFIED_DATE");
+					
+					alterDateColumn = "Alter Table "+sessionData1.getDBName()+"."+"fees_report_mandatory ADD MODIFIED_DATE DATETIME ON UPDATE CURRENT_TIMESTAMP";
+					statement = connection.createStatement();
+					statement.executeUpdate(alterDateColumn);
+				}
+			}
+			catch(Exception e) {
+				logger.warn("failed to modify column name MODIFIED_DATE in FEES_REPORT_MANDATORY >> "+e);
+			}
 
 //			if(optional.equalsIgnoreCase("No")){
 			if (payFrequency.equalsIgnoreCase("Monthly") || payFrequency.equalsIgnoreCase("Occasionally")) {
@@ -20881,6 +20979,7 @@ public class DBValidate {
 		String gr_no, paying_free = "";
 
 		try {
+			logger.info("=========getFreeStudentData============");
 			if (!std.equalsIgnoreCase("") && !std.equalsIgnoreCase("All")) {
 				addToCondition += " AND PRESENT_STD = '" + std + "'";
 			}
@@ -20907,7 +21006,7 @@ public class DBValidate {
 		return retFreeStudentDataMap;
 	}
 
-	/////////// get Fees Head Data////////////////////////////////////////
+	/////////// get Staff SMS Data////////////////////////////////////////
 	public LinkedHashMap<String, LinkedHashMap<String, String>> getStaffSMSData(SessionData sessionData,
 			String academic) throws Exception {
 		LinkedHashMap<String, LinkedHashMap<String, String>> retStaffDetailsMap = new LinkedHashMap<String, LinkedHashMap<String, String>>();
@@ -20915,17 +21014,6 @@ public class DBValidate {
 		String staffName, designation, contact, std, div, smsEnabled = "";
 
 		try {
-//	//		retFeesHeadMap.put("Select", null);
-//			if(!category.equalsIgnoreCase("")){
-//				addToCondition = " AND CATEGORY='"+category+"'";
-//			}
-//			if(std.contains(",")) {
-//				addToCondition += " AND STD_1 IN ("+std+")";
-//			}
-//			else {
-//				addToCondition += " AND STD_1='"+std+"'";
-//			}
-
 			findStaffDetailsQuery = "SELECT * FROM " + sessionData.getDBName() + "."
 					+ "STAFF_DATA WHERE ACADEMIC_YEAR='" + academic + "' " + "AND SECTION_NM='"
 					+ sessionData.getSectionName() + "' AND STATUS IS NULL ORDER BY CREATED_DATE ASC";
@@ -20958,6 +21046,96 @@ public class DBValidate {
 			cm.logException(e);
 		}
 		return retStaffDetailsMap;
+	}
+	
+	/////////// get SMS temaplate Data////////////////////////////////////////
+	public LinkedHashMap<String, LinkedHashMap<String, String>> getSMSTemplateData(SessionData sessionData) throws Exception {
+		LinkedHashMap<String, LinkedHashMap<String, String>> retSmsTemplateDetailsMap = new LinkedHashMap<String, LinkedHashMap<String, String>>();
+		String findsmsTemplateDetailsQuery, addToCondition = "";
+		String senderName, templateId, templateName, messageBody = "";
+	
+		try {
+			findsmsTemplateDetailsQuery = "SELECT * FROM " + sessionData.getDBName() + "."
+					+ "SMS_TEMPLATE WHERE SECTION_NM='"+ sessionData.getSectionName() + "' AND STATUS = 'Enable' ORDER BY CREATED_DATE ASC";
+			statement = connection.createStatement();
+			resultSet = statement.executeQuery(findsmsTemplateDetailsQuery);
+	
+			while (resultSet.next()) {
+				LinkedHashMap<String, String> smsTemplateDetailMap = new LinkedHashMap<String, String>();
+				senderName = resultSet.getString("SENDER_NAME") == null ? "" : (resultSet.getString("SENDER_NAME").trim());
+				senderName = cm.revertCommaApostrophy(senderName);
+				smsTemplateDetailMap.put("senderName", senderName);
+				templateId = resultSet.getString("TEMPLATE_ID") == null ? "" : (resultSet.getString("TEMPLATE_ID").trim());
+				templateId = cm.revertCommaApostrophy(templateId);
+				smsTemplateDetailMap.put("templateId", templateId);
+				templateName = resultSet.getString("TEMPLATE_NAME") == null ? "" : (resultSet.getString("TEMPLATE_NAME").trim());
+				templateName = cm.revertCommaApostrophy(templateName);
+				smsTemplateDetailMap.put("templateName", templateName);
+				messageBody = resultSet.getString("MESSAGE_BODY") == null ? "" : (resultSet.getString("MESSAGE_BODY").trim());
+				messageBody = cm.revertCommaApostrophy(messageBody);
+				smsTemplateDetailMap.put("messageBody", messageBody);
+				
+	
+				if (retSmsTemplateDetailsMap.get(messageBody) == null) {
+					retSmsTemplateDetailsMap.put(messageBody, smsTemplateDetailMap);
+				}
+			}
+	
+		} catch (Exception e) {
+			cm.logException(e);
+		}
+		return retSmsTemplateDetailsMap;
+	}
+
+	/////////// get SMS temaplate String////////////////////////////////////////
+	public String getSMSTemplateStr(SessionData sessionData) throws Exception {
+		String findsmsTemplateDetailsQuery;
+		String smsTemplateStr = "", messageTemplateName = "";
+	
+		try {
+			findsmsTemplateDetailsQuery = "SELECT * FROM " + sessionData.getDBName() + "."
+					+ "SMS_TEMPLATE WHERE SECTION_NM='"+ sessionData.getSectionName() + "' AND STATUS = 'Enable' ORDER BY CREATED_DATE ASC";
+			statement = connection.createStatement();
+			resultSet = statement.executeQuery(findsmsTemplateDetailsQuery);
+	
+			while (resultSet.next()) {
+				messageTemplateName = resultSet.getString("TEMPLATE_NAME") == null ? "" : (resultSet.getString("TEMPLATE_NAME").trim().toString());
+				smsTemplateStr = smsTemplateStr + cm.revertCommaApostrophy(messageTemplateName) +"|";
+			}
+			smsTemplateStr = smsTemplateStr.substring(0, smsTemplateStr.length()-1);
+		} catch (Exception e) {
+			cm.logException(e);
+		}
+		return smsTemplateStr;
+	}
+	
+	/////////// get SMS temaplate ID////////////////////////////////////////
+	public LinkedHashMap<String, LinkedHashMap<String, String>> getSMSTemplateIdMap(SessionData sessionData) throws Exception {
+		LinkedHashMap<String, LinkedHashMap<String, String>> retSmsTemplateIdMap = new LinkedHashMap<String, LinkedHashMap<String, String>>();
+		String findsmsTemplateDetailsQuery;
+		String tempId = "", messageBody = "", tempName = "";
+	
+		try {
+			findsmsTemplateDetailsQuery = "SELECT * FROM " + sessionData.getDBName() + "."
+					+ "SMS_TEMPLATE WHERE SECTION_NM='"+ sessionData.getSectionName() + "' AND STATUS = 'Enable' ORDER BY CREATED_DATE ASC";
+			statement = connection.createStatement();
+			resultSet = statement.executeQuery(findsmsTemplateDetailsQuery);
+	
+			while (resultSet.next()) {
+				LinkedHashMap<String, String> smsTemplateNameMap = new LinkedHashMap<String, String>();
+				tempId = resultSet.getString("TEMPLATE_ID") == null ? "" : (resultSet.getString("TEMPLATE_ID").trim().toString());
+				smsTemplateNameMap.put("templateId", tempId);
+				tempName = resultSet.getString("TEMPLATE_NAME") == null ? "" : (resultSet.getString("TEMPLATE_NAME").trim().toString());
+				smsTemplateNameMap.put("templateName", tempName);
+				messageBody = resultSet.getString("MESSAGE_BODY") == null ? "" : (resultSet.getString("MESSAGE_BODY").trim().toString());
+				messageBody =  cm.revertCommaApostrophy(messageBody);
+				smsTemplateNameMap.put("messageBody", messageBody);
+				retSmsTemplateIdMap.put(tempName, smsTemplateNameMap);
+			}
+		} catch (Exception e) {
+			cm.logException(e);
+		}
+		return retSmsTemplateIdMap;
 	}
 
 	/////////// get consolidated Fees Head
@@ -21035,6 +21213,32 @@ public class DBValidate {
 
 			statement = connection.createStatement();
 			udpdateCount = statement.executeUpdate(deleteStaffName);
+			if (udpdateCount > 0) {
+				updateFlag = true;
+			}
+
+		} catch (Exception e) {
+			cm.logException(e);
+		}
+		return updateFlag;
+	}
+	
+	/// delete sms template/////
+	public boolean deleteSmsTemplate(SessionData sessionData, String sender, String tempId, String tempName,
+			String messageBody) throws Exception {
+
+		boolean updateFlag = false;
+		String deleteSmsTemplate = "";
+		int udpdateCount = 0;
+		String createdBy = sessionData.getUserName();
+		try {
+			deleteSmsTemplate = "Update " + sessionData.getDBName() + "." + "SMS_TEMPLATE set " + "MODIFIED_BY='"
+					+ createdBy.trim() + "',STATUS='Disable'," + "MODIFIED_DATE=SYSDATE() where SECTION_NM='"
+					+ sessionData.getSectionName().toUpperCase() + "' " + "AND SENDER_NAME='" + sender
+					+ "' AND TEMPLATE_ID='" + tempId + "' " + "AND TEMPLATE_NAME='" + tempName + "'";
+
+			statement = connection.createStatement();
+			udpdateCount = statement.executeUpdate(deleteSmsTemplate);
 			if (udpdateCount > 0) {
 				updateFlag = true;
 			}
@@ -21194,7 +21398,7 @@ public class DBValidate {
 		List<String> passGrList = new ArrayList();
 		LinkedHashMap foundStudentMap = new LinkedHashMap<>();
 		LinkedHashMap grMap = new LinkedHashMap<>();
-		String smsText = "", sms_fee_flag = "", smsTemplate;
+		String smsText = "", sms_fee_flag = "", smsTemplate = "", smsTemplateId = "", smsPeId = "";
 		String smsType = "Send Sms";
 		String grNoSms = "", stdSms = "", divSms = "", rollSms = "", nameSms = "", contact1Sms = "", contact2Sms = "",
 				receiptNoSms = "";
@@ -21589,7 +21793,9 @@ public class DBValidate {
 			// send sms to fee student////
 			sms_fee_flag = bundle.getString("SMS_FEE_FLAG");
 			if (sms_fee_flag.equalsIgnoreCase("true") && feeTableUpdated) {
-				smsTemplate = bundle.getString("SMS_FEE");
+				smsTemplate = bundle.getString("SMS_FEE") + "\nBy " + bundle.getString("SMS_"+sessionData.getAppType()+"_FOOTER");
+				smsTemplateId = bundle.getString("SMS_FEE_TEMP_ID");
+				smsPeId = bundle.getString("SMS_PE_ID");
 
 				// iterate students
 				Set setForSms = selectedStudentMap.entrySet();
@@ -21631,7 +21837,7 @@ public class DBValidate {
 					smsText = smsText.replace("#amount#", totalAmountTmp + "");
 					smsText = smsText.replace("#date#", cm.getCurrentDate());
 
-					String smsResponse = cm.sendHspSms(sessionData, passGrList, foundStudentMap, smsText,
+					String smsResponse = cm.sendHspSms(sessionData, passGrList, foundStudentMap, smsText, smsTemplateId,
 							sessionData.getSectionName(), smsType, academic, std, div, "", "FEE");
 					logger.info("smsResponse for GR " + grNoSms + " :: " + smsResponse);
 				}
@@ -21676,15 +21882,18 @@ public class DBValidate {
 		List<String> passGrList = new ArrayList();
 		LinkedHashMap foundStudentMap = new LinkedHashMap<>();
 		LinkedHashMap grMap = new LinkedHashMap<>();
-		String smsText = "", sms_fee_flag = "", staff_fee_sms_flag = "", smsTemplate;
+		String smsText = "", sms_fee_flag = "", staff_fee_sms_flag = "", smsTemplate = "", smsTemplateId = "";
 		String smsType = "Send Sms";
 		String currentDate = cm.dateToYYYYMMDD(new Date());
+		String currentDate_DMY = cm.dateToDDMMYYYY(new Date());
 		String mandate_opt = "MANDATORY";
 		String insertDate = "SYSDATE()";
-		String firstKey = "";
+		String firstKey = "", smsPeId = "";
 
 		try {
-			smsTemplate = bundle.getString("SMS_FEE");
+			smsTemplate = bundle.getString("SMS_FEE") + "\nBy " + bundle.getString("SMS_"+sessionData.getAppType()+"_FOOTER");
+			smsTemplateId = bundle.getString("SMS_FEE_TEMP_ID");
+			smsPeId = bundle.getString("SMS_PE_ID");
 			sms_fee_flag = bundle.getString("SMS_FEE_FLAG");
 			staff_fee_sms_flag = bundle.getString("STAFF_FEE_SMS");
 
@@ -21765,7 +21974,7 @@ public class DBValidate {
 					insertReportFields = "STD_1,DIV_1,ACADEMIC_YEAR,FEE_STATUS,TOTAL_AMOUNT,CONCESSION_AMOUNT,CREATED_BY,SECTION_NM,FEE_DATE,PENALTY_AMOUNT,BALANCE_AMOUNT";
 					insertReportValues = "'" + std + "','" + div + "','" + academic + "','" + feeStatus + "',"
 							+ String.format("%.2f", totalAmount) + "," + String.format("%.2f", concessionAmount) + ",'"
-							+ sessionData.getUserName() + "','" + sessionData.getSectionName() + "',SYSDATE()" + ","
+							+ sessionData.getUserName() + "','" + sessionData.getSectionName() + "',STR_TO_DATE('"+currentDate_DMY+"', '%d/%m/%Y')" + ","
 							+ penaltyAmount + "," + balanceAmount;
 
 					if (paymentMode.equalsIgnoreCase("CASH")) {
@@ -21792,7 +22001,7 @@ public class DBValidate {
 				insertReportFields = "STD_1,DIV_1,ACADEMIC_YEAR,FEE_STATUS,TOTAL_AMOUNT,CONCESSION_AMOUNT,CREATED_BY,SECTION_NM,FEE_DATE,PENALTY_AMOUNT";
 				insertReportValues = "'" + std + "','" + div + "','" + academic + "','" + feeStatus + "',"
 						+ String.format("%.2f", totalAmount) + "," + String.format("%.2f", concessionAmount) + ",'"
-						+ sessionData.getUserName() + "','" + sessionData.getSectionName() + "',SYSDATE()" + ","
+						+ sessionData.getUserName() + "','" + sessionData.getSectionName() + "',STR_TO_DATE('"+currentDate_DMY+"', '%d/%m/%Y')" + ","
 						+ penaltyAmount;
 
 				if (paymentMode.equalsIgnoreCase("CASH")) {
@@ -21930,7 +22139,7 @@ public class DBValidate {
 				if (isUpdateFeesReport) {
 					feeReportQuery = feeReportQuery + " WHERE STD_1='" + std + "' and DIV_1='" + div
 							+ "' and ACADEMIC_YEAR='" + academic + "' and " + "SECTION_NM='"
-							+ sessionData.getSectionName() + "'";
+							+ sessionData.getSectionName() + "' and FEE_DATE = '" + currentDate + "'";
 				} else {
 					feeReportQuery = feeReportQuery + insertReportFields + ") VALUES(" + insertReportValues + ")";
 				}
@@ -21990,14 +22199,14 @@ public class DBValidate {
 				smsText = smsText.replace("#amount#", totalAmount + "");
 				smsText = smsText.replace("#date#", cm.getCurrentDate());
 
-				String smsResponse = cm.sendHspSms(sessionData, passGrList, foundStudentMap, smsText,
+				String smsResponse = cm.sendHspSms(sessionData, passGrList, foundStudentMap, smsText, smsTemplateId,
 						sessionData.getSectionName(), smsType, academic, std, div, "", "FEE");
 				if (!smsResponse.contains("connecting")) {
 					smsResponse = "SMS sent successfully..";
 
 					// send same fee SMS to staff
 					if (staff_fee_sms_flag.equalsIgnoreCase("true")) {
-						smsResponse = cm.sendHspStaffFeeSms(sessionData, passGrList, foundStudentMap, smsText,
+						smsResponse = cm.sendHspStaffFeeSms(sessionData, passGrList, foundStudentMap, smsText, smsTemplateId,
 								sessionData.getSectionName(), "", academic, std, div, "", "SMS_FEE_STAFF");
 					}
 				}
@@ -22446,6 +22655,54 @@ public class DBValidate {
 	}
 	////////////////////
 
+	/////Export from Fees_Data_Mandatory to Fees_Report_Mandatory////////////////
+	public void exportFeesDataToReport(SessionData sessionData) {
+		String dataColumn = "", addColumnQuery = "ALTER TABLE FEES_REPORT_MANDATORY ADD (";
+		ArrayList<String> list=new ArrayList<String>();
+		
+		try {
+			
+			String trucateQuery = "TRUNCATE TABLE " + sessionData.getDBName() + ".FEES_REPORT_MANDATORY";
+			statement = connection.createStatement();
+			statement.executeQuery(trucateQuery);
+			
+			String findColumnListQuery = "select DISTINCT COLUMN_NAME from INFORMATION_SCHEMA.COLUMNS "
+					+ "where TABLE_NAME='FEES_REPORT_MANDATORY' AND TABLE_SCHEMA='" + sessionData.getDBName() + "'";
+			statement = connection.createStatement();
+			resultSet = statement.executeQuery(findColumnListQuery);
+			while (resultSet.next()) {
+				dataColumn = resultSet.getString("COLUMN_NAME");
+				list.add(dataColumn);
+			}
+			
+			findColumnListQuery = "select DISTINCT COLUMN_NAME from INFORMATION_SCHEMA.COLUMNS "
+					+ "where TABLE_NAME='FEES_DATA_MANDATORY' AND TABLE_SCHEMA='" + sessionData.getDBName() + "'";
+			statement = connection.createStatement();
+			resultSet = statement.executeQuery(findColumnListQuery);
+			while (resultSet.next()) {
+				dataColumn = resultSet.getString("COLUMN_NAME");
+				if(dataColumn.contains("_BANK")){
+					dataColumn = dataColumn.substring(0, dataColumn.length()-9);
+					if(!list.contains(dataColumn)) {
+						addColumnQuery = addColumnQuery + dataColumn+"  DOUBLE,";
+					}
+				}
+			}
+			addColumnQuery = addColumnQuery.substring(0, addColumnQuery.length()-1);
+			addColumnQuery =  addColumnQuery + ")";
+			
+			try {
+				statement = connection.createStatement();
+				statement.executeUpdate(addColumnQuery);
+			} catch (Exception e) {
+				logger.info("failed to create columns in Fees Report Mandatory table >> " + e);
+			}
+		}
+		catch(Exception e) {
+			cm.logException(e);
+		}
+	}
+	
 	/////////// getDailyFeesReport////////////////////////////////////////
 	public TreeMap<Integer, LinkedHashMap<String, String>> getDailyFeesReport(SessionData sessionData,
 			String academicYear, String std, String div, String category, String fromDateStr, String toDateStr)
@@ -23299,7 +23556,7 @@ public class DBValidate {
 				LinkedHashMap<String, String> feesReportDetailMap = new LinkedHashMap<String, String>();
 				LinkedHashMap concessionMap = new LinkedHashMap();
 				grNoDb = resultSet.getString("GR_NO");
-				if (freePayingData.get(grNoDb).toString().equalsIgnoreCase("Free")) {
+				if (freePayingData.get(grNoDb) == null || freePayingData.get(grNoDb).toString().equalsIgnoreCase("Free")) {
 					continue;
 				}
 				nameDb = resultSet.getString("NAME");
@@ -23567,7 +23824,7 @@ public class DBValidate {
 				LinkedHashMap<String, String> feesReportDetailMap = new LinkedHashMap<String, String>();
 				LinkedHashMap concessionMap = new LinkedHashMap();
 				grNoDb = resultSet.getString("GR_NO");
-				if (freePayingData.get(grNoDb).toString().equalsIgnoreCase("Free")) {
+				if (freePayingData.get(grNoDb) == null || freePayingData.get(grNoDb).toString().equalsIgnoreCase("Free")) {
 					continue;
 				}
 				nameDb = resultSet.getString("NAME");
@@ -23662,6 +23919,7 @@ public class DBValidate {
 			studentReportList.add(totalStr);
 
 		} catch (Exception e) {
+			logger.info("getConsolidateFeeReport error===>"+e.toString());
 			cm.logException(e);
 			return studentReportList;
 		}
@@ -24805,7 +25063,6 @@ public class DBValidate {
 				/// use for loop for columns and append in query
 				for (String str : fee_column_arr) {
 					tempStr = resultSet.getString(str.toUpperCase());
-					System.out.println(tempStr);
 
 					if (tempStr == null || tempStr.equalsIgnoreCase(null)) {
 						continue;
@@ -24849,7 +25106,6 @@ public class DBValidate {
 //					+ "AUDIO$47$VISUAL_FEES_JUN_BANK='"+audio$47$visual_fees_jun_bank+"',AUDIO$47$VISUAL_FEES_DEC_BANK='"+audio$47$visual_fees_dec_bank+"' "
 //					+ "where STD_1='IX' and GR_NO='"+gr_no+"' and ACADEMIC_YEAR='2020-21' AND SECTION_NM='"+sessionData.getSectionName()+"'";
 
-				System.out.println(updateQuery);
 //			statement = connection.createStatement();
 //			statement.executeUpdate(updateQuery);
 			}
@@ -25611,7 +25867,7 @@ public class DBValidate {
 					+ sessionData.getSectionName() + "' and " + "GR_NO IN (SELECT GR_NO FROM " + sessionData.getDBName()
 					+ ".CLASS_ALLOTMENT where PRESENT_STD='" + std + "' " + "AND PRESENT_DIV='" + div
 					+ "' and ACADEMIC_YEAR='" + academicYear + "' and " + "SECTION_NM='" + sessionData.getSectionName()
-					+ "')  GROUP BY  GR_NO";
+					+ "')";
 
 			statement = sessionData.getConnection().createStatement();
 			resultSet = statement.executeQuery(query);

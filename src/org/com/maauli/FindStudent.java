@@ -945,7 +945,8 @@ public class FindStudent extends JFrame {
 			stdDiv_label.setBounds(width, 00, 120, 50);
 			dataPanel.add(stdDiv_label);
 			
-			width = width + 90;
+//			width = width + 90;
+			width = width + 170;
 			JLabel pipe_label2 = new JLabel("|");
 			pipe_label2.setFont(new Font("Book Antiqua", Font.BOLD, 16));
 			pipe_label2.setBounds(width, 00, 120, 50);
@@ -1051,7 +1052,7 @@ public class FindStudent extends JFrame {
 					width = width + 60;
 					rollNo_labels[k] = new JLabel(rollNo);
 					rollNo_labels[k].setFont(new Font("Book Antiqua", Font.BOLD, 16));
-//					rollNo_labels[k].setToolTipText(gr);
+					rollNo_labels[k].setToolTipText(gr);
 					rollNo_labels[k].setBounds(width, j, 120, 50);
 					dataPanel.add(rollNo_labels[k]);
 					
@@ -1070,10 +1071,11 @@ public class FindStudent extends JFrame {
 					width = width + 20;
 					stdDiv_labels[k] = new JLabel(std+" - "+div);
 					stdDiv_labels[k].setFont(new Font("Book Antiqua", Font.BOLD, 16));
-					stdDiv_labels[k].setBounds(width, j, 120, 50);
+					stdDiv_labels[k].setBounds(width, j, 200, 50);
 					dataPanel.add(stdDiv_labels[k]);
 					
-					width = width + 90;
+//					width = width + 90;
+					width = width + 170;
 					pipe_labels[k] = new JLabel("|");
 					pipe_labels[k].setFont(new Font("Book Antiqua", Font.BOLD, 16));
 					pipe_labels[k].setBounds(width, j, 120, 50);

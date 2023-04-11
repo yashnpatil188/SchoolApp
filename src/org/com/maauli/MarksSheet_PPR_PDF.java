@@ -25,7 +25,7 @@ import com.itextpdf.text.pdf.PdfWriter;
 import com.lowagie.text.DocumentException;
 import com.itextpdf.text.PageSize;
 
-public class MarksSheet_IX_PDF {
+public class MarksSheet_PPR_PDF {
 
 	static String fileName = "";
 	static String fileAddress = "";
@@ -33,9 +33,9 @@ public class MarksSheet_IX_PDF {
 	static boolean fileOpenFlag = false;
 	Common commonObj = new Common();
 	ResourceBundle bundle = ResourceBundle.getBundle("org.com.accesser.school");
-	static Logger logger = Logger.getLogger(MarksSheet_IX_PDF.class.getName());
+	static Logger logger = Logger.getLogger(MarksSheet_PPR_PDF.class.getName());
 
-	public MarksSheet_IX_PDF(SessionData sessionData, String exam, String subject, String std, String div,
+	public MarksSheet_PPR_PDF(SessionData sessionData, String exam, String subject, String std, String div,
 			String academic, LinkedHashMap<String, LinkedHashMap<String, String>> marksSemDataMap,
 			LinkedHashMap<String, LinkedHashMap<String, String>> studentOptSubAllotMap,
 			LinkedHashMap<String, LinkedHashMap<String, String>> maxSubMarks, 
@@ -49,7 +49,7 @@ public class MarksSheet_IX_PDF {
 		String examHeader = "", sem = "", subMarks = "", subjectMarksDisp = "", obtainedStr = "";
 		double total = 0, totalObtained = 0, subjectMarks = 0, subjectTotal = 0, percent = 0;
 		int subjectHeadCount = maxSubMarks.size(), addRow = 0;
-		String subTitle = "", grNo = "", subGrade = "", totalGrade = "", outOfMarks = "", finalSubMarks = "0";
+		String subTitle = "", grNo = "", subGrade = "", totalGrade = "", outOfMarks = "", gradeMarks = "", finalSubMarks = "0";
 		String bonafide_header = bundle.getString("BONAFIDE_HEADER_" + sessionData.getAppType());
 		String bonafide_header_0 = bundle.getString("BONAFIDE_HEADER_0_" + sessionData.getAppType());
 		if(!bonafide_header_0.trim().equalsIgnoreCase("")){
@@ -132,7 +132,7 @@ public class MarksSheet_IX_PDF {
 			paragraph5.setAlignment(Element.ALIGN_LEFT);
 			paragraph5.setSpacingBefore(-16);
 
-			Chunk chunk6 = new Chunk("																Div :");
+			Chunk chunk6 = new Chunk("																										Div :");
 			Font font6 = FontFactory.getFont("TIMES_ROMAN");
 			font6.setStyle(Font.BOLD);
 			font6.setSize(12);
@@ -143,7 +143,7 @@ public class MarksSheet_IX_PDF {
 			paragraph6.setSpacingBefore(-16);
 
 			Chunk chunk7 = new Chunk(
-					"																									"
+					"																																			"
 							+ div);
 			Font font7 = FontFactory.getFont("TIMES_ROMAN");
 			font7.setStyle(Font.NORMAL);
@@ -313,10 +313,13 @@ public class MarksSheet_IX_PDF {
 				subTitle = me.getKey().toString();
 				subjectMax = (LinkedHashMap<String, String>) me.getValue();
 				outOfMarks = subjectMax.get(sem+"_"+subTitle+"_total");
-				if(outOfMarks.contains(".") && Double.parseDouble(outOfMarks) > 0){
+				gradeMarks = subjectMax.get("marks_grade"); 
+				if(gradeMarks.equalsIgnoreCase("MARKS") && outOfMarks.contains(".") && Double.parseDouble(outOfMarks) > 0){
 					outOfMarks = outOfMarks.substring(0, outOfMarks.indexOf("."));
-				}else if(Double.parseDouble(outOfMarks) == 0){
+				} else if(gradeMarks.equalsIgnoreCase("MARKS") && Double.parseDouble(outOfMarks) == 0){
 					outOfMarks = "-";
+				} else {
+					outOfMarks = " ";
 				}
 				
 				PdfPCell cellMarks = new PdfPCell(new Paragraph(outOfMarks, FontFactory.getFont(FontFactory.TIMES_ROMAN, 10)));
@@ -375,6 +378,9 @@ public class MarksSheet_IX_PDF {
 				optionalSubject = studentOptSubAllotMap.get(grNo) == null ? "" :studentOptSubAllotMap.get(grNo).get("optionalSubject");
 				if(grResultMap != null){
 					attendance = grResultMap.get("attendance");
+					if(attendance.equalsIgnoreCase("0/0")) {
+						attendance = grResultMap.get("ATT_"+sem.toUpperCase());
+					}
 					attended = attendance.substring(0,attendance.indexOf("/")).equalsIgnoreCase("null") ? "" : attendance.substring(0,attendance.indexOf("/"));
 					working = attendance.substring(attendance.indexOf("/")+1);
 				}
@@ -425,15 +431,26 @@ public class MarksSheet_IX_PDF {
 					Iterator p = setSubjectMarks.iterator();
 					while (p.hasNext()) {
 						isMg = false;
+						LinkedHashMap<String, String> subjectMax = new LinkedHashMap<String, String>();
 						Map.Entry meSubject = (Map.Entry) p.next();
+						subTitle = me.getKey().toString();
+						subjectMax = (LinkedHashMap<String, String>) meSubject.getValue();
 						subTitle = meSubject.getKey().toString();
+						gradeMarks = subjectMax.get("marks_grade"); 
 						
 						if(!optionalSubject.contains(subTitle+"_YES") || optionalSubject.equalsIgnoreCase("")){
 							subjectCount = subjectCount + 1.0;
 						}
 						
 						if(!sem.equalsIgnoreCase("final")){
-							subjectMarks = Double.parseDouble(grDetail.get(subTitle + "_MARKS") == null ? "0" : grDetail.get(subTitle + "_MARKS"));
+							if(gradeMarks.equalsIgnoreCase("MARKS")) {
+								subjectMarks = Double.parseDouble(grDetail.get(subTitle + "_MARKS") == null ? "0" : grDetail.get(subTitle + "_MARKS"));
+							}
+							else {
+								subjectMarksDisp = grResultMap.get(subTitle+"_SEM1");
+								subjectMarksDisp = subjectMarksDisp.substring(0, subjectMarksDisp.indexOf("("));
+								subjectMarksDisp = subjectMarksDisp.substring(0, subjectMarksDisp.indexOf("+"));
+							}
 						} else{
 							finalSubMarks = grResultMap.get(subTitle + "_FINAL") == null ? "0" : grResultMap.get(subTitle + "_FINAL");
 							if(finalSubMarks.contains("MG")){
@@ -459,9 +476,9 @@ public class MarksSheet_IX_PDF {
 							subGrade = "-";
 						}
 						else{
-							if(commonObj.validateNumber(subjectMarks+"") && commonObj.validateNumber(finalSubMarks)){
+							if(subjectMarksDisp.equalsIgnoreCase("") && commonObj.validateNumber(subjectMarks+"") && commonObj.validateNumber(finalSubMarks)){
 								subjectMarksDisp = String.format("%.0f", subjectMarks);
-							} else {
+							} else if(subjectMarksDisp.equalsIgnoreCase("")){
 								subjectMarksDisp = finalSubMarks;
 							}
 						}
@@ -489,6 +506,7 @@ public class MarksSheet_IX_PDF {
 
 						subjectMarks = 0;
 						finalSubMarks = "0";
+						subjectMarksDisp = "";
 					}
 
 					if(sem.equalsIgnoreCase("final")){
@@ -595,50 +613,6 @@ public class MarksSheet_IX_PDF {
 					document.newPage();
 					lastPage = false;
 				}
-				/*else if(pageCount != 1 && (rowCount-1) != displayRows && ((rowCount)+addRow)%displayRows==0){
-					document.add(paragraph1);
-					document.add(paragraph2);
-					document.add(paragraph3);
-					document.add(paragraph4);
-					document.add(paragraph5);
-					document.add(paragraph6);
-					document.add(paragraph7);
-					
-					tableHeader.setWidths(columnWidths);
-					table1.setWidths(columnWidths);
-					
-					document.add(tableHeader);
-					document.add(blankParagraph);
-					document.add(table1);
-					pageCount++;
-					rowCount = rowCount+addRow;
-					addRow = 0;
-					table1.flushContent();
-					document.newPage();
-					lastPage = false;
-				}
-				else if((rowCount+addRow) == count){
-					document.add(paragraph1);
-					document.add(paragraph2);
-					document.add(paragraph3);
-					document.add(paragraph4);
-					document.add(paragraph5);
-					document.add(paragraph6);
-					document.add(paragraph7);
-					
-					tableHeader.setWidths(columnWidths);
-					table1.setWidths(columnWidths);
-					
-					document.add(tableHeader);
-					document.add(blankParagraph);
-					document.add(table1);
-					pageCount++;
-					rowCount = rowCount+addRow;
-					addRow = 0;
-					table1.flushContent();
-					document.newPage();
-					lastPage = false;
-				}*/
 				totalObtained = 0;
 				total = 0;
 				isDoubleLine = false;

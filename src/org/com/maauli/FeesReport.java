@@ -924,7 +924,8 @@ public class FeesReport extends JFrame {
 
 			public void actionPerformed(ActionEvent e) {
 				String todayDate = commonObj.getCurrentDate();
-				String period = "", smsText = "", fromDate = "", toDate = "", optionSelect = "", smsType = "", stdStr = "";
+				String period = "", smsText = "", smsTemplateId = "", fromDate = "", toDate = "", optionSelect = "", 
+						smsType = "", stdStr = "";
 				String std = (String) admittedStd_combo.getSelectedItem();
 				String div = (String) admittedDiv_combo.getSelectedItem();
 				String academic = (String) academicYear_combo.getSelectedItem();
@@ -973,9 +974,10 @@ public class FeesReport extends JFrame {
 							smsType = "SMS_FEE_ADMIN";
 							dbValidate.connectDatabase(sessionData);
 							totalAmount = dbValidate.getFeesCollection(sessionData, optionSelect, fromDate, toDate, std, div, academic);
-							smsText = "Fees Report\n"+period + " fees collection amount is Rs."+totalAmount+" By "+smsFooter;
+							smsText = "Fees Report\n"+period + " fees collection amount is Rs."+totalAmount+"\nBy "+smsFooter;
+							smsTemplateId = bundle.getString("SMS_FEE_COLLECTION_REPORT_TEMP_ID");
 							if(isValid) {
-								String smsResponse = commonObj.sendHspSms(sessionData, passGrList, foundStudentMap, smsText, section, "", 
+								String smsResponse = commonObj.sendHspSms(sessionData, passGrList, foundStudentMap, smsText, smsTemplateId, section, "", 
 										academicYearClass, "", "", "", smsType);
 							}
 						}
@@ -1031,9 +1033,10 @@ public class FeesReport extends JFrame {
 								if(!div.equalsIgnoreCase("All") && !div.equalsIgnoreCase("")) {
 									smsCondition = smsCondition + " DIV="+div+"";
 								}
-								smsText = "Fees Report\n" + smsSchoolStr + smsCondition +" total fees collection is Rs. "+totalAmount+ " from date "+fromDate+ " to "+toDate+" By "+smsFooter;
+								smsText = "Fees Report\n" + smsSchoolStr + smsCondition +" total fees collection is Rs. "+totalAmount+ " from date "+fromDate+ " to "+toDate+"\nBy "+smsFooter;
+								smsTemplateId = bundle.getString("SMS_FEE_TOTAL_COLLECTION_TEMP_ID");
 								if(isValid) {
-									String smsResponse = commonObj.sendHspStaffFeeSms(sessionData, passGrList, foundStudentMap, smsText, section, "", 
+									String smsResponse = commonObj.sendHspStaffFeeSms(sessionData, passGrList, foundStudentMap, smsText, smsTemplateId, section, "", 
 											academicYearClass, std, div, "", smsType);
 									if(smsResponse.contains("Success")) {
 										JOptionPane.showMessageDialog(null, smsResponse);
@@ -2052,6 +2055,7 @@ public class FeesReport extends JFrame {
 				if(dbValidate.connectDatabase(sessionData)){
 					if(reportTypeSel.equalsIgnoreCase("Daily")){
 						dbValidate.getDailyFeesReport(sessionData, academic, std, div, category, fromDate, toDate);
+//						dbValidate.exportFeesDataToReport(sessionData);
 					}
 					else if(reportTypeSel.equalsIgnoreCase("Classwise")){
 						LinkedHashMap<String, LinkedHashMap<String, String>> feesHeadMap = new LinkedHashMap<String, LinkedHashMap<String, String>>();

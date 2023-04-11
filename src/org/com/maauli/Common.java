@@ -99,7 +99,7 @@ public class Common {
 	}
 
 	private enum WordStd {
-		am3, am2, am1, a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, a16, a17, a18, a31
+		am3, am2, am1, a0, a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, a16, a17, a18, a31
 	}
 
 	private enum Alphabet {
@@ -717,48 +717,48 @@ public class Common {
 
 		String RomanInWord = "";
 
-		RomanStd word = RomanStd.valueOf(RomanWord.trim()); // surround with
-															// try/catch
-
-		switch (word) {
-		case I:
-			RomanInWord = "First";
-			break;
-		case II:
-			RomanInWord = "Second";
-			break;
-		case III:
-			RomanInWord = "Third";
-			break;
-		case IV:
-			RomanInWord = "Fourth";
-			break;
-		case V:
-			RomanInWord = "Fifth";
-			break;
-		case VI:
-			RomanInWord = "Sixth";
-			break;
-		case VII:
-			RomanInWord = "Seventh";
-			break;
-		case VIII:
-			RomanInWord = "eighth";
-			break;
-		case IX:
-			RomanInWord = "Ninth";
-			break;
-		case X:
-			RomanInWord = "Tenth";
-			break;
-		case XI:
-			RomanInWord = "Eleventh";
-			break;
-		case XII:
-			RomanInWord = "Twelfth";
-			break;
-		default:
-			logger.info("Invalid Std.");
+		if(RomanWord != null && !RomanWord.equalsIgnoreCase("") && !RomanWord.equalsIgnoreCase("-")) {
+			RomanStd word = RomanStd.valueOf(RomanWord.trim()); // surround with
+			switch (word) {
+				case I:
+				RomanInWord = "First";
+				break;
+				case II:
+				RomanInWord = "Second";
+				break;
+				case III:
+				RomanInWord = "Third";
+				break;
+				case IV:
+				RomanInWord = "Fourth";
+				break;
+				case V:
+				RomanInWord = "Fifth";
+				break;
+				case VI:
+				RomanInWord = "Sixth";
+				break;
+				case VII:
+				RomanInWord = "Seventh";
+				break;
+				case VIII:
+				RomanInWord = "eighth";
+				break;
+				case IX:
+				RomanInWord = "Ninth";
+				break;
+				case X:
+				RomanInWord = "Tenth";
+				break;
+				case XI:
+				RomanInWord = "Eleventh";
+				break;
+				case XII:
+				RomanInWord = "Twelfth";
+				break;
+				default:
+				logger.info("Invalid Std.");
+			}
 		}
 
 		return RomanInWord;
@@ -859,6 +859,9 @@ public class Common {
 			break;
 		case am1:
 			intToRoman = "SR KG";
+			break;
+		case a0:
+			intToRoman = "I";
 			break;
 		case a1:
 			intToRoman = "I";
@@ -3732,7 +3735,7 @@ public class Common {
 								.get("roll_no")).toString();
 						dbValidate.insertSmsData(sessionData, me.getKey().toString(), std, div, academic,
 								me.getValue().toString(), smsText, sms_sender, priority, type, status, response, msgId,
-								section, "", "", smsType, name, rollNo, moduleName);
+								section, "", "", smsType, name, rollNo, moduleName, "");
 						noOfResultCount++;
 					}
 				}
@@ -3755,7 +3758,7 @@ public class Common {
 
 	/// send hsp SMS
 	public String sendHspSms(SessionData sessionData, List<String> passGrList, LinkedHashMap foundStudent,
-			String smsText, String section, String smsType, String academic, String std, String div, 
+			String smsText, String smsTemplateId, String section, String smsType, String academic, String std, String div, 
 			String dateTime, String moduleName) {
 		String sResult = null;
 		try {
@@ -3766,6 +3769,7 @@ public class Common {
 			String sms_pass = bundle.getString("SMS_"+sessionData.getAppType()+"_PASS");
 			String sms_sender = bundle.getString("SMS_"+sessionData.getAppType()+"_SENDER");
 			String apiKey = bundle.getString(sessionData.getAppType()+"_APIKEY");
+			String sms_pe_id = bundle.getString("SMS_PE_ID");
 			String sms_maauli_flag = bundle.getString("SMS_MAAULI_FLAG");
 			
 			if(sessionData.getUserName().equalsIgnoreCase("prp") && sms_maauli_flag.equalsIgnoreCase("true")){
@@ -3801,6 +3805,8 @@ public class Common {
 			data += "&" + "smstype=" + type;
 			data += "&" + "sendername=" + sms_sender;
 			data += "&" + "numbers=" + phonenumbers;
+			data += "&" + "peid=" + sms_pe_id;
+			data += "&" + "templateid=" + smsTemplateId;
 			data += "&" + "message=" + URLEncoder.encode(smsText, "UTF-8");
 
 			if (smsType.equalsIgnoreCase("Schedule SMS") && sms_url.contains("hspsms")) {
@@ -3866,7 +3872,7 @@ public class Common {
 									.get("roll_no")).toString();
 							dbValidate.insertSmsData(sessionData, me.getKey().toString(), std, div, academic,
 									me.getValue().toString(), smsText, sms_sender, "", type, status, response, msgId,
-									section, scheduleTime, apiKey, smsType, name, rollNo, moduleName);
+									section, scheduleTime, apiKey, smsType, name, rollNo, moduleName, smsTemplateId);
 							noOfResultCount++;
 						}	
 					}
@@ -3894,7 +3900,7 @@ public class Common {
 						
 						dbValidate.insertSmsData(sessionData, "", "", "", academic,
 								phonenumbers, smsText, sms_sender, "", type, status, response, msgId,
-								section, scheduleTime, apiKey, smsType, "admin", "", moduleName);
+								section, scheduleTime, apiKey, smsType, "admin", "", moduleName, smsTemplateId);
 					}
 				}
 			} catch (Exception e1) {
@@ -3914,7 +3920,7 @@ public class Common {
 	
 	/// send hsp Staff Fee SMS
 	public String sendHspStaffFeeSms(SessionData sessionData, List<String> passGrList, LinkedHashMap foundStudent,
-			String smsText, String section, String smsType, String academic, String std, String div, 
+			String smsText, String smsTemplateId, String section, String smsType, String academic, String std, String div, 
 			String dateTime, String moduleName) {
 		String sResult = "SMS sent successfully..";
 		try {
@@ -3925,6 +3931,7 @@ public class Common {
 			String sms_pass = bundle.getString("SMS_"+sessionData.getAppType()+"_PASS");
 			String sms_sender = bundle.getString("SMS_"+sessionData.getAppType()+"_SENDER");
 			String apiKey = bundle.getString(sessionData.getAppType()+"_APIKEY");
+			String sms_pe_id = bundle.getString("SMS_PE_ID");
 			String sms_maauli_flag = bundle.getString("SMS_MAAULI_FLAG");
 			
 			if(sessionData.getUserName().equalsIgnoreCase("prp") && sms_maauli_flag.equalsIgnoreCase("true")){
@@ -3959,6 +3966,8 @@ public class Common {
 					data += "&" + "smstype=" + type;
 					data += "&" + "sendername=" + sms_sender;
 					data += "&" + "numbers=" + phonenumbers;
+					data += "&" + "peid=" + sms_pe_id;
+					data += "&" + "templateid=" + smsTemplateId;
 					data += "&" + "message=" + URLEncoder.encode(smsText, "UTF-8");
 		
 					if (smsType.equalsIgnoreCase("Schedule SMS") && sms_url.contains("hspsms")) {
@@ -4003,7 +4012,7 @@ public class Common {
 
 							dbValidate.insertSmsData(sessionData, "", "", "", academic,
 								phonenumbers, smsText, sms_sender, "", type, status, response, msgId,
-								section, scheduleTime, apiKey, smsType, staffName, "", moduleName);
+								section, scheduleTime, apiKey, smsType, staffName, "", moduleName, smsTemplateId);
 						}
 					} catch (Exception e1) {
 						sResult = "SMS sent failed...";

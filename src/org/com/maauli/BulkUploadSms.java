@@ -131,7 +131,7 @@ public class BulkUploadSms {
 							msgId = sResult1.substring(sResult1.indexOf("msgid") + 8, sResult1.lastIndexOf("}") - 1);
 
 							dbValidate.insertSmsData(sessionData, "", "", "", academic, phone, message, sms_sender, "",
-									type, status, response, msgId, "", "", apiKey, "Bulk SMS", name, "", moduleName);
+									type, status, response, msgId, "", "", apiKey, "Bulk SMS", name, "", moduleName, "");
 							noOfResultCount++;
 						} catch (Exception e1) {
 							logger.error("Exception e1 ::" + e1);

@@ -45,7 +45,7 @@ public class MarksheetSubjectwise_PDF {
 		fileOpenFlag = true;
 		int displayRows= 45, fontSize = 9, fontSizeRTE = 7;
 		String examHeader = "", sem = "", semInitial = "", subMarks = "", noOfRecords = "45", divisorStr = "", name = "";
-		String dispTotalA = "", dispTotalB = "", dispTotalAB = "", ctStr = "";
+		String dispTotalA = "", dispTotalB = "", dispTotalAB = "", ctStr = "", gradeMarks = "";
 		double totalA = 0, totalB = 0, total = 0,subTotalA = 0, subTotalB = 0, subTotal = 0, pageNumber = 0, addRow = 0, 
 				pageCount = 0, academicStart = 0, stdInt = 0;
 		boolean isDoubleLine = false;
@@ -804,6 +804,10 @@ public class MarksheetSubjectwise_PDF {
 
 				String grade = commonObj.getGradeFromMarks(total, subject, subTotal, std);
 				if(leftDataMap != null && leftDataMap.get(grMap.get("grNo").toString()) != null){
+					grade = "-";
+				}
+				gradeMarks = subMaxMarks.get("marks_grade");
+				if(gradeMarks.equalsIgnoreCase("MARKS") && stdInt < 0) {
 					grade = "-";
 				}
 				PdfPCell cell344 = new PdfPCell(new Paragraph(grade, FontFactory.getFont(FontFactory.TIMES_ROMAN, fontSize)));

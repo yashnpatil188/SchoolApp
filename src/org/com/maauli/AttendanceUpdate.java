@@ -2012,7 +2012,7 @@ public class AttendanceUpdate extends JFrame {
 							
 					    	List<String> passGrList = new ArrayList();
 							LinkedHashMap foundStudentMap = new LinkedHashMap<>();
-							String grNoSms = "", smsText = "";
+							String grNoSms = "", smsText = "", smsTemplateId = "";
 							//iterate students
 							Set setForSms = reasonMap.entrySet();
 							Iterator j = setForSms.iterator();
@@ -2028,8 +2028,9 @@ public class AttendanceUpdate extends JFrame {
 								foundStudentMap.put(grNoSms, grMap);
 								
 								smsText = grMap.get("reason");
+								smsTemplateId = bundle.getString("SMS_ATTENDANCE_REASON_TEMP_ID");
 								
-								String smsResponse = commonObj.sendHspSms(sessionData, passGrList, foundStudentMap, smsText, sessionData.getSectionName(), "", 
+								String smsResponse = commonObj.sendHspSms(sessionData, passGrList, foundStudentMap, smsText, smsTemplateId, sessionData.getSectionName(), "", 
 										academicYearClass, stdClass, divClass, "", "HALFATT");
 							}
 					    }

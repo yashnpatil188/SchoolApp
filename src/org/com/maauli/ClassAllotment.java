@@ -1250,7 +1250,7 @@ public class ClassAllotment extends JFrame {
 
 			JLabel pipe_label5 = new JLabel("|");
 			pipe_label5.setFont(new Font("Book Antiqua", Font.BOLD, 16));
-			pipe_label5.setBounds(780, 00, 120, 50);
+			pipe_label5.setBounds(850, 00, 120, 50);
 			dataPanel.add(pipe_label5);
 
 			String labelTodisplay = "New Div";
@@ -1259,7 +1259,7 @@ public class ClassAllotment extends JFrame {
 			}
 			JLabel newDiv_label = new JLabel(labelTodisplay);
 			newDiv_label.setFont(new Font("Book Antiqua", Font.BOLD, 16));
-			newDiv_label.setBounds(800, 00, 120, 50);
+			newDiv_label.setBounds(870, 00, 120, 50);
 			dataPanel.add(newDiv_label);
 
 			JLabel line_label = new JLabel(
@@ -1370,18 +1370,18 @@ public class ClassAllotment extends JFrame {
 
 					pipe_labels5[i] = new JLabel("|");
 					pipe_labels5[i].setFont(new Font("Book Antiqua", Font.BOLD, 16));
-					pipe_labels5[i].setBounds(780, j, 120, 50);
+					pipe_labels5[i].setBounds(850, j, 120, 50);
 					dataPanel.add(pipe_labels5[i]);
 
 					String newDiv = presentDiv + "," + div;
 					String[] divList = newDiv.split(",");
 					newDiv_combo[i] = new JComboBox(divList);
 					newDiv_combo[i].setFont(new Font("Book Antiqua", Font.BOLD, 16));
-					newDiv_combo[i].setBounds(800, j + 12, 100, 20);
+					newDiv_combo[i].setBounds(870, j + 12, 120, 20);
 					
 					newRollText[i] = new JTextField(rollNo);
 					newRollText[i].setFont(new Font("Book Antiqua", Font.BOLD, 16));
-					newRollText[i].setBounds(800, j + 12, 100, 20);
+					newRollText[i].setBounds(870, j + 12, 100, 20);
 					
 					if(!allomentTypeClass.equalsIgnoreCase("Manual Roll No.")){
 						dataPanel.add(newDiv_combo[i]);

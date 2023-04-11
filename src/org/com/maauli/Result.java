@@ -1732,8 +1732,10 @@ public class Result extends JFrame {
 					j = j + 30;
 					l = j + 50;
 
+//					if(examClass.equalsIgnoreCase("Final") && !stdClass.equalsIgnoreCase("IX") && !stdClass.equalsIgnoreCase("X") && 
+//							!stdClass.equalsIgnoreCase("XI") && !stdClass.equalsIgnoreCase("XII") && !stdClass.equalsIgnoreCase("JR KG") && !stdClass.equalsIgnoreCase("SR KG")){
 					if(examClass.equalsIgnoreCase("Final") && !stdClass.equalsIgnoreCase("IX") && !stdClass.equalsIgnoreCase("X") && 
-							!stdClass.equalsIgnoreCase("XI") && !stdClass.equalsIgnoreCase("XII") && !stdClass.equalsIgnoreCase("JR KG") && !stdClass.equalsIgnoreCase("SR KG")){
+							!stdClass.equalsIgnoreCase("XI") && !stdClass.equalsIgnoreCase("XII")){
 						//As numbering starts from Zero
 						if(i % 2 == 0){
 							str = studentSem1Array[sem1Index].toString();
@@ -1796,8 +1798,10 @@ public class Result extends JFrame {
 					pipe_label11.setBounds(450, j, 120, 50);
 					dataPanel.add(pipe_label11);
 					
+//					if(examClass.equalsIgnoreCase("Final") && !stdClass.equalsIgnoreCase("IX") && !stdClass.equalsIgnoreCase("X") && 
+//							!stdClass.equalsIgnoreCase("XI") && !stdClass.equalsIgnoreCase("XII") && !stdClass.equalsIgnoreCase("JR KG") && !stdClass.equalsIgnoreCase("SR KG")){
 					if(examClass.equalsIgnoreCase("Final") && !stdClass.equalsIgnoreCase("IX") && !stdClass.equalsIgnoreCase("X") && 
-							!stdClass.equalsIgnoreCase("XI") && !stdClass.equalsIgnoreCase("XII") && !stdClass.equalsIgnoreCase("JR KG") && !stdClass.equalsIgnoreCase("SR KG")){
+							!stdClass.equalsIgnoreCase("XI") && !stdClass.equalsIgnoreCase("XII")){
 						//As numbering starts from Zero
 						if(i % 2 == 0){
 							dataPanel.add(sr_radio[i]);
