@@ -1572,7 +1572,7 @@ public class SmsPage extends JFrame {
 				} else if (smsType.equalsIgnoreCase("Bulk SMS Template")) {
 					try {
 						List bulkSmsTemplate = new ArrayList();
-						bulkSmsTemplate.add("Name|Phone|Message");
+						bulkSmsTemplate.add("Name|Phone|Message|TemplateId");
 						CreateExcel ce = new CreateExcel();
 						ce.generateExcel(sessionData, "PRINTLIST", "Bulk SMS Template_", "", bulkSmsTemplate, true, "Bulk SMS Template", 1);
 					} catch (Exception e1) {

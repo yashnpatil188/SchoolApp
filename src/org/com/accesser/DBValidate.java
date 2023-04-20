@@ -4751,7 +4751,7 @@ public class DBValidate {
 					statement.executeUpdate(insertQuery);
 				}
 			} catch (Exception e1) {
-				logger.error(
+				logger.warn(
 						"failed to create column name for subect title " + subject_title + " in RESULT_DATA >>> " + e1);
 			}
 			retFlag = true;
@@ -7696,7 +7696,7 @@ public class DBValidate {
 			SessionData sessionData1, String std, String academic, String semester) throws Exception {
 
 		String maxMarksQuery = "";
-		String subjectTitle = "";
+		String subjectTitle = "", gradeMarks = "";
 		String maxMarks = "";
 		String sem1Marks = "";
 		String sem2Marks = "";
@@ -7717,17 +7717,17 @@ public class DBValidate {
 			}
 			if (initialYearFromAcademic < 2017) {// To get results before 2017 on previous logic
 				if (!semester.equalsIgnoreCase("FINAL")) {
-					maxMarksQuery = "SELECT SUBJECT_TITLE,SUM(IF(" + semester + "_DOBS>0, " + semester + "_DOBS, 0)) + "
+					maxMarksQuery = "SELECT SUBJECT_TITLE,MARKS_GRADE,SUM(IF(" + semester + "_DOBS>0, " + semester + "_DOBS, 0)) + "
 							+ "SUM(IF(" + semester + "_OBT>0, " + semester + "_OBT, 0)) + SUM(IF(" + semester
 							+ "_ORAL>0, " + semester + "_ORAL, 0)) + " + "SUM(IF(" + semester + "_ASSIGN>0, " + semester
 							+ "_ASSIGN, 0)) + SUM(IF(" + semester + "_WRITE>0, " + semester + "_WRITE, 0)) + "
 							+ "SUM(IF(" + semester + "_PRACT>0, " + semester + "_PRACT, 0)) AS " + semester + "_MARKS "
 							+ "FROM " + sessionData1.getDBName() + "." + "subject_allotment WHERE STD_1='" + std
 							+ "' AND ACADEMIC_YEAR='" + academic + "' AND (SECTION_NM='" + sessionData1.getSectionName()
-							+ "') GROUP BY  SUBJECT_TITLE ORDER BY ORDER_NO ASC";
+							+ "') GROUP BY  SUBJECT_TITLE,MARKS_GRADE"; // ORDER BY ORDER_NO ASC
 				} else if (semester.equalsIgnoreCase("FINAL") && (std.equalsIgnoreCase("IX")
 						|| std.equalsIgnoreCase("X") || std.equalsIgnoreCase("XI") || std.equalsIgnoreCase("XII"))) {
-					maxMarksQuery = "SELECT SUBJECT_TITLE,"
+					maxMarksQuery = "SELECT SUBJECT_TITLE,MARKS_GRADE,"
 							+ "SUM(IF(SEM1_DOBS_CT>0, SEM1_DOBS_CT, IF(SEM1_DOBS>0, SEM1_DOBS, 0))) + "
 							+ "SUM(IF(SEM1_OBT_CT>0, SEM1_OBT_CT, IF(SEM1_OBT>0, SEM1_OBT, 0))) + "
 							+ "SUM(IF(SEM1_ORAL_CT>0, SEM1_ORAL_CT, IF(SEM1_ORAL>0, SEM1_ORAL, 0))) + "
@@ -7742,9 +7742,9 @@ public class DBValidate {
 							+ "SUM(IF(SEM2_PRACT_CT>0, SEM2_PRACT_CT, IF(SEM2_PRACT>0, SEM2_PRACT, 0))) AS SEM2_MARKS "
 							+ "FROM " + sessionData1.getDBName() + "." + "subject_allotment " + "WHERE STD_1='" + std
 							+ "' AND ACADEMIC_YEAR='" + academic + "' AND " + "(SECTION_NM='"
-							+ sessionData1.getSectionName() + "') GROUP BY  SUBJECT_TITLE ORDER BY ORDER_NO ASC";
+							+ sessionData1.getSectionName() + "') GROUP BY  SUBJECT_TITLE,MARKS_GRADE"; // ORDER BY ORDER_NO ASC
 				} else {
-					maxMarksQuery = "SELECT SUBJECT_TITLE,SUM(IF(SEM1_DOBS>0, SEM1_DOBS, 0)) + SUM(IF(SEM1_OBT>0, SEM1_OBT, 0)) + "
+					maxMarksQuery = "SELECT SUBJECT_TITLE,MARKS_GRADE,SUM(IF(SEM1_DOBS>0, SEM1_DOBS, 0)) + SUM(IF(SEM1_OBT>0, SEM1_OBT, 0)) + "
 							+ "SUM(IF(SEM1_ORAL>0, SEM1_ORAL, 0)) + SUM(IF(SEM1_ASSIGN>0, SEM1_ASSIGN, 0)) + SUM(IF(SEM1_WRITE>0, SEM1_WRITE, 0)) + "
 							+ "SUM(IF(SEM1_PRACT>0, SEM1_PRACT, 0)) AS SEM1_MARKS, "
 							+ "SUM(IF(SEM2_DOBS>0, SEM2_DOBS, 0)) + SUM(IF(SEM2_OBT>0, SEM2_OBT, 0)) + "
@@ -7752,11 +7752,11 @@ public class DBValidate {
 							+ "SUM(IF(SEM2_PRACT>0, SEM2_PRACT, 0)) AS SEM2_MARKS FROM " + sessionData1.getDBName()
 							+ "." + "subject_allotment " + "WHERE STD_1='" + std + "' AND ACADEMIC_YEAR='" + academic
 							+ "' AND " + "(SECTION_NM='" + sessionData1.getSectionName()
-							+ "') GROUP BY  SUBJECT_TITLE ORDER BY ORDER_NO ASC";
+							+ "') GROUP BY  SUBJECT_TITLE,MARKS_GRADE"; // ORDER BY ORDER_NO ASC
 				}
 			} else {// To get results after 2017 on new logic
 				if (!semester.equalsIgnoreCase("FINAL") && stdInt < 9) {
-					maxMarksQuery = "SELECT SUBJECT_TITLE,SUM(IF(" + semester + "_DOBS>0, " + semester + "_DOBS, 0)) + "
+					maxMarksQuery = "SELECT SUBJECT_TITLE,MARKS_GRADE,SUM(IF(" + semester + "_DOBS>0, " + semester + "_DOBS, 0)) + "
 							+ "SUM(IF(" + semester + "_OBT>0, " + semester + "_OBT, 0)) + SUM(IF(" + semester
 							+ "_ORAL>0, " + semester + "_ORAL, 0)) + " + "SUM(IF(" + semester + "_ASSIGN>0, " + semester
 							+ "_ASSIGN, 0)) + SUM(IF(" + semester + "_WRITE>0, " + semester + "_WRITE, 0)) + "
@@ -7772,9 +7772,9 @@ public class DBValidate {
 							+ "_ASSIGN1>0, " + semester + "_ASSIGN1, 0)) AS " + semester + "_MARKS " + "FROM "
 							+ sessionData1.getDBName() + "." + "subject_allotment WHERE STD_1='" + std
 							+ "' AND ACADEMIC_YEAR='" + academic + "' AND (SECTION_NM='" + sessionData1.getSectionName()
-							+ "') GROUP BY  SUBJECT_TITLE ORDER BY ORDER_NO ASC";
+							+ "') GROUP BY  SUBJECT_TITLE,MARKS_GRADE"; // ORDER BY ORDER_NO ASC
 				} else if (!semester.equalsIgnoreCase("FINAL") && stdInt >= 9) {
-					maxMarksQuery = "SELECT SUBJECT_TITLE," + "SUM(IF(" + semester + "_DOBS_CT>=0, " + semester
+					maxMarksQuery = "SELECT SUBJECT_TITLE,MARKS_GRADE," + "SUM(IF(" + semester + "_DOBS_CT>=0, " + semester
 							+ "_DOBS_CT, IF(" + semester + "_DOBS>0, " + semester + "_DOBS, 0))) + " + "SUM(IF("
 							+ semester + "_OBT_CT>=0, " + semester + "_OBT_CT, IF(" + semester + "_OBT>0, " + semester
 							+ "_OBT, 0))) + " + "SUM(IF(" + semester + "_ORAL_CT>=0, " + semester + "_ORAL_CT, IF("
@@ -7803,9 +7803,9 @@ public class DBValidate {
 							+ "_ASSIGN1, 0))) AS " + semester + "_MARKS " + "FROM " + sessionData1.getDBName() + "."
 							+ "subject_allotment " + "WHERE STD_1='" + std + "' AND ACADEMIC_YEAR='" + academic
 							+ "' AND " + "(SECTION_NM='" + sessionData1.getSectionName()
-							+ "') GROUP BY  SUBJECT_TITLE ORDER BY ORDER_NO ASC";
+							+ "') GROUP BY  SUBJECT_TITLE,MARKS_GRADE"; // ORDER BY ORDER_NO ASC
 				} else if (semester.equalsIgnoreCase("FINAL") && stdInt >= 9) {
-					maxMarksQuery = "SELECT SUBJECT_TITLE,"
+					maxMarksQuery = "SELECT SUBJECT_TITLE,MARKS_GRADE,"
 							+ "SUM(IF(SEM1_DOBS_CT>=0, SEM1_DOBS_CT, IF(SEM1_DOBS>0, SEM1_DOBS, 0))) + "
 							+ "SUM(IF(SEM1_OBT_CT>=0, SEM1_OBT_CT, IF(SEM1_OBT>0, SEM1_OBT, 0))) + "
 							+ "SUM(IF(SEM1_ORAL_CT>=0, SEM1_ORAL_CT, IF(SEM1_ORAL>0, SEM1_ORAL, 0))) + "
@@ -7842,9 +7842,9 @@ public class DBValidate {
 							+ "SUM(IF(SEM2_WRITE1_CT>=0, SEM2_WRITE1_CT, IF(SEM2_WRITE1>0, SEM2_WRITE1, 0))) AS SEM2_MARKS "
 							+ "FROM " + sessionData1.getDBName() + "." + "subject_allotment " + "WHERE STD_1='" + std
 							+ "' AND ACADEMIC_YEAR='" + academic + "' AND " + "(SECTION_NM='"
-							+ sessionData1.getSectionName() + "') GROUP BY  SUBJECT_TITLE ORDER BY ORDER_NO ASC";
+							+ sessionData1.getSectionName() + "') GROUP BY  SUBJECT_TITLE,MARKS_GRADE"; // ORDER BY ORDER_NO ASC
 				} else {
-					maxMarksQuery = "SELECT SUBJECT_TITLE,SUM(IF(SEM1_DOBS>0, SEM1_DOBS, 0)) + SUM(IF(SEM1_OBT>0, SEM1_OBT, 0)) + "
+					maxMarksQuery = "SELECT SUBJECT_TITLE,MARKS_GRADE,SUM(IF(SEM1_DOBS>0, SEM1_DOBS, 0)) + SUM(IF(SEM1_OBT>0, SEM1_OBT, 0)) + "
 							+ "SUM(IF(SEM1_ORAL>0, SEM1_ORAL, 0)) + SUM(IF(SEM1_ASSIGN>0, SEM1_ASSIGN, 0)) + SUM(IF(SEM1_WRITE>0, SEM1_WRITE, 0)) + "
 							+ "SUM(IF(SEM1_PRACT>0, SEM1_PRACT, 0)) + SUM(IF(SEM1_PRES>0, SEM1_PRES, 0)) + SUM(IF(SEM1_MCAP>0, SEM1_MCAP, 0)) + "
 							+ "SUM(IF(SEM1_ACTIVITY>0, SEM1_ACTIVITY, 0)) + SUM(IF(SEM1_PROJECT>0, SEM1_PROJECT, 0)) + SUM(IF(SEM1_OTHER>0, SEM1_OTHER, 0)) + "
@@ -7858,7 +7858,7 @@ public class DBValidate {
 							+ "SUM(IF(SEM2_SPEAK>0, SEM2_SPEAK, 0)) + SUM(IF(SEM2_LISTEN>0, SEM2_LISTEN, 0)) + SUM(IF(SEM2_ASSIGN1>0, SEM2_ASSIGN1, 0)) AS SEM2_MARKS FROM "
 							+ sessionData1.getDBName() + "." + "subject_allotment " + "WHERE STD_1='" + std
 							+ "' AND ACADEMIC_YEAR='" + academic + "' AND " + "(SECTION_NM='"
-							+ sessionData1.getSectionName() + "') GROUP BY  SUBJECT_TITLE ORDER BY ORDER_NO ASC";
+							+ sessionData1.getSectionName() + "') GROUP BY  SUBJECT_TITLE,MARKS_GRADE"; // ORDER BY ORDER_NO ASC
 				}
 			}
 			statement = connection.createStatement();
@@ -7868,6 +7868,7 @@ public class DBValidate {
 				LinkedHashMap<String, String> maxMarksMap = new LinkedHashMap<String, String>();
 				subjectTitle = resultSet.getString("SUBJECT_TITLE") == null ? " "
 						: (resultSet.getString("SUBJECT_TITLE").trim());
+				gradeMarks = resultSet.getString("MARKS_GRADE") == null ? " " : (resultSet.getString("MARKS_GRADE").trim());
 				if (!semester.equalsIgnoreCase("FINAL")) {
 					maxMarks = resultSet.getString(semester + "_MARKS") == null ? "0"
 							: (resultSet.getString(semester + "_MARKS").trim());
@@ -7891,6 +7892,7 @@ public class DBValidate {
 					maxMarks = (int) (Integer.parseInt(maxMarks) / (Integer.parseInt(maxMarks) / marksDivisor)) + "";
 				}
 				maxMarksMap.put(semester + "_" + subjectTitle.replace(" ", "_") + "_total", maxMarks);
+				maxMarksMap.put("grade_marks", gradeMarks);
 				maxMarksMapOrder.put(subjectTitle.replace(" ", "_"), maxMarksMap);
 				semCount = 0;
 			}
@@ -13277,7 +13279,7 @@ public class DBValidate {
 
 			if (ft_marksObtained.equalsIgnoreCase("")) {
 				if (subjectTitleDB.equalsIgnoreCase(prevSubjectTitle) && j == rowCount) {
-					subjectMarksRetrive = subjectMarksRetrive + " AS " + subjectNameDB;
+					subjectMarksRetrive = subjectMarksRetrive + " AS " + subjectTitleDB;
 				} else if (j == rowCount) {
 					subjectMarksRetrive = subjectMarksRetrive + " AS " + subjectTitleDB;
 				} else if (j != rowCount) {
@@ -13334,6 +13336,7 @@ public class DBValidate {
 				resultSet = statement.executeQuery(checkOptionalAllotment);
 				while (resultSet.next()) {
 					dataInOptionalAllotment = true;
+					break;
 				}
 
 				if (!dataInOptionalAllotment) {
@@ -22655,53 +22658,468 @@ public class DBValidate {
 	}
 	////////////////////
 
-	/////Export from Fees_Data_Mandatory to Fees_Report_Mandatory////////////////
-	public void exportFeesDataToReport(SessionData sessionData) {
-		String dataColumn = "", addColumnQuery = "ALTER TABLE FEES_REPORT_MANDATORY ADD (";
-		ArrayList<String> list=new ArrayList<String>();
-		
+/////Export from Fees_Data_Mandatory to Fees_Report_Mandatory////////////////
+	public boolean exportFeesDataToReport(SessionData sessionData, String academicYear, String std, String div, 
+			String category, String fromDateStr, String toDateStr, boolean deleteTable)
+			throws Exception {
+	//	logger.info("=========exportFeesDataToReport Query============");
+		TreeMap<Integer, LinkedHashMap<String, String>> feesReportMap = new TreeMap<Integer, LinkedHashMap<String, String>>();
+		LinkedHashMap<String, String> receiptDetailMap = new LinkedHashMap<String, String>();
+		LinkedHashMap<String, Double> selFeesHeadMap = new LinkedHashMap<String, Double>();
+		LinkedHashMap<String, LinkedHashMap<String, String>> feesHeadMap = new LinkedHashMap<String, LinkedHashMap<String, String>>();
+		LinkedHashMap<String, String> contactDetailMap = new LinkedHashMap<String, String>();
+		LinkedHashMap<String, String> dateMap = new LinkedHashMap<String, String>();
+	
+		String feesHead = "", feesHeadColumn = "", grNoDb = "", stdDb = "", divDb = "", rollNo = "", feesDate = "",
+				whereCondition = "", bank = "", paymentMode = "", chequeDDNo = "", chequeDDDate = "", detailStr = "",
+				feesHeadStr = "", feeData = "", nameDb = "", rollNoDb = "", prevStd = "", findColumnListQuery = "",
+				columnList = "", columnName = "", tableName = "", contact = "", insertFeeReport = "", feesStr = "", 
+				feesValue = "", updateFeeReport = "";
+		int frequencyInt = 0, receipt = 0, udpdateCount = 0;
+		double feesHeadAmount = 0, studentTotalAmount = 0, penalty = 0, concession = 0, balanceAmount = 0,
+				prevBalanceAmount = 0, cashTotal = 0, chequeTotal = 0, upiTotal = 0, otherTotal = 0, ddTotal = 0;
+		List<String> studentReportList = new ArrayList<String>();
+		String[] data = null, dataSplit = null;
+		String colFees = "";
+	
 		try {
-			
-			String trucateQuery = "TRUNCATE TABLE " + sessionData.getDBName() + ".FEES_REPORT_MANDATORY";
-			statement = connection.createStatement();
-			statement.executeQuery(trucateQuery);
-			
-			String findColumnListQuery = "select DISTINCT COLUMN_NAME from INFORMATION_SCHEMA.COLUMNS "
-					+ "where TABLE_NAME='FEES_REPORT_MANDATORY' AND TABLE_SCHEMA='" + sessionData.getDBName() + "'";
-			statement = connection.createStatement();
-			resultSet = statement.executeQuery(findColumnListQuery);
-			while (resultSet.next()) {
-				dataColumn = resultSet.getString("COLUMN_NAME");
-				list.add(dataColumn);
-			}
-			
-			findColumnListQuery = "select DISTINCT COLUMN_NAME from INFORMATION_SCHEMA.COLUMNS "
-					+ "where TABLE_NAME='FEES_DATA_MANDATORY' AND TABLE_SCHEMA='" + sessionData.getDBName() + "'";
-			statement = connection.createStatement();
-			resultSet = statement.executeQuery(findColumnListQuery);
-			while (resultSet.next()) {
-				dataColumn = resultSet.getString("COLUMN_NAME");
-				if(dataColumn.contains("_BANK")){
-					dataColumn = dataColumn.substring(0, dataColumn.length()-9);
-					if(!list.contains(dataColumn)) {
-						addColumnQuery = addColumnQuery + dataColumn+"  DOUBLE,";
+			if(deleteTable) {
+//				String trucateQuery = "TRUNCATE TABLE " + sessionData.getDBName() + ".FEES_REPORT_MANDATORY";
+//				statement = connection.createStatement();
+//				statement.executeQuery(trucateQuery);
+				
+				try {
+					String alterQuery = "DROP TABLE " + sessionData.getDBName() + "." + "FEES_REPORT_MANDATORY";
+					statement = connection.createStatement();
+					statement.executeUpdate(alterQuery);
+				} catch(Exception e) {
+					cm.logException(e);
+				}
+				
+				try {
+					String feesHeadQuery = "SELECT DISTINCT FEES_NAME from " + sessionData.getDBName() + "." + "fees_head";
+					statement = connection.createStatement();
+					resultSet = statement.executeQuery(feesHeadQuery);
+					while (resultSet.next()) {
+						colFees = colFees + resultSet.getString("FEES_NAME") + " double UNSIGNED,";
 					}
+				} catch(Exception e) {
+					cm.logException(e);
+				}
+				
+				try {
+					String queryfees_data = "CREATE TABLE `fees_report_mandatory` ( `STD_1` varchar(10) DEFAULT NULL, `DIV_1` varchar(10) DEFAULT NULL, "
+							+ "`ACADEMIC_YEAR` varchar(10) DEFAULT NULL,  `FEE_STATUS` varchar(20) DEFAULT NULL, `PENALTY_AMOUNT` double DEFAULT NULL, "
+							+ "`TOTAL_AMOUNT` double unsigned DEFAULT NULL, `CONCESSION_AMOUNT` double unsigned DEFAULT NULL, `FEE_DATE` date DEFAULT NULL, "
+							+ "`CASH_TOTAL` double DEFAULT NULL, `CHEQUE_TOTAL` double DEFAULT NULL, `UPI_TOTAL` double DEFAULT NULL, `OTHER_TOTAL` double DEFAULT NULL, "
+							+ "`CHEQUE_DETAIL` varchar(5000) DEFAULT NULL, `DD_TOTAL` double DEFAULT NULL, `DD_DETAIL` varchar(5000) DEFAULT NULL, "
+							+ "`CREATED_DATE` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP, `CREATED_BY` varchar(30) DEFAULT NULL, "
+							+ "`MODIFIED_DATE` DATETIME ON UPDATE CURRENT_TIMESTAMP, `MODIFIED_BY` varchar(30) DEFAULT NULL, "
+							+ "`SECTION_NM` varchar(10) DEFAULT NULL,"+colFees+" KEY `AcaSecIndex` (`ACADEMIC_YEAR`,`SECTION_NM`)) "
+							+ "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci";
+					statement.executeUpdate(queryfees_data);
+				} catch (Exception e) {
+					cm.logException(e);
 				}
 			}
-			addColumnQuery = addColumnQuery.substring(0, addColumnQuery.length()-1);
-			addColumnQuery =  addColumnQuery + ")";
 			
-			try {
-				statement = connection.createStatement();
-				statement.executeUpdate(addColumnQuery);
-			} catch (Exception e) {
-				logger.info("failed to create columns in Fees Report Mandatory table >> " + e);
+			tableName = "FEES_DATA_MANDATORY";
+	
+			int startMonth = Integer.parseInt(bundle.getString("ACADEMIC_START_MONTH"));
+	
+			findColumnListQuery = "select DISTINCT COLUMN_NAME from INFORMATION_SCHEMA.COLUMNS where " + "TABLE_NAME='"
+					+ tableName + "' AND TABLE_SCHEMA='" + sessionData.getDBName() + "'";
+			statement = connection.createStatement();
+			resultSet = statement.executeQuery(findColumnListQuery);
+			while (resultSet.next()) {
+				columnName = resultSet.getString("COLUMN_NAME");
+				if (columnName.contains("_DATE") && !columnName.equalsIgnoreCase("CREATED_DATE")
+						&& !columnName.equalsIgnoreCase("MODIFIED_DATE")) {
+					columnList += "DATE_FORMAT(" + resultSet.getString("COLUMN_NAME") + ", '%d/%m/%Y')" + " AS "
+							+ resultSet.getString("COLUMN_NAME") + ",";
+				} else {
+					columnList += tableName + "." + resultSet.getString("COLUMN_NAME") + ",";
+				}
 			}
-		}
-		catch(Exception e) {
+	
+			if (!std.equalsIgnoreCase("All")) {
+				whereCondition = " AND " + tableName + ".STD_1='" + std + "'";
+			}
+			if (!div.equalsIgnoreCase("All")) {
+				whereCondition += " AND " + tableName + ".DIV_1='" + div + "'";
+			}
+	
+			/// Get contact Number
+			contactDetailMap = getContactGrMap(sessionData, academicYear, std, div);
+	
+			ResultSet resultSetFeesData = null;
+			String query = "SELECT " + columnList
+					+ "FEES_DATA_MANDATORY.ROLL_NO,concat(FEES_DATA_MANDATORY.LAST_NAME,' ',FEES_DATA_MANDATORY.FIRST_NAME,' ',FEES_DATA_MANDATORY.FATHER_NAME) AS NAME "
+					+ "FROM " + sessionData.getDBName() + "." + tableName + " WHERE " + tableName + ".ACADEMIC_YEAR='"
+					+ academicYear + "' " + "AND " + tableName + ".SECTION_NM='" + sessionData.getSectionName() + "' "
+					+ whereCondition + " ORDER BY " + tableName + ".STD_1";
+			statement = connection.createStatement();
+			resultSetFeesData = statement.executeQuery(query);
+	
+			while (resultSetFeesData.next()) {
+				detailStr = "";
+				studentTotalAmount = 0;
+				LinkedHashMap<String, String> feesReportDetailMap = new LinkedHashMap<String, String>();
+				grNoDb = resultSetFeesData.getString("GR_NO");
+				stdDb = resultSetFeesData.getString("STD_1");
+				divDb = resultSetFeesData.getString("DIV_1");
+				nameDb = resultSetFeesData.getString("NAME") == null ? " "
+						: (resultSetFeesData.getString("NAME").trim());
+				rollNoDb = resultSetFeesData.getString("ROLL_NO");
+				data = new String[20];
+	
+				if (!prevStd.equalsIgnoreCase(stdDb)) {
+					feesHeadMap = getFeesHeadData(sessionData, academicYear, stdDb, sessionData.getSectionName(),
+							category);
+				}
+	
+				Set set = feesHeadMap.entrySet();
+				Iterator j = set.iterator();
+				while (j.hasNext()) {
+					feesHeadAmount = 0;
+					penalty = 0;
+					concession = 0;
+	
+					Map.Entry me = (Map.Entry) j.next();
+					feesHead = me.getKey().toString();
+					frequencyInt = cm.frequencyToInteger(
+							((LinkedHashMap<?, ?>) feesHeadMap.get(feesHead)).get("frequency").toString());
+					if (frequencyInt == 12) {
+						for (int i = 0; i < 12; i++) {
+	
+							feesDate = resultSetFeesData.getString(cm.replaceCommaApostrophy(feesHead) + "_"
+									+ cm.intgerToMonth((startMonth + i) + "") + "_DATE");
+							if (feesDate != null && cm.isDateBetween(fromDateStr, toDateStr, feesDate)) {
+								feesHeadAmount = resultSetFeesData
+										.getDouble(feesHead + "_" + cm.intgerToMonth((startMonth + i) + ""));
+								feeData = resultSetFeesData.getString(cm.replaceCommaApostrophy(feesHead) + "_"
+										+ cm.intgerToMonth((startMonth + i) + "") + "_BANK");
+								if (feeData == null)
+									continue;
+								dataSplit = feeData.split("\\!");
+								data = cm.toAddInReport(dataSplit);
+								if (data == null)
+									continue;
+	
+								paymentMode = data[0];
+								bank = data[1];
+								chequeDDNo = data[2];
+								chequeDDDate = data[3];
+								penalty = Double.parseDouble(data[4].equalsIgnoreCase("NA") ? "0" : (data[4]));
+								concession = Double.parseDouble(data[5].equalsIgnoreCase("NA") ? "0" : (data[5]));
+								receipt = Integer.parseInt(data[6]);
+								if (data.length > 10) {
+									balanceAmount = Double
+											.parseDouble(data[10].equalsIgnoreCase("NA") ? "0" : (data[10]));
+									prevBalanceAmount = Double
+											.parseDouble(data[11].equalsIgnoreCase("NA") ? "0" : (data[11]));
+								}
+	
+								updateFeesReportMap(sessionData, feesReportMap, academicYear, stdDb, divDb, receipt,
+										feesHead, feesHeadAmount, penalty, concession, grNoDb, nameDb, rollNoDb,
+										paymentMode, bank, chequeDDNo, chequeDDDate, selFeesHeadMap, feesDate,
+										balanceAmount, prevBalanceAmount);
+							}
+						}
+					} else if (frequencyInt == 4) {
+						for (int i = 0; i < 12; i += 3) {
+							feesDate = resultSetFeesData.getString(cm.replaceCommaApostrophy(feesHead) + "_"
+									+ cm.intgerToMonth((startMonth + i) + "") + "_DATE");
+							if (feesDate != null && cm.isDateBetween(fromDateStr, toDateStr, feesDate)) {
+								feesHeadAmount = resultSetFeesData
+										.getDouble(feesHead + "_" + cm.intgerToMonth((startMonth + i) + ""));
+								feeData = resultSetFeesData.getString(cm.replaceCommaApostrophy(feesHead) + "_"
+										+ cm.intgerToMonth((startMonth + i) + "") + "_BANK");
+								if (feeData == null)
+									continue;
+								dataSplit = feeData.split("\\!");
+								data = cm.toAddInReport(dataSplit);
+								if (data == null)
+									continue;
+								paymentMode = data[0];
+								bank = data[1];
+								chequeDDNo = data[2];
+								chequeDDDate = data[3];
+								penalty = Double.parseDouble(data[4].equalsIgnoreCase("NA") ? "0" : (data[4]));
+								concession = Double.parseDouble(data[5].equalsIgnoreCase("NA") ? "0" : (data[5]));
+								receipt = Integer.parseInt(data[6]);
+								if (data.length > 10) {
+									balanceAmount = Double
+											.parseDouble(data[10].equalsIgnoreCase("NA") ? "0" : (data[10]));
+									prevBalanceAmount = Double
+											.parseDouble(data[11].equalsIgnoreCase("NA") ? "0" : (data[11]));
+								}
+	
+								updateFeesReportMap(sessionData, feesReportMap, academicYear, stdDb, divDb, receipt,
+										feesHead, feesHeadAmount, penalty, concession, grNoDb, nameDb, rollNoDb,
+										paymentMode, bank, chequeDDNo, chequeDDDate, selFeesHeadMap, feesDate,
+										balanceAmount, prevBalanceAmount);
+							}
+						}
+					} else if (frequencyInt == 2) {
+						for (int i = 0; i < 12; i += 6) {
+							feesDate = resultSetFeesData.getString(cm.replaceCommaApostrophy(feesHead) + "_"
+									+ cm.intgerToMonth((startMonth + i) + "") + "_DATE");
+							if (feesDate != null && cm.isDateBetween(fromDateStr, toDateStr, feesDate)) {
+								feesHeadAmount = resultSetFeesData
+										.getDouble(feesHead + "_" + cm.intgerToMonth((startMonth + i) + ""));
+								feeData = resultSetFeesData.getString(cm.replaceCommaApostrophy(feesHead) + "_"
+										+ cm.intgerToMonth((startMonth + i) + "") + "_BANK");
+								if (feeData == null)
+									continue;
+								dataSplit = feeData.split("\\!");
+								data = cm.toAddInReport(dataSplit);
+								if (data == null)
+									continue;
+								paymentMode = data[0];
+								bank = data[1];
+								chequeDDNo = data[2];
+								chequeDDDate = data[3];
+								penalty = Double.parseDouble(data[4].equalsIgnoreCase("NA") ? "0" : (data[4]));
+								concession = Double.parseDouble(data[5].equalsIgnoreCase("NA") ? "0" : (data[5]));
+								receipt = Integer.parseInt(data[6]);
+								if (data.length > 10) {
+									balanceAmount = Double
+											.parseDouble(data[10].equalsIgnoreCase("NA") ? "0" : (data[10]));
+									prevBalanceAmount = Double
+											.parseDouble(data[11].equalsIgnoreCase("NA") ? "0" : (data[11]));
+								}
+	
+								updateFeesReportMap(sessionData, feesReportMap, academicYear, stdDb, divDb, receipt,
+										feesHead, feesHeadAmount, penalty, concession, grNoDb, nameDb, rollNoDb,
+										paymentMode, bank, chequeDDNo, chequeDDDate, selFeesHeadMap, feesDate,
+										balanceAmount, prevBalanceAmount);
+							}
+						}
+					} else if (frequencyInt == 1) {
+						feesDate = resultSetFeesData.getString(cm.replaceCommaApostrophy(feesHead) + "_"
+								+ cm.intgerToMonth(startMonth + "") + "_DATE");
+						if (feesDate != null && cm.isDateBetween(fromDateStr, toDateStr, feesDate)) {
+							feesHeadAmount = resultSetFeesData
+									.getDouble(feesHead + "_" + cm.intgerToMonth(startMonth + ""));
+							feeData = resultSetFeesData.getString(cm.replaceCommaApostrophy(feesHead) + "_"
+									+ cm.intgerToMonth(startMonth + "") + "_BANK");
+							if (feeData == null)
+								continue;
+							dataSplit = feeData.split("\\!");
+							data = cm.toAddInReport(dataSplit);
+							if (data == null)
+								continue;
+							paymentMode = data[0];
+							bank = data[1];
+							chequeDDNo = data[2];
+							chequeDDDate = data[3];
+							penalty = Double.parseDouble(data[4].equalsIgnoreCase("NA") ? "0" : (data[4]));
+							concession = Double.parseDouble(data[5].equalsIgnoreCase("NA") ? "0" : (data[5]));
+							receipt = Integer.parseInt(data[6]);
+							if (data.length > 10) {
+								balanceAmount = Double.parseDouble(data[10].equalsIgnoreCase("NA") ? "0" : (data[10]));
+								prevBalanceAmount = Double
+										.parseDouble(data[11].equalsIgnoreCase("NA") ? "0" : (data[11]));
+							}
+	
+							updateFeesReportMap(sessionData, feesReportMap, academicYear, stdDb, divDb, receipt,
+									feesHead, feesHeadAmount, penalty, concession, grNoDb, nameDb, rollNoDb,
+									paymentMode, bank, chequeDDNo, chequeDDDate, selFeesHeadMap, feesDate,
+									balanceAmount, prevBalanceAmount);
+						}
+					}
+				}
+	
+				// clear fields for next student
+				receipt = 0;
+				paymentMode = "";
+				bank = "";
+				chequeDDNo = "";
+				chequeDDDate = "";
+				prevStd = stdDb;
+			}
+	
+			Double feesHeadTotal = 0.0;
+			Double feesHeadValue = 0.0;
+			Double penaltyTotal = 0.0;
+			Double concessionTotal = 0.0;
+			Double balanceTotal = 0.0;
+			Double grandTotal = 0.0;
+	
+			String headerStr = "GR NO|NAME|CONTACT|STD|DIV|ROLL|RECEIPT|DATE|";
+			String totalStr = " |GRAND TOTAL| | | | | | |";
+			Set set = selFeesHeadMap.entrySet();
+			Iterator i = set.iterator();
+			while (i.hasNext()) {
+				Map.Entry me = (Map.Entry) i.next();
+				headerStr += me.getKey().toString().replace("$$", ".") + "|";
+			}
+			headerStr += "PENALTY|CONCESSION|BALANCE|TOTAL|PAYMENT MODE|BANK|CHEQUE/DD NO|CHEQUE/DD DATE";
+			studentReportList.add(cm.revertCommaApostrophy(headerStr));
+	
+			String valueStr = "";
+			LinkedHashMap feesReceipt = new LinkedHashMap();
+			Set setFees = feesReportMap.entrySet();
+			Iterator j = setFees.iterator();
+			while (j.hasNext()) {
+				Map.Entry me = (Map.Entry) j.next();
+				feesReceipt = new LinkedHashMap<String, String>();
+	
+				feesReceipt = (LinkedHashMap<String, String>) me.getValue();
+	
+				contact = contactDetailMap.get(feesReceipt.get("grNo")) == null ? "0"
+						: contactDetailMap.get(feesReceipt.get("grNo")).toString();
+				if (contact.equalsIgnoreCase("")) {
+					contact = "0";
+				}
+				valueStr = feesReceipt.get("grNo") + "|" + feesReceipt.get("name") + "|" + contact + "|"
+						+ feesReceipt.get("std") + "|" + feesReceipt.get("div") + "|" + feesReceipt.get("rollNo") + "|"
+						+ me.getKey() + "|" + feesReceipt.get("feesDate") + "|";
+	
+				Iterator k = set.iterator();
+				while (k.hasNext()) {
+					Map.Entry meFees = (Map.Entry) k.next();
+					feesHeadValue = feesReceipt.get(meFees.getKey()) == null ? 0
+							: Double.parseDouble(feesReceipt.get(meFees.getKey()).toString());
+	
+					feesHeadTotal = (Double.parseDouble(meFees.getValue().toString()) + feesHeadValue);
+					valueStr += String.format("%.2f", feesHeadValue) + "|";
+					meFees.setValue(String.format("%.2f", feesHeadTotal));
+					
+					if(dateMap.get(feesReceipt.get("feesDate").toString()) != null) {
+						feesStr = feesStr + ""+meFees.getKey()+"="+meFees.getKey()+" + " + feesHeadValue +",";
+					}
+					else {
+						feesStr = feesStr + meFees.getKey() + ",";
+						feesValue = feesValue + feesHeadValue + ",";
+					}
+				}
+				if(dateMap.get(feesReceipt.get("feesDate").toString()) == null) {
+					feesStr = feesStr.substring(0, feesStr.length()-1);
+					feesValue = feesValue.substring(0, feesValue.length()-1);
+				}
+				
+				if(feesReceipt.get("paymentMode").toString().equalsIgnoreCase("Cash")) {
+					cashTotal = Double.parseDouble((String) feesReceipt.get("total"));
+					chequeTotal = 0;
+					upiTotal = 0;
+					otherTotal = 0;
+					ddTotal = 0;
+				} else if(feesReceipt.get("paymentMode").toString().equalsIgnoreCase("Cheque")) {
+					chequeTotal = Double.parseDouble((String) feesReceipt.get("total"));
+					cashTotal = 0;
+					upiTotal = 0;
+					otherTotal = 0;
+					ddTotal = 0;
+				} else if(feesReceipt.get("paymentMode").toString().equalsIgnoreCase("DD")) {
+					ddTotal = Double.parseDouble((String) feesReceipt.get("total"));
+					cashTotal = 0;
+					upiTotal = 0;
+					otherTotal = 0;
+					chequeTotal = 0;
+				} else if(feesReceipt.get("paymentMode").toString().equalsIgnoreCase("UPI")) {
+					upiTotal = Double.parseDouble((String) feesReceipt.get("total"));
+					cashTotal = 0;
+					chequeTotal = 0;
+					otherTotal = 0;
+					ddTotal = 0;
+				} else {
+					otherTotal = Double.parseDouble((String) feesReceipt.get("total"));
+					cashTotal = 0;
+					chequeTotal = 0;
+					upiTotal = 0;
+					ddTotal = 0;
+				}
+				
+				if(dateMap.get(feesReceipt.get("feesDate").toString()) != null) {
+					updateFeeReport = "UPDATE " + sessionData.getDBName() + ".fees_report_mandatory SET "+feesStr 
+							+ "PENALTY_AMOUNT=PENALTY_AMOUNT+"+Double.parseDouble((String) feesReceipt.get("penalty"))
+							+",TOTAL_AMOUNT=TOTAL_AMOUNT+"+ Double.parseDouble((String) feesReceipt.get("total"))
+							+",CONCESSION_AMOUNT=CONCESSION_AMOUNT+"+ Double.parseDouble((String) feesReceipt.get("concession")) 
+							+",CASH_TOTAL=CASH_TOTAL+"+cashTotal+",CHEQUE_TOTAL=CHEQUE_TOTAL+"+chequeTotal
+							+",UPI_TOTAL=UPI_TOTAL+"+upiTotal+",OTHER_TOTAL=OTHER_TOTAL+"+otherTotal+",DD_TOTAL=DD_TOTAL+"+ddTotal
+							+" Where FEE_DATE=STR_TO_DATE('"+feesReceipt.get("feesDate")+"', '%d/%m/%Y') "
+							+ "AND SECTION_NM='"+sessionData.getSectionName() +"' AND ACADEMIC_YEAR='" + academicYear.trim() + "' "
+							+ "AND STD_1='"+feesReceipt.get("std")+"' AND DIV_1='"+feesReceipt.get("div")+"'";
+					statement = connection.createStatement();
+					udpdateCount = statement.executeUpdate(updateFeeReport);
+				}
+				else {
+					insertFeeReport = "INSERT INTO " + sessionData.getDBName() + ".fees_report_mandatory "
+							+ "(STD_1, DIV_1, ACADEMIC_YEAR, FEE_STATUS, PENALTY_AMOUNT, TOTAL_AMOUNT, CONCESSION_AMOUNT, FEE_DATE, "
+							+ "CASH_TOTAL,CHEQUE_TOTAL,UPI_TOTAL,OTHER_TOTAL, CHEQUE_DETAIL, DD_TOTAL, DD_DETAIL, CREATED_DATE, CREATED_BY, MODIFIED_DATE, "
+							+ "MODIFIED_BY,SECTION_NM, "+feesStr+") "
+							+ "VALUES ('" + feesReceipt.get("std") + "','" + feesReceipt.get("div") + "','" + academicYear.trim() + "','Pending'," 
+							+ Double.parseDouble((String) feesReceipt.get("penalty")) +","+ Double.parseDouble((String) feesReceipt.get("total"))+","
+							+ Double.parseDouble((String) feesReceipt.get("concession")) +",STR_TO_DATE('"+feesReceipt.get("feesDate")+"', '%d/%m/%Y'),"+ cashTotal +","
+							+ chequeTotal +","+ upiTotal +","+ otherTotal+ ",'',"+ ddTotal+",'',SYSDATE(),'"+sessionData.getUserName()+"',SYSDATE(),'"
+							+ sessionData.getUserName()+"','"+sessionData.getSectionName() +"'," +feesValue  +")";
+					
+					statement = connection.createStatement();
+					udpdateCount = statement.executeUpdate(insertFeeReport);
+				}
+				
+				feesStr = "";
+				feesValue = "";
+				dateMap.put(feesReceipt.get("feesDate").toString(),"");
+			}
+	
+	
+		} catch (Exception e) {
 			cm.logException(e);
+			return false;
 		}
+		return true;
 	}
+
+//	/////Export from Fees_Data_Mandatory to Fees_Report_Mandatory////////////////
+//	public void exportFeesDataToReport(SessionData sessionData) {
+//		String dataColumn = "", addColumnQuery = "ALTER TABLE FEES_REPORT_MANDATORY ADD (";
+//		ArrayList<String> list=new ArrayList<String>();
+//		
+//		try {
+//			
+//			String trucateQuery = "TRUNCATE TABLE " + sessionData.getDBName() + ".FEES_REPORT_MANDATORY";
+//			statement = connection.createStatement();
+//			statement.executeQuery(trucateQuery);
+//			
+//			String findColumnListQuery = "select DISTINCT COLUMN_NAME from INFORMATION_SCHEMA.COLUMNS "
+//					+ "where TABLE_NAME='FEES_REPORT_MANDATORY' AND TABLE_SCHEMA='" + sessionData.getDBName() + "'";
+//			statement = connection.createStatement();
+//			resultSet = statement.executeQuery(findColumnListQuery);
+//			while (resultSet.next()) {
+//				dataColumn = resultSet.getString("COLUMN_NAME");
+//				list.add(dataColumn);
+//			}
+//			
+//			findColumnListQuery = "select DISTINCT COLUMN_NAME from INFORMATION_SCHEMA.COLUMNS "
+//					+ "where TABLE_NAME='FEES_DATA_MANDATORY' AND TABLE_SCHEMA='" + sessionData.getDBName() + "'";
+//			statement = connection.createStatement();
+//			resultSet = statement.executeQuery(findColumnListQuery);
+//			while (resultSet.next()) {
+//				dataColumn = resultSet.getString("COLUMN_NAME");
+//				if(dataColumn.contains("_BANK")){
+//					dataColumn = dataColumn.substring(0, dataColumn.length()-9);
+//					if(!list.contains(dataColumn)) {
+//						addColumnQuery = addColumnQuery + dataColumn+"  DOUBLE,";
+//					}
+//				}
+//			}
+//			addColumnQuery = addColumnQuery.substring(0, addColumnQuery.length()-1);
+//			addColumnQuery =  addColumnQuery + ")";
+//			
+//			try {
+//				statement = connection.createStatement();
+//				statement.executeUpdate(addColumnQuery);
+//			} catch (Exception e) {
+//				logger.info("failed to create columns in Fees Report Mandatory table >> " + e);
+//			}
+//		}
+//		catch(Exception e) {
+//			cm.logException(e);
+//		}
+//	}
 	
 	/////////// getDailyFeesReport////////////////////////////////////////
 	public TreeMap<Integer, LinkedHashMap<String, String>> getDailyFeesReport(SessionData sessionData,

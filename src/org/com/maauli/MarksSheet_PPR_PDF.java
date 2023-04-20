@@ -381,8 +381,15 @@ public class MarksSheet_PPR_PDF {
 					if(attendance.equalsIgnoreCase("0/0")) {
 						attendance = grResultMap.get("ATT_"+sem.toUpperCase());
 					}
-					attended = attendance.substring(0,attendance.indexOf("/")).equalsIgnoreCase("null") ? "" : attendance.substring(0,attendance.indexOf("/"));
-					working = attendance.substring(attendance.indexOf("/")+1);
+					if(attendance != null && !attendance.equalsIgnoreCase("NA") && !attendance.equalsIgnoreCase("")) {
+						attended = attendance.substring(0,attendance.indexOf("/")).equalsIgnoreCase("null") ? "" : attendance.substring(0,attendance.indexOf("/"));
+						working = attendance.substring(attendance.indexOf("/")+1);
+					}
+					else {
+						attended = "-";
+						working = "-";
+					}
+					
 				}
 				else{
 					attended = "-";
@@ -448,8 +455,10 @@ public class MarksSheet_PPR_PDF {
 							}
 							else {
 								subjectMarksDisp = grResultMap.get(subTitle+"_SEM1");
-								subjectMarksDisp = subjectMarksDisp.substring(0, subjectMarksDisp.indexOf("("));
-								subjectMarksDisp = subjectMarksDisp.substring(0, subjectMarksDisp.indexOf("+"));
+								if(!subjectMarksDisp.equalsIgnoreCase("NA")){
+									subjectMarksDisp = subjectMarksDisp.substring(0, subjectMarksDisp.indexOf("("));
+									subjectMarksDisp = subjectMarksDisp.substring(0, subjectMarksDisp.indexOf("+"));
+								}
 							}
 						} else{
 							finalSubMarks = grResultMap.get(subTitle + "_FINAL") == null ? "0" : grResultMap.get(subTitle + "_FINAL");

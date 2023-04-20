@@ -45,8 +45,8 @@ public class MarksSheet_IX_PDF {
 		System.gc();
 		fileOpenFlag = true;
 		boolean isMg = false, isDoubleLine = false, lastPage = true;
-		int displayRows= 26;
-		String examHeader = "", sem = "", subMarks = "", subjectMarksDisp = "", obtainedStr = "";
+		int displayRows= 25;
+		String examHeader = "", sem = "", subMarks = "", subjectMarksDisp = "", obtainedStr = "", gradeMarks = "";
 		double total = 0, totalObtained = 0, subjectMarks = 0, subjectTotal = 0, percent = 0;
 		int subjectHeadCount = maxSubMarks.size(), addRow = 0;
 		String subTitle = "", grNo = "", subGrade = "", totalGrade = "", outOfMarks = "", finalSubMarks = "0";
@@ -54,7 +54,7 @@ public class MarksSheet_IX_PDF {
 		String bonafide_header_0 = bundle.getString("BONAFIDE_HEADER_0_" + sessionData.getAppType());
 		if(!bonafide_header_0.trim().equalsIgnoreCase("")){
 			bonafide_header_0 = bonafide_header_0 + " \n";
-			displayRows = 25;
+//			displayRows = 25;
 		}
 
 		try {
@@ -231,7 +231,11 @@ public class MarksSheet_IX_PDF {
 				}
 				
 				subTitle = subTitle.replaceFirst("_", "\n");
+				subTitle = subTitle.replaceFirst("_", " ");
+				subTitle = subTitle.replaceFirst("_", "\n");
+				subTitle = subTitle.replaceFirst("_", " ");
 				subTitle = subTitle.replace("_", " ");
+				subTitle = subTitle.replace("AND", "&");
 				PdfPCell cell305 = new PdfPCell(
 						new Paragraph(subTitle, FontFactory.getFont(FontFactory.TIMES_ROMAN, 10)));
 				cell305.setColspan(1);
@@ -312,11 +316,14 @@ public class MarksSheet_IX_PDF {
 				LinkedHashMap<String, String> subjectMax = new LinkedHashMap<String, String>();
 				subTitle = me.getKey().toString();
 				subjectMax = (LinkedHashMap<String, String>) me.getValue();
+				gradeMarks = subjectMax.get("grade_marks");
 				outOfMarks = subjectMax.get(sem+"_"+subTitle+"_total");
 				if(outOfMarks.contains(".") && Double.parseDouble(outOfMarks) > 0){
 					outOfMarks = outOfMarks.substring(0, outOfMarks.indexOf("."));
-				}else if(Double.parseDouble(outOfMarks) == 0){
+				} else if(Double.parseDouble(outOfMarks) == 0){
 					outOfMarks = "-";
+				} else if(gradeMarks.equalsIgnoreCase("GRADE")) {
+					outOfMarks = " ";
 				}
 				
 				PdfPCell cellMarks = new PdfPCell(new Paragraph(outOfMarks, FontFactory.getFont(FontFactory.TIMES_ROMAN, 10)));

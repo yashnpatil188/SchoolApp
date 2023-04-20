@@ -451,10 +451,14 @@ public class ResultPPRMarksPDF {
 									else {
 										dispMarksSem2 = subjectMarksObtainedSem2;
 									}
-									if(!dispMarksSem2.contains("+") && !dispMarksSem2.contains("#") && !dispMarksSem2.contains("(") && !commonObj.validateAlphabets(dispMarksSem2)) {
+									
+									if(!dispMarksSem2.contains("+") && !dispMarksSem2.contains("#") && !dispMarksSem2.contains("(") && !dispMarksSem2.contains("-")) {
 										obtainedSem2TotalMarks = obtainedSem2TotalMarks + Double.parseDouble(dispMarksSem2);
 									}
-									else if(dispMarksSem2.contains("+")){
+									else if(dispPassStatus.equalsIgnoreCase("F") && gradeMarksMapOrder.get(item).toString().equalsIgnoreCase("Marks")){
+										obtainedSem2TotalMarks = obtainedSem2TotalMarks + Double.parseDouble(dispMarksSem2.substring(0, dispMarksSem2.indexOf("(")));
+									}
+									else if(dispMarksSem2.contains("+") ){
 										dispMarksSem2 = dispMarksSem2.substring(0, dispMarksSem2.indexOf("+"));
 									}
 								}

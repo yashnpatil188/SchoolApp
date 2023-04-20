@@ -974,6 +974,7 @@ public class FeesReport extends JFrame {
 							smsType = "SMS_FEE_ADMIN";
 							dbValidate.connectDatabase(sessionData);
 							totalAmount = dbValidate.getFeesCollection(sessionData, optionSelect, fromDate, toDate, std, div, academic);
+							totalAmount = Math.round(totalAmount*100.0)/100.0;
 							smsText = "Fees Report\n"+period + " fees collection amount is Rs."+totalAmount+"\nBy "+smsFooter;
 							smsTemplateId = bundle.getString("SMS_FEE_COLLECTION_REPORT_TEMP_ID");
 							if(isValid) {
@@ -1025,15 +1026,21 @@ public class FeesReport extends JFrame {
 								smsType = "SMS_FEE_STAFF";
 								dbValidate.connectDatabase(sessionData);
 								totalAmount = dbValidate.getFeesCollection(sessionData, optionSelect, fromDate, toDate, std, div, academic);
+								totalAmount = Math.round(totalAmount*100.0)/100.0;
 								String smsSchoolStr = bundle.getString("SMS_"+sessionData.getAppType());
-								String smsCondition = "";
+								String smsCondition = "", totalStr = " total";
 								if(!std.equalsIgnoreCase("All") && !std.equalsIgnoreCase("")) {
 									smsCondition = " STD="+std+"";
 								}
 								if(!div.equalsIgnoreCase("All") && !div.equalsIgnoreCase("")) {
 									smsCondition = smsCondition + " DIV="+div+"";
 								}
-								smsText = "Fees Report\n" + smsSchoolStr + smsCondition +" total fees collection is Rs. "+totalAmount+ " from date "+fromDate+ " to "+toDate+"\nBy "+smsFooter;
+								
+								if(smsSchoolStr.equalsIgnoreCase("") && smsCondition.equalsIgnoreCase("")) {
+									totalStr = "Total";
+								}
+								
+								smsText = "Fees Report\n" + smsSchoolStr + smsCondition + totalStr + " fees collection is Rs. "+totalAmount+ " from date "+fromDate+ " to "+toDate+"\nBy "+smsFooter;
 								smsTemplateId = bundle.getString("SMS_FEE_TOTAL_COLLECTION_TEMP_ID");
 								if(isValid) {
 									String smsResponse = commonObj.sendHspStaffFeeSms(sessionData, passGrList, foundStudentMap, smsText, smsTemplateId, section, "", 
@@ -2055,7 +2062,7 @@ public class FeesReport extends JFrame {
 				if(dbValidate.connectDatabase(sessionData)){
 					if(reportTypeSel.equalsIgnoreCase("Daily")){
 						dbValidate.getDailyFeesReport(sessionData, academic, std, div, category, fromDate, toDate);
-//						dbValidate.exportFeesDataToReport(sessionData);
+//						dbValidate.exportFeesDataToReport(sessionData, academic, std, div, category, fromDate, toDate);
 					}
 					else if(reportTypeSel.equalsIgnoreCase("Classwise")){
 						LinkedHashMap<String, LinkedHashMap<String, String>> feesHeadMap = new LinkedHashMap<String, LinkedHashMap<String, String>>();

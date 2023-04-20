@@ -152,6 +152,69 @@ public class HelpPageWithoutScroll {
         });
         
         height = height + 45;
+		JButton updateFeesReportButton = new JButton("Update Fees Report");
+		updateFeesReportButton.setFont(new Font("Book Antiqua", Font.BOLD, 12));
+		updateFeesReportButton.setBounds(width, height, 200, 35);
+        panel.add(updateFeesReportButton);
+        
+		try {
+			String feesReportYearList = "";
+			if (dbValidate.connectDatabase(sessionData)) {
+				feesReportYearList = dbValidate.getAcademicYearList(sessionData, "FEES_REPORT_MANDATORY", "ACADEMIC_YEAR").toString();
+			}
+			
+			String[] academicYearList = feesReportYearList.split(",");
+	 		final JComboBox academicYear_combo = new JComboBox(academicYearList);
+	 		academicYear_combo.setFont(new Font("Book Antiqua", Font.BOLD, 16));
+	 		academicYear_combo.setBounds(260, height, 150, 40);
+	 		panel.add(academicYear_combo);
+	 		
+	 		String [] chooseDeleteTable = { "False", "True" };
+	 		final JComboBox deleteTable_combo = new JComboBox(chooseDeleteTable);
+	 		deleteTable_combo.setFont(new Font("Book Antiqua", Font.BOLD, 16));
+	 		deleteTable_combo.setBounds(425, height, 150, 40);
+	 		panel.add(deleteTable_combo);
+	 		
+	 		JLabel updateFeesReportLabel = new JLabel("Select True only for first time and run as false for other academic year (One time activity)");
+	        updateFeesReportLabel.setFont(new Font("Book Antiqua", Font.BOLD, 18));
+	        updateFeesReportLabel.setBounds(575, height, 900, 40);
+			panel.add(updateFeesReportLabel);
+
+			updateFeesReportButton.addActionListener(new ActionListener() {
+
+	            public void actionPerformed(ActionEvent e) {
+					
+	            	try {
+	            		if (dbValidate.connectDatabase(sessionData)) {
+	            			boolean isTableDelete = Boolean.parseBoolean(deleteTable_combo.getSelectedItem().toString());
+	            			String academicSelected = (String) academicYear_combo.getSelectedItem();
+	            			String startDate = bundle.getString("ACADEMIC_YEAR_START_"+sessionData.getDBName());
+	            			String startYear = academicSelected.substring(0, academicSelected.indexOf("-"));
+	            			String endYear = (Integer.parseInt(startYear)+1) + "";
+	    					startDate = commonObj.formatyyyymmddtoddmmyyyy(startYear + "-" + startDate);//yyyy-mm-dd
+	    					
+	    					String endDate = bundle.getString("ACADEMIC_YEAR_END_"+sessionData.getDBName());
+	    					endDate = commonObj.formatyyyymmddtoddmmyyyy(endYear + "-" + endDate);//yyyy-mm-dd
+	            			boolean isSuccess = dbValidate.exportFeesDataToReport(sessionData, academicSelected, "All", "All", "Academic", startDate, endDate, isTableDelete);
+	            			deleteTable_combo.setSelectedItem("False");
+	            			if(isSuccess) {
+	    	            		JOptionPane.showMessageDialog(null, "Attendance Periodly table created successfully.");
+	    	            	}
+	    	            	else {
+	    	            		JOptionPane.showMessageDialog(null, "Attendance Periodly table already created.");
+	    	            	}
+	    				}
+	            	}
+	            	catch(Exception e1) {
+	            		commonObj.logException(e1);
+	            	}
+	            }
+	        });
+		} catch (Exception e2) {
+			commonObj.logException(e2);
+		}
+        
+        height = height + 45;
 		JButton attendanceButton = new JButton("Periodly Attendance");
 		attendanceButton.setFont(new Font("Book Antiqua", Font.BOLD, 12));
 		attendanceButton.setBounds(width, height, 200, 35);

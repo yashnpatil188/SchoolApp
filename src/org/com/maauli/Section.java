@@ -479,6 +479,7 @@ public class Section
 					if (dbValidate.connectDatabase(sessionData)) {
 						frame.setVisible(false);
 						new HelpPage(sessionData);
+//						new HelpPageWithoutScroll(sessionData);
 					}
 				} catch (Exception e1) {
 					commonObj.logException(e1);

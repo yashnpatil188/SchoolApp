@@ -1408,7 +1408,7 @@ public class AttendanceUpdate extends JFrame {
 							    				"", "", "", academicSel, "", "", section, true, exam, month, "");
 							    		frame.setVisible(false);
 							    		new AttendanceUpdate(sessionData, std, div, academicSel, section, user_name, user_role, 
-							    				foundStudentList, catType, month, fromDate,toDate,false,"",true, exam, isHalfDaySel);
+							    				foundStudentList, catType, month, fromDate,toDate,false,"",false, exam, isHalfDaySel);
 							    	}
 								}
 							} else{
@@ -1575,6 +1575,9 @@ public class AttendanceUpdate extends JFrame {
 			if(examClass.equalsIgnoreCase("Final")){
 				totalDays_text.setEditable(false);
 			}
+			else {
+				totalDays_text.setEditable(isEditClass);
+			}
 			totalDays_text.setBounds(750, j - 10, 50, 20);
 			
 			JLabel attendedDays_label = new JLabel("Days Attended");
@@ -1641,11 +1644,167 @@ public class AttendanceUpdate extends JFrame {
 			editButton.addActionListener(new ActionListener() {
 
 				public void actionPerformed(ActionEvent e) {
+					boolean validateFields = true;
+					boolean isHalfDaySel = false;
+					String std = "";
+					String div = "";
+					String academicSel = "";
+					String catType = "";
+					String print = "";
+					String fromDate = "";
+					String toDate = "";
+					String attendStatus = "";
+					String month = "";
+					String year = "";
+					int addOnTokens = 0;
 
-					List studentList = new ArrayList();
-					frame.setVisible(false);
-					new AttendanceUpdate(sessionData, stdClass, divClass, academicYearClass, section, user_name, user_role, foundStudentList, catTypeClass,"",
-							fromDateClass,toDateClass,isRecordNewClass,updateAllClass,true,"", false);
+					std = (String) admittedStd_combo.getSelectedItem();
+					div = (String) admittedDiv_combo.getSelectedItem();
+					catType = (String) cat_combo.getSelectedItem();
+					academicSel = (String) academicYear_combo.getSelectedItem();
+					isHalfDaySel = halfDayRadio.isSelected();
+					if(month_radio.isSelected()){
+						month = (String) month_combo.getSelectedItem();
+						year = (String) academicYear_combo.getSelectedItem();
+					}
+					
+					Date today = new Date();
+					
+			        Date selectedFromDate = (Date) datePickerFrom.getModel().getValue();
+			        fromDate = commonObj.dateToDDMMYYYY(selectedFromDate);
+			        
+			        Date selectedToDate = (Date) datePickerTo.getModel().getValue();
+			        toDate = commonObj.dateToDDMMYYYY(selectedToDate);
+			        
+			        if(!catType.equalsIgnoreCase("Update Attendance")){
+						today = selectedToDate;
+					}
+			        
+					if (std.equalsIgnoreCase("Select")){
+						commonObj.showMessageDialog("Please select std");
+						validateFields = false;
+					}
+					else if (validateFields && div.equalsIgnoreCase("Select")){
+						commonObj.showMessageDialog("Please select div");
+						validateFields = false;
+					}
+					else if(commonObj.daysBetween(selectedFromDate, today) < 0){
+						commonObj.showMessageDialog("Please select valid date");
+						validateFields = false;
+					}
+					/*else if(commonObj.daysBetween(selectedToDate, today) < 0){
+						commonObj.showMessageDialog("Please select valid date");
+						validateFields = false;
+					}*/
+					else if(commonObj.daysBetween(selectedFromDate, selectedToDate) < 0 && !catType.equalsIgnoreCase("Update Attendance")){
+						commonObj.showMessageDialog("From date cannot be less than To date");
+						validateFields = false;
+					}
+					else if(commonObj.daysBetween(selectedFromDate, selectedToDate) > 6 && catType.equalsIgnoreCase("Attendance Report") && month.equalsIgnoreCase("")){
+						commonObj.showMessageDialog("Please select a period of 7 days or less.");
+						validateFields = false;
+					}
+					/*else if(catType.equalsIgnoreCase("Attendance Report") && commonObj.daysBetween(selectedFromDate, selectedToDate) > 7){
+						commonObj.showMessageDialog("Please select a period of 7 days for daywise status.");
+						validateFields = false;
+					}*/
+					else if(catType.equalsIgnoreCase("Manual Attendance") && 
+							exam_combo.getSelectedItem().toString().equalsIgnoreCase("Select") && 
+							(month.equalsIgnoreCase("All") || month.equalsIgnoreCase(""))){
+						commonObj.showMessageDialog("Please select Exam");
+						validateFields = false;
+					}
+					
+					if (validateFields) {//validateFields
+						try {
+							if(dbValidate.connectDatabase(sessionData)){
+							
+								if(catType.equalsIgnoreCase("Mark Vacation")){
+									attendStatus = "HOLIDAY";
+								} else if(catType.equalsIgnoreCase("Update Attendance")){
+									attendStatus = "PRESENT";
+								}
+								
+								if(!catType.equalsIgnoreCase("Attendance Report")){
+									
+									if(!catType.equalsIgnoreCase("Manual Attendance")){
+										////First check for records not present in attendance table
+										recordsNotInAttendanceList = dbValidate.recordsNotInAttendanceForDate(sessionData, std, div, academicSel, section, fromDate, attendStatus);
+										if (recordsNotInAttendanceList.size() > 0) {
+											foundStudentList = recordsNotInAttendanceList;
+											frame.setVisible(false);
+											new AttendanceUpdate(sessionData, std, div, academicSel, section, user_name, user_role, foundStudentList, catType,"",
+													fromDate,toDate,true,"",true, "", isHalfDaySel);
+										} else {
+										////check for records present in attendance table
+											recordsNotInAttendanceList = dbValidate.recordsFoundInAttendanceForDate(sessionData, std, div, academicSel, section, fromDate, "");
+											if(recordsNotInAttendanceList.size() <= 0){
+												commonObj.showMessageDialog("No data found.");
+												frame.setVisible(false);
+												new AttendanceUpdate(sessionData, std, div, academicSel, section, user_name, user_role, recordsNotInAttendanceList, catType,"",
+														fromDate,toDate,false,"",true, "", isHalfDaySel);
+											}
+											else{
+												foundStudentList = recordsNotInAttendanceList;
+												frame.setVisible(false);
+												new AttendanceUpdate(sessionData, std, div, academicSel, section, user_name, user_role, foundStudentList, catType,"",
+														fromDate,toDate,false,"",true, "", isHalfDaySel);
+											}
+										}
+									}
+									else{
+										String exam = (String) exam_combo.getSelectedItem();
+								    	if(exam.equalsIgnoreCase("Select") && month.equalsIgnoreCase("")){
+								    		JOptionPane.showMessageDialog(null, "Please select Exam or Month");
+								    	}
+								    	else{
+								    		dbValidate.newStudents(sessionData, academicSel, std, div, section, "ATTENDANCE_PERIOD");
+								    		foundStudentList = dbValidate.findAtendancePeriodicList(sessionData, "", std, div, 
+								    				"", "", "", academicSel, "", "", section, true, exam, month, "");
+								    		frame.setVisible(false);
+								    		new AttendanceUpdate(sessionData, std, div, academicSel, section, user_name, user_role, 
+								    				foundStudentList, catType, month, fromDate,toDate,false,"",true, exam, isHalfDaySel);
+								    	}
+									}
+								} else{
+									boolean isMonthSelected = false;
+									isMonthSelected = month_radio.isSelected();
+									if(isMonthSelected){
+										addOnTokens = 5;
+										foundStudentList = dbValidate.attendanceReport(sessionData, academicSel, std, div, section, fromDate, toDate, month, year);
+										if(foundStudentList.size() <= 0){
+											commonObj.showMessageDialog("No data found.");
+											frame.setVisible(false);
+											new AttendanceReport(sessionData, std, div, academicSel, section, user_name, user_role, foundStudentList, catType, month,fromDate,toDate,false,"", addOnTokens, isMonthSelected);
+										} else{
+											frame.setVisible(false);
+											new AttendanceReport(sessionData, std, div, academicSel, section, user_name, user_role, foundStudentList, catType, month,fromDate,toDate,false,"", addOnTokens, isMonthSelected);
+										}
+									} else{
+										addOnTokens = commonObj.daysBetween(selectedFromDate, selectedToDate)+1;
+										foundStudentList = dbValidate.attendanceStatus(sessionData, academicSel, std, div, section, fromDate, toDate, month, year, addOnTokens);
+										if(foundStudentList.size() <= 0){
+											commonObj.showMessageDialog("No data found.");
+											frame.setVisible(false);
+											new AttendanceReport(sessionData, std, div, academicSel, section, user_name, user_role, foundStudentList, catType, month,fromDate,toDate,false,"", addOnTokens, isMonthSelected);
+										} else{
+											frame.setVisible(false);
+											new AttendanceReport(sessionData, std, div, academicSel, section, user_name, user_role, foundStudentList, catType, month,fromDate,toDate,false,"", addOnTokens, isMonthSelected);
+										}
+									}
+								}
+							}
+						} catch (Exception e1) {
+							commonObj.logException(e1);
+						} finally {
+							dbValidate.closeDatabase(sessionData);
+						}
+					}
+//					
+//					List studentList = new ArrayList();
+//					frame.setVisible(false);
+//					new AttendanceUpdate(sessionData, stdClass, divClass, academicYearClass, section, user_name, user_role, foundStudentList, catTypeClass,"",
+//							fromDateClass,toDateClass,isRecordNewClass,updateAllClass,true,"", false);
 				}
 			});
 			
@@ -1778,6 +1937,9 @@ public class AttendanceUpdate extends JFrame {
 					attendedDaysText[i].setText(attendedDays);
 					if(examClass.equalsIgnoreCase("Final")){
 						attendedDaysText[i].setEditable(false);
+					}
+					else {
+						attendedDaysText[i].setEditable(isEditClass);
 					}
 					attendedDaysText[i].setFont(new Font("Book Antiqua", Font.BOLD, 16));
 					attendedDaysText[i].setBounds(690, j + 12, 50, 20);
@@ -2040,7 +2202,7 @@ public class AttendanceUpdate extends JFrame {
 							List studentList = new ArrayList();
 							frame.setVisible(false);
 							new AttendanceUpdate(sessionData, stdClass, divClass, academicYearClass, section, user_name, user_role, studentList, catTypeClass,"",
-									fromDateClass,toDateClass,isRecordNewClass,"",true, examClass, false);
+									fromDateClass,toDateClass,isRecordNewClass,"",false, examClass, false);
 						}
 						else{
 							commonObj.showMessageDialog("Attendance updation failed.");
