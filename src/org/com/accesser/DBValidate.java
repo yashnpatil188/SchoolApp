@@ -7717,17 +7717,17 @@ public class DBValidate {
 			}
 			if (initialYearFromAcademic < 2017) {// To get results before 2017 on previous logic
 				if (!semester.equalsIgnoreCase("FINAL")) {
-					maxMarksQuery = "SELECT SUBJECT_TITLE,MARKS_GRADE,SUM(IF(" + semester + "_DOBS>0, " + semester + "_DOBS, 0)) + "
+					maxMarksQuery = "SELECT SUBJECT_TITLE,MARKS_GRADE,ORDER_NO,SUM(IF(" + semester + "_DOBS>0, " + semester + "_DOBS, 0)) + "
 							+ "SUM(IF(" + semester + "_OBT>0, " + semester + "_OBT, 0)) + SUM(IF(" + semester
 							+ "_ORAL>0, " + semester + "_ORAL, 0)) + " + "SUM(IF(" + semester + "_ASSIGN>0, " + semester
 							+ "_ASSIGN, 0)) + SUM(IF(" + semester + "_WRITE>0, " + semester + "_WRITE, 0)) + "
 							+ "SUM(IF(" + semester + "_PRACT>0, " + semester + "_PRACT, 0)) AS " + semester + "_MARKS "
 							+ "FROM " + sessionData1.getDBName() + "." + "subject_allotment WHERE STD_1='" + std
 							+ "' AND ACADEMIC_YEAR='" + academic + "' AND (SECTION_NM='" + sessionData1.getSectionName()
-							+ "') GROUP BY  SUBJECT_TITLE,MARKS_GRADE"; // ORDER BY ORDER_NO ASC
+							+ "') GROUP BY  SUBJECT_TITLE,MARKS_GRADE,ORDER_NO ORDER BY ORDER_NO ASC";
 				} else if (semester.equalsIgnoreCase("FINAL") && (std.equalsIgnoreCase("IX")
 						|| std.equalsIgnoreCase("X") || std.equalsIgnoreCase("XI") || std.equalsIgnoreCase("XII"))) {
-					maxMarksQuery = "SELECT SUBJECT_TITLE,MARKS_GRADE,"
+					maxMarksQuery = "SELECT SUBJECT_TITLE,MARKS_GRADE,ORDER_NO,"
 							+ "SUM(IF(SEM1_DOBS_CT>0, SEM1_DOBS_CT, IF(SEM1_DOBS>0, SEM1_DOBS, 0))) + "
 							+ "SUM(IF(SEM1_OBT_CT>0, SEM1_OBT_CT, IF(SEM1_OBT>0, SEM1_OBT, 0))) + "
 							+ "SUM(IF(SEM1_ORAL_CT>0, SEM1_ORAL_CT, IF(SEM1_ORAL>0, SEM1_ORAL, 0))) + "
@@ -7742,9 +7742,9 @@ public class DBValidate {
 							+ "SUM(IF(SEM2_PRACT_CT>0, SEM2_PRACT_CT, IF(SEM2_PRACT>0, SEM2_PRACT, 0))) AS SEM2_MARKS "
 							+ "FROM " + sessionData1.getDBName() + "." + "subject_allotment " + "WHERE STD_1='" + std
 							+ "' AND ACADEMIC_YEAR='" + academic + "' AND " + "(SECTION_NM='"
-							+ sessionData1.getSectionName() + "') GROUP BY  SUBJECT_TITLE,MARKS_GRADE"; // ORDER BY ORDER_NO ASC
+							+ sessionData1.getSectionName() + "') GROUP BY  SUBJECT_TITLE,MARKS_GRADE,ORDER_NO ORDER BY ORDER_NO ASC";
 				} else {
-					maxMarksQuery = "SELECT SUBJECT_TITLE,MARKS_GRADE,SUM(IF(SEM1_DOBS>0, SEM1_DOBS, 0)) + SUM(IF(SEM1_OBT>0, SEM1_OBT, 0)) + "
+					maxMarksQuery = "SELECT SUBJECT_TITLE,MARKS_GRADE,ORDER_NO,SUM(IF(SEM1_DOBS>0, SEM1_DOBS, 0)) + SUM(IF(SEM1_OBT>0, SEM1_OBT, 0)) + "
 							+ "SUM(IF(SEM1_ORAL>0, SEM1_ORAL, 0)) + SUM(IF(SEM1_ASSIGN>0, SEM1_ASSIGN, 0)) + SUM(IF(SEM1_WRITE>0, SEM1_WRITE, 0)) + "
 							+ "SUM(IF(SEM1_PRACT>0, SEM1_PRACT, 0)) AS SEM1_MARKS, "
 							+ "SUM(IF(SEM2_DOBS>0, SEM2_DOBS, 0)) + SUM(IF(SEM2_OBT>0, SEM2_OBT, 0)) + "
@@ -7752,11 +7752,11 @@ public class DBValidate {
 							+ "SUM(IF(SEM2_PRACT>0, SEM2_PRACT, 0)) AS SEM2_MARKS FROM " + sessionData1.getDBName()
 							+ "." + "subject_allotment " + "WHERE STD_1='" + std + "' AND ACADEMIC_YEAR='" + academic
 							+ "' AND " + "(SECTION_NM='" + sessionData1.getSectionName()
-							+ "') GROUP BY  SUBJECT_TITLE,MARKS_GRADE"; // ORDER BY ORDER_NO ASC
+							+ "') GROUP BY  SUBJECT_TITLE,MARKS_GRADE,ORDER_NO ORDER BY ORDER_NO ASC";
 				}
 			} else {// To get results after 2017 on new logic
 				if (!semester.equalsIgnoreCase("FINAL") && stdInt < 9) {
-					maxMarksQuery = "SELECT SUBJECT_TITLE,MARKS_GRADE,SUM(IF(" + semester + "_DOBS>0, " + semester + "_DOBS, 0)) + "
+					maxMarksQuery = "SELECT SUBJECT_TITLE,MARKS_GRADE,ORDER_NO,SUM(IF(" + semester + "_DOBS>0, " + semester + "_DOBS, 0)) + "
 							+ "SUM(IF(" + semester + "_OBT>0, " + semester + "_OBT, 0)) + SUM(IF(" + semester
 							+ "_ORAL>0, " + semester + "_ORAL, 0)) + " + "SUM(IF(" + semester + "_ASSIGN>0, " + semester
 							+ "_ASSIGN, 0)) + SUM(IF(" + semester + "_WRITE>0, " + semester + "_WRITE, 0)) + "
@@ -7772,9 +7772,9 @@ public class DBValidate {
 							+ "_ASSIGN1>0, " + semester + "_ASSIGN1, 0)) AS " + semester + "_MARKS " + "FROM "
 							+ sessionData1.getDBName() + "." + "subject_allotment WHERE STD_1='" + std
 							+ "' AND ACADEMIC_YEAR='" + academic + "' AND (SECTION_NM='" + sessionData1.getSectionName()
-							+ "') GROUP BY  SUBJECT_TITLE,MARKS_GRADE"; // ORDER BY ORDER_NO ASC
+							+ "') GROUP BY  SUBJECT_TITLE,MARKS_GRADE,ORDER_NO ORDER BY ORDER_NO ASC";
 				} else if (!semester.equalsIgnoreCase("FINAL") && stdInt >= 9) {
-					maxMarksQuery = "SELECT SUBJECT_TITLE,MARKS_GRADE," + "SUM(IF(" + semester + "_DOBS_CT>=0, " + semester
+					maxMarksQuery = "SELECT SUBJECT_TITLE,MARKS_GRADE,ORDER_NO," + "SUM(IF(" + semester + "_DOBS_CT>=0, " + semester
 							+ "_DOBS_CT, IF(" + semester + "_DOBS>0, " + semester + "_DOBS, 0))) + " + "SUM(IF("
 							+ semester + "_OBT_CT>=0, " + semester + "_OBT_CT, IF(" + semester + "_OBT>0, " + semester
 							+ "_OBT, 0))) + " + "SUM(IF(" + semester + "_ORAL_CT>=0, " + semester + "_ORAL_CT, IF("
@@ -7803,9 +7803,9 @@ public class DBValidate {
 							+ "_ASSIGN1, 0))) AS " + semester + "_MARKS " + "FROM " + sessionData1.getDBName() + "."
 							+ "subject_allotment " + "WHERE STD_1='" + std + "' AND ACADEMIC_YEAR='" + academic
 							+ "' AND " + "(SECTION_NM='" + sessionData1.getSectionName()
-							+ "') GROUP BY  SUBJECT_TITLE,MARKS_GRADE"; // ORDER BY ORDER_NO ASC
+							+ "') GROUP BY  SUBJECT_TITLE,MARKS_GRADE,ORDER_NO ORDER BY ORDER_NO ASC";
 				} else if (semester.equalsIgnoreCase("FINAL") && stdInt >= 9) {
-					maxMarksQuery = "SELECT SUBJECT_TITLE,MARKS_GRADE,"
+					maxMarksQuery = "SELECT SUBJECT_TITLE,MARKS_GRADE,ORDER_NO,"
 							+ "SUM(IF(SEM1_DOBS_CT>=0, SEM1_DOBS_CT, IF(SEM1_DOBS>0, SEM1_DOBS, 0))) + "
 							+ "SUM(IF(SEM1_OBT_CT>=0, SEM1_OBT_CT, IF(SEM1_OBT>0, SEM1_OBT, 0))) + "
 							+ "SUM(IF(SEM1_ORAL_CT>=0, SEM1_ORAL_CT, IF(SEM1_ORAL>0, SEM1_ORAL, 0))) + "
@@ -7842,9 +7842,9 @@ public class DBValidate {
 							+ "SUM(IF(SEM2_WRITE1_CT>=0, SEM2_WRITE1_CT, IF(SEM2_WRITE1>0, SEM2_WRITE1, 0))) AS SEM2_MARKS "
 							+ "FROM " + sessionData1.getDBName() + "." + "subject_allotment " + "WHERE STD_1='" + std
 							+ "' AND ACADEMIC_YEAR='" + academic + "' AND " + "(SECTION_NM='"
-							+ sessionData1.getSectionName() + "') GROUP BY  SUBJECT_TITLE,MARKS_GRADE"; // ORDER BY ORDER_NO ASC
+							+ sessionData1.getSectionName() + "') GROUP BY  SUBJECT_TITLE,MARKS_GRADE,ORDER_NO ORDER BY ORDER_NO ASC";
 				} else {
-					maxMarksQuery = "SELECT SUBJECT_TITLE,MARKS_GRADE,SUM(IF(SEM1_DOBS>0, SEM1_DOBS, 0)) + SUM(IF(SEM1_OBT>0, SEM1_OBT, 0)) + "
+					maxMarksQuery = "SELECT SUBJECT_TITLE,MARKS_GRADE,ORDER_NO,SUM(IF(SEM1_DOBS>0, SEM1_DOBS, 0)) + SUM(IF(SEM1_OBT>0, SEM1_OBT, 0)) + "
 							+ "SUM(IF(SEM1_ORAL>0, SEM1_ORAL, 0)) + SUM(IF(SEM1_ASSIGN>0, SEM1_ASSIGN, 0)) + SUM(IF(SEM1_WRITE>0, SEM1_WRITE, 0)) + "
 							+ "SUM(IF(SEM1_PRACT>0, SEM1_PRACT, 0)) + SUM(IF(SEM1_PRES>0, SEM1_PRES, 0)) + SUM(IF(SEM1_MCAP>0, SEM1_MCAP, 0)) + "
 							+ "SUM(IF(SEM1_ACTIVITY>0, SEM1_ACTIVITY, 0)) + SUM(IF(SEM1_PROJECT>0, SEM1_PROJECT, 0)) + SUM(IF(SEM1_OTHER>0, SEM1_OTHER, 0)) + "
@@ -7858,7 +7858,7 @@ public class DBValidate {
 							+ "SUM(IF(SEM2_SPEAK>0, SEM2_SPEAK, 0)) + SUM(IF(SEM2_LISTEN>0, SEM2_LISTEN, 0)) + SUM(IF(SEM2_ASSIGN1>0, SEM2_ASSIGN1, 0)) AS SEM2_MARKS FROM "
 							+ sessionData1.getDBName() + "." + "subject_allotment " + "WHERE STD_1='" + std
 							+ "' AND ACADEMIC_YEAR='" + academic + "' AND " + "(SECTION_NM='"
-							+ sessionData1.getSectionName() + "') GROUP BY  SUBJECT_TITLE,MARKS_GRADE"; // ORDER BY ORDER_NO ASC
+							+ sessionData1.getSectionName() + "') GROUP BY  SUBJECT_TITLE,MARKS_GRADE,ORDER_NO ORDER BY ORDER_NO ASC";
 				}
 			}
 			statement = connection.createStatement();
@@ -13278,7 +13278,10 @@ public class DBValidate {
 			}
 
 			if (ft_marksObtained.equalsIgnoreCase("")) {
-				if (subjectTitleDB.equalsIgnoreCase(prevSubjectTitle) && j == rowCount) {
+				if (!semester.equalsIgnoreCase("FINAL") && subjectTitleDB.equalsIgnoreCase(prevSubjectTitle)) {
+					subjectMarksRetrive = subjectMarksRetrive + " AS " + subjectNameDB;
+				}
+				else if (subjectTitleDB.equalsIgnoreCase(prevSubjectTitle) && j == rowCount) {
 					subjectMarksRetrive = subjectMarksRetrive + " AS " + subjectTitleDB;
 				} else if (j == rowCount) {
 					subjectMarksRetrive = subjectMarksRetrive + " AS " + subjectTitleDB;

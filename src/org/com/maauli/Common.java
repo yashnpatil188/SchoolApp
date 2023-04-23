@@ -1292,6 +1292,27 @@ public class Common {
 			return st1;
 		}
 	}
+	
+	///replace space with new line char
+	public String replaceSpaceWithNewLine(String str, int wordCount) {
+		try {
+			for(int i = 0; i < wordCount; i++) {
+				if(i < 2) {
+					str = str.replaceFirst("\\s+", "*");
+				}
+				else {
+					str = str.replaceFirst("\\s+", "\n");
+					break;
+				}
+			}
+			str = str.replace("*", " ");
+			return str;
+		}
+		catch (Exception e) {
+			logException(e);
+			return str;
+		}
+	}
 
 	// ////////replace comma,apostophy//////////////////
 	public String replaceComma(String str) {

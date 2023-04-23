@@ -192,7 +192,7 @@ public class ExamRegister_IX_PDF {
 			columnWidths[0]=  0.8f;
 			columnWidths[1]=  0.8f;
 			columnWidths[2]=  0.8f;
-			columnWidths[3]=  0.8f;
+			columnWidths[3]=  1.2f;
 			columnWidths[4]=  3.0f;
 			
 			for(int i = 0; i < 2; i++){
@@ -350,12 +350,19 @@ public class ExamRegister_IX_PDF {
 					cell344.setVerticalAlignment(Element.ALIGN_MIDDLE);
 					table1.addCell(cell344);
 					
-					if(grDetail.get("name").length() > 40){
+					String name = grDetail.get("name");
+					if(name.length() > 40){
 						isDoubleLine = true;
 						addRow = addRow + 1;
 					}
+					name = commonObj.FirstWordCap(name);
+					int wordCount = commonObj.WordCountInString(name);
+					if(wordCount >= 4) {
+						name = commonObj.replaceSpaceWithNewLine(name, wordCount);
+					}
+					
 					PdfPCell cell343 = new PdfPCell(
-							new Paragraph(commonObj.FirstWordCap(grDetail.get("name")), FontFactory.getFont(FontFactory.TIMES_ROMAN, 10)));
+							new Paragraph(name, FontFactory.getFont(FontFactory.TIMES_ROMAN, 10)));
 					cell343.setColspan(1);
 					cell343.setRowspan(rowSpanInt);
 					cell343.setRotation(90);
