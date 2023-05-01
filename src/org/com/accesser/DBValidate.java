@@ -7678,12 +7678,17 @@ public class DBValidate {
 			while (resultSet.next()) {
 				subjectTitle = resultSet.getString("SUBJECT_TITLE") == null ? " "
 						: (resultSet.getString("SUBJECT_TITLE").trim());
+				subjectTitle = subjectTitle.replace(" ", "_");
 				maxMarks = resultSet.getString("MAX_MARKS") == null ? " " : (resultSet.getString("MAX_MARKS").trim());
 				if (semester.equalsIgnoreCase("FINAL")) {
 					double marksDivisor = cm.getConvertMarksForDivisor(Double.parseDouble(maxMarks), 0, false);
 					maxMarks = (int) (Integer.parseInt(maxMarks) / (Integer.parseInt(maxMarks) / marksDivisor)) + "";
+					
+					if(maxMarksMapOrder.get(subjectTitle) != null) {
+						maxMarks = (Integer.parseInt(maxMarks) + Integer.parseInt(maxMarksMapOrder.get(subjectTitle))) + "";
+					}
 				}
-				maxMarksMapOrder.put(subjectTitle.replace(" ", "_"), maxMarks);
+				maxMarksMapOrder.put(subjectTitle, maxMarks);
 			}
 		} catch (Exception e) {
 			logger.error("Exception==>" + e);
