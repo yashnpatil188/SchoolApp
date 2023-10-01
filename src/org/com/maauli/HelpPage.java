@@ -49,7 +49,7 @@ public class HelpPage {
 	static int screenWidth;
     static int screenHeight;
     static int mainCentre;
-    static int scrollHeight = 900;
+    static int scrollHeight = 2000;
     static JFrame frame = null;
 	static String img_path			= "";
 	static String img_home 			= "";
@@ -1306,7 +1306,7 @@ public class HelpPage {
 			try {
 				String feesReportYearList = "";
 				if (dbValidate.connectDatabase(sessionData)) {
-					feesReportYearList = dbValidate.getAcademicYearList(sessionData, "FEES_REPORT_MANDATORY", "ACADEMIC_YEAR").toString();
+					feesReportYearList = dbValidate.getAcademicYearList(sessionData, "FEES_DATA_MANDATORY", "ACADEMIC_YEAR").toString();
 				}
 				
 				String[] academicYearList = feesReportYearList.split(",");
@@ -1344,10 +1344,10 @@ public class HelpPage {
 		            			boolean isSuccess = dbValidate.exportFeesDataToReport(sessionData, academicSelected, "All", "All", "Academic", startDate, endDate, isTableDelete);
 		            			deleteTable_combo.setSelectedItem("False");
 		            			if(isSuccess) {
-		    	            		JOptionPane.showMessageDialog(null, "Attendance Periodly table created successfully.");
+		    	            		JOptionPane.showMessageDialog(null, "Fees data updated successfully for "+academicSelected);
 		    	            	}
 		    	            	else {
-		    	            		JOptionPane.showMessageDialog(null, "Attendance Periodly table already created.");
+		    	            		JOptionPane.showMessageDialog(null, "Fees data updated failed for "+academicSelected);
 		    	            	}
 		    				}
 		            	}
@@ -1360,6 +1360,35 @@ public class HelpPage {
 				commonObj.logException(e2);
 			}
 		}
+
+		height = height + 45;
+		JButton insertExcelDataButton = new JButton("Excel Data");
+		insertExcelDataButton.setFont(new Font("Book Antiqua", Font.BOLD, 12));
+		insertExcelDataButton.setBounds(width, height, 200, 35);
+        panel.add(insertExcelDataButton);
+        
+        JLabel insertExcelDataLabel = new JLabel("Insert Excel Data for Fees Report Quarterly & Collection");
+        insertExcelDataLabel.setFont(new Font("Book Antiqua", Font.BOLD, 18));
+        insertExcelDataLabel.setBounds(260, height, 900, 40);
+		panel.add(insertExcelDataLabel);
+		
+		insertExcelDataButton.addActionListener(new ActionListener() {
+
+            public void actionPerformed(ActionEvent e) {
+            	
+            	boolean isSuccess;
+				try {
+					isSuccess = dbValidate.insertExcelData(sessionData);
+					if(isSuccess) {
+	            		JOptionPane.showMessageDialog(null, "Excel data for quarterly fees inserted successfully");
+	            	}
+	            	else {
+	            		JOptionPane.showMessageDialog(null, "Excel data for quarterly fees failed");
+	            	}
+				} catch (Exception e1) {
+				}
+            }
+        });
 		
 //		if(appType.equalsIgnoreCase("College")) {
 //			height = height + 45;

@@ -1543,11 +1543,14 @@ public class SearchFeeStudentNew extends JFrame {
 	        grStr = grStr.substring(1);
 	        
 	        String stdStr = "";
-	        if(!stdClass.equalsIgnoreCase("") && !stdClass.equalsIgnoreCase("I")) {
+	        if(!stdClass.equalsIgnoreCase("") && !stdClass.equalsIgnoreCase("Nursery") && !stdClass.equalsIgnoreCase("I") ) {
 	        	stdStr = "'"+commonObj.IntegerToRoman("a"+(commonObj.RomanToInteger(stdClass)-1))+"','"+stdClass+"'";
 	        }
-	        else {
+	        else if(stdClass.equalsIgnoreCase("I")) {
 	        	stdStr = "I";
+	        }
+	        else if(stdClass.equalsIgnoreCase("Nursery")) {
+	        	stdStr = "Nursery";
 	        }
 	        
 	        try {

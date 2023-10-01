@@ -471,6 +471,21 @@ public class Common {
 		return currentUser;
 	}
 
+	public String getCurrentTimeStamp() {
+	    return new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS").format(new Date());
+	}
+	
+	////////
+	public TreeMap<String, Double> updateTreeMap(TreeMap<String, Double> map, String keyStr, Double value){
+		DecimalFormat df = new DecimalFormat("####0.00");
+		if(map.get(keyStr) != null) {
+			
+			map.put(keyStr, Double.parseDouble(df.format((map.get(keyStr) + value))));
+		} else {
+			map.put(keyStr, value);
+		}
+		return map;
+	}
 	// ////////////////////////////////////////////////////////////////
 	public String formatdd_MM_yyyy(String dateReceived) {
 
@@ -716,51 +731,77 @@ public class Common {
 	public String RomanToWord(String RomanWord) {
 
 		String RomanInWord = "";
+		if(RomanWord.contains(" ")) {
+			RomanWord = RomanWord.replace(" ", "_");
+		}
 
 		if(RomanWord != null && !RomanWord.equalsIgnoreCase("") && !RomanWord.equalsIgnoreCase("-")) {
 			RomanStd word = RomanStd.valueOf(RomanWord.trim()); // surround with
 			switch (word) {
 				case I:
-				RomanInWord = "First";
-				break;
+					RomanInWord = "First";
+					break;
 				case II:
-				RomanInWord = "Second";
-				break;
+					RomanInWord = "Second";
+					break;
 				case III:
-				RomanInWord = "Third";
-				break;
+					RomanInWord = "Third";
+					break;
 				case IV:
-				RomanInWord = "Fourth";
-				break;
+					RomanInWord = "Fourth";
+					break;
 				case V:
-				RomanInWord = "Fifth";
-				break;
+					RomanInWord = "Fifth";
+					break;
 				case VI:
-				RomanInWord = "Sixth";
-				break;
+					RomanInWord = "Sixth";
+					break;
 				case VII:
-				RomanInWord = "Seventh";
-				break;
+					RomanInWord = "Seventh";
+					break;
 				case VIII:
-				RomanInWord = "eighth";
-				break;
+					RomanInWord = "eighth";
+					break;
 				case IX:
-				RomanInWord = "Ninth";
-				break;
+					RomanInWord = "Ninth";
+					break;
 				case X:
-				RomanInWord = "Tenth";
-				break;
+					RomanInWord = "Tenth";
+					break;
 				case XI:
-				RomanInWord = "Eleventh";
-				break;
+					RomanInWord = "Eleventh";
+					break;
 				case XII:
-				RomanInWord = "Twelfth";
-				break;
+					RomanInWord = "Twelfth";
+					break;
+				case XIII:
+					RomanInWord = "Thirteenth";
+					break;
+				case XIV:
+					RomanInWord = "Fourteenth";
+					break;
+				case XV:
+					RomanInWord = "Fifteenth";
+					break;
+				case NURSERY:
+					RomanInWord = "Nursery";
+					break;
+				case LOWER_KG:
+					RomanInWord = "Lower KG";
+					break;
+				case UPPER_KG:
+					RomanInWord = "Upper KG";
+					break;
+				case JR_KG:
+					RomanInWord = "JR KG";
+					break;
+				case SR_KG:
+					RomanInWord = "SR KG";
+					break;
 				default:
 				logger.info("Invalid Std.");
 			}
 		}
-
 		return RomanInWord;
 	}
 
@@ -768,7 +809,7 @@ public class Common {
 	public int RomanToInteger(String RomanWord) {
 
 		int RomanToInteger = 0;
-		RomanWord = RomanWord.replace(" ", "_");
+		RomanWord = RomanWord.toUpperCase().replace(" ", "_");
 
 		RomanStd word = RomanStd.valueOf(RomanWord.trim()); // surround with
 
@@ -4588,11 +4629,13 @@ public class Common {
         c.add(Calendar.DATE, lastDay);
         dataMap.put("lastDay", df.format(c.getTime()));
         
-        c.set(Calendar.DAY_OF_MONTH, 1);
-        dataMap.put("firstDayOfMonth", df.format(c.getTime()));
+        // Get calendar set to current date and time
+        Calendar c1 = Calendar.getInstance();
+        c1.set(Calendar.DAY_OF_MONTH, 1);
+        dataMap.put("firstDayOfMonth", df.format(c1.getTime()));
         
-        c.set(Calendar.DATE, c.getActualMaximum(Calendar.DATE));
-        dataMap.put("lastDayOfMonth", df.format(c.getTime()));
+        c1.set(Calendar.DATE, c1.getActualMaximum(Calendar.DATE));
+        dataMap.put("lastDayOfMonth", df.format(c1.getTime()));
         
         return dataMap;
 	}
@@ -4627,8 +4670,10 @@ public class Common {
 		String[] data = null;
 		for(int k = 0; k < dataSplit.length; k++) {
 			data = dataSplit[k].split("\\^");
-			if(data[9].equalsIgnoreCase("A")) {
-				return data;
+			if(data.length > 9) {
+				if(data[9].equalsIgnoreCase("A")) {
+					return data;
+				}
 			}
 		}
 		return null;
@@ -4650,12 +4695,18 @@ public class Common {
 		byte b[] = null;
 		try {
 
+			logger.info("convertImage imgPath :: "+imgPath);
+			if((System.getProperty("os.name").toLowerCase().indexOf("mac") < 0)) {
+				imgPath = imgPath.replace("/","\\\\");
+			}
+			logger.info("convertImage imgPath 2 :: "+imgPath);
 			BufferedImage originalImage = ImageIO.read(new File(imgPath));
+//			BufferedImage originalImage = ImageIO.read(this.getClass().getResource(imgPath));
 			int type = originalImage.getType() == 0 ? BufferedImage.TYPE_INT_ARGB : originalImage.getType();
 
 			BufferedImage resizeImageJpg = resizeImage(originalImage, type);
 			ImageIO.write(resizeImageJpg, "jpg", new File(tmpPath));
-
+			
 //			BufferedImage resizeImagePng = resizeImage(originalImage, type);
 //			ImageIO.write(resizeImagePng, "png", new File("d:\\image\\mkyong_png.jpg"));
 //
@@ -4671,7 +4722,7 @@ public class Common {
 			b = baos.toByteArray();
 			baos.close();
 
-		} catch (IOException e) {
+		} catch (Exception e) {
 			logException(e);
 		}
 		return b;

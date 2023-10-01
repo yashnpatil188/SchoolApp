@@ -1976,9 +1976,9 @@ public class AdmissionFormNew extends JFrame {
 						} else if(category.equalsIgnoreCase("Select")){
 							validateFields = false;
 							JOptionPane.showMessageDialog(null, "Please select Category");
-						} else if (cast.length() > 20) {
+						} else if (cast.length() > 30) {
 							validateFields = false;
-							JOptionPane.showMessageDialog(null, commonObj.charExceeded("Cast", cast, 20));
+							JOptionPane.showMessageDialog(null, commonObj.charExceeded("Cast", cast, 30));
 						} else if (commonObj.checkComma(cast) || commonObj.validateSpecial(cast)) {
 							validateFields = false;
 							JOptionPane.showMessageDialog(null, "Please enter valid Cast without |-:';,");
@@ -2810,11 +2810,20 @@ public class AdmissionFormNew extends JFrame {
 		
 		labelStudentImg.addMouseListener(new MouseAdapter() {
  			public void mouseClicked(MouseEvent me) {
- 				boolean retFlag = false, isUpdate = false, validate = true;
+ 				boolean retFlag = false, isUpdate = false, validate = true, checkGrNoFlag = false;
  				try {
  					String gr = gr_no_text.getText();
  					String name = lastName_text.getText().trim() +" "+ firstName_text.getText().trim() +" "+ fatherName_text.getText().trim() +" "+ motherName_text.getText().trim();
- 					boolean checkGrNoFlag = dbValidate.validateGrNo(sessionData, gr, section, "student_imgs");
+ 					
+ 					if(name.trim().equalsIgnoreCase("")) {
+ 						isUpdate = false;
+ 						validate = false;
+ 						JOptionPane.showMessageDialog(null, "Please enter Name before uploading image.");
+ 					}
+ 					
+ 					if (dbValidate.connectDatabase(sessionData)){
+ 						checkGrNoFlag = dbValidate.validateGrNo(sessionData, gr, section, "student_imgs");
+ 					}
  					
  					if(classPageStatus.equalsIgnoreCase("Submit") && !checkGrNoFlag) {
  						isUpdate = false;
@@ -2849,19 +2858,38 @@ public class AdmissionFormNew extends JFrame {
  									String fileName = gr+"_"+sessionData.getSectionName()+".jpg";
  									destinationPath = studentImagePath + fileName;
  									commonObj.copyFileUsingStream(sourcePath, destinationPath);
- 									
 // 									////code to store in database
 // 									byte[] imgByte = commonObj.convertImage(imgPath, fileName);
 // 									if (dbValidate.connectDatabase(sessionData)){
-// 										retFlag = dbValidate.insertStudentImage(sessionData, name, gr, fileName, isUpdate);
+// 										retFlag = dbValidate.insertStudentImage(sessionData, name, gr, destinationPath);
 // 									}
  									
  									/////to display in screen on selection
- 									byte[] imgByte = commonObj.convertImage(destinationPath, fileName);
-									labelStudentImg.setIcon(new ImageIcon(imgByte));
+// 									byte[] imgByte = commonObj.convertImage(destinationPath, fileName);
+//									labelStudentImg.setIcon(new ImageIcon(imgByte));
+ 									
+ 									if(retFlag) {
+ 										byte b[] = null;
+ 	 									ImageIcon studentImage;
+ 	 									try {
+ 	 										b = commonObj.imageToByteArray(destinationPath);
+ 	 									} catch (IOException e2) {
+ 	 										commonObj.logException(e2);
+ 	 									}
+ 	 									
+ 	 									if(b == null) {
+ 	 							 			studentImage = new ImageIcon(img_path + "student.jpg");
+ 	 							 		}
+ 	 							 		else {
+ 	 							 			studentImage = new ImageIcon(b);
+ 	 							 		}
+ 	 									labelStudentImg.setIcon(new ImageIcon(studentImage.getImage().getScaledInstance(120, 140, Image.SCALE_DEFAULT)));
+ 	 							        labelStudentImg.setBounds(960, -130, 120, 417);
+// 	 							      labelStudentImg.revalidate();
+ 									}
 									
  								} catch (Exception e1) {
- 									JOptionPane.showMessageDialog(null, "Error : "+ e1);
+ 									JOptionPane.showMessageDialog(null, "Error while upload: "+ e1);
  								}
  							} else if (reply == JOptionPane.NO_OPTION) {
  								JOptionPane.showMessageDialog(null, "You have cancelled to upload.");

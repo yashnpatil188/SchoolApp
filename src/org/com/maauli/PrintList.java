@@ -1237,7 +1237,7 @@ public class PrintList extends JFrame {
 	
 					pipe_labels7[i] = new JLabel("|");
 					pipe_labels7[i].setFont(new Font("Book Antiqua", Font.BOLD, 16));
-					pipe_labels7[i].setBounds(1090, j, 120, 50);
+					pipe_labels7[i].setBounds(1130, j, 120, 50);
 					dataPanel.add(pipe_labels7[i]);
 				}
 				

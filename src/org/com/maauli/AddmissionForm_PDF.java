@@ -431,7 +431,7 @@ public class AddmissionForm_PDF {
 
 				Chunk chunk2 = new Chunk(
 						"																																												"
-								+ "	" + residentAdd);
+								+ "	" + commonObj.FirstWordCap(residentAdd));
 				Font font2 = FontFactory.getFont("TIMES_ROMAN");
 				font2.setStyle(Font.NORMAL);
 				font2.setSize(10);
@@ -453,7 +453,7 @@ public class AddmissionForm_PDF {
 
 				Chunk chunk4 = new Chunk(
 						"																																									"
-								+ "			" + permanentAdd);
+								+ "			" + commonObj.FirstWordCap(permanentAdd));
 				Font font4 = FontFactory.getFont("TIMES_ROMAN");
 				font4.setStyle(Font.NORMAL);
 				font4.setSize(10);
@@ -498,7 +498,7 @@ public class AddmissionForm_PDF {
 				Chunk chunk8 = new Chunk(
 						"																								"
 				+ "						" + commonObj.formatyyyymmddtoddmmyyyy(studentDetail.get("dob")) + " , " 
-				+ studentDetail.get("dobWords"));
+				+ commonObj.FirstWordCap(studentDetail.get("dobWords")));
 				
 				Font font8 = FontFactory.getFont("TIMES_ROMAN");
 				font8.setStyle(Font.NORMAL);
@@ -672,75 +672,93 @@ public class AddmissionForm_PDF {
 				paragraph22.setAlignment(Element.ALIGN_LEFT);
 				paragraph22.setSpacingBefore(-16);
 
-				Chunk chunk23 = new Chunk("CATEGORY: ");
-				Font font23 = FontFactory.getFont("TIMES_ROMAN");
-				font23.setStyle(Font.NORMAL);
-				font23.setSize(10);
-				chunk23.setFont(font23);
-				Paragraph paragraph23 = new Paragraph();
-				paragraph23.add(chunk23);
-				paragraph23.setAlignment(Element.ALIGN_LEFT);
-				paragraph23.setSpacingBefore(0);
+//				Chunk chunk23 = new Chunk("CATEGORY: ");
+//				Font font23 = FontFactory.getFont("TIMES_ROMAN");
+//				font23.setStyle(Font.NORMAL);
+//				font23.setSize(10);
+//				chunk23.setFont(font23);
+//				Paragraph paragraphCategory = new Paragraph();
+//				paragraphCategory.add(chunk23);
+//				paragraphCategory.setAlignment(Element.ALIGN_LEFT);
+//				paragraphCategory.setSpacingBefore(0);
 
-				Chunk chunk24 = new Chunk("																		"
-						+ "				" + commonObj.FirstWordCap(studentDetail.get("category")));
+//				Chunk chunk24 = new Chunk("																		"
+//						+ "				" + commonObj.FirstWordCap(studentDetail.get("category")));
+				Chunk chunk24 = new Chunk(commonObj.FirstWordCap(studentDetail.get("category")));
 				Font font24 = FontFactory.getFont("TIMES_ROMAN");
 				font24.setStyle(Font.NORMAL);
 				font24.setSize(10);
 				chunk24.setFont(font24);
-				Paragraph paragraph24 = new Paragraph();
-				paragraph24.add(chunk24);
-				paragraph24.setAlignment(Element.ALIGN_LEFT);
-				paragraph24.setSpacingBefore(-16);
+				Paragraph paragraphCategoryValue = new Paragraph();
+				paragraphCategoryValue.add(chunk24);
+				paragraphCategoryValue.setAlignment(Element.ALIGN_LEFT);
+				paragraphCategoryValue.setSpacingBefore(-16);
 
-				Chunk chunk25 = new Chunk(
-						"																																																																						"
-								+ "								CASTE: ");
+//				Chunk chunk25 = new Chunk(
+//						"																																																																						"
+//								+ "								CASTE: ");
+				Chunk chunk25 = new Chunk("CASTE: ");
 				Font font25 = FontFactory.getFont("TIMES_ROMAN");
 				font25.setStyle(Font.NORMAL);
 				font25.setSize(10);
 				chunk25.setFont(font25);
-				Paragraph paragraph25 = new Paragraph();
-				paragraph25.add(chunk25);
-				paragraph25.setAlignment(Element.ALIGN_LEFT);
-				paragraph25.setSpacingBefore(-16);
+				Paragraph paragraphCast = new Paragraph();
+				paragraphCast.add(chunk25);
+				paragraphCast.setAlignment(Element.ALIGN_LEFT);
+				paragraphCast.setSpacingBefore(-16);
 
-				Chunk chunk26 = new Chunk(
-						"																																																																																							"
-								+ "						" + commonObj.FirstWordCap(studentDetail.get("cast")));
+//				Chunk chunk26 = new Chunk(
+//						"																																																																																							"
+//								+ "						" + commonObj.FirstWordCap(studentDetail.get("cast")));
+				Chunk chunk26 = new Chunk(commonObj.FirstWordCap(studentDetail.get("cast")));
 				Font font26 = FontFactory.getFont("TIMES_ROMAN");
 				font26.setStyle(Font.NORMAL);
 				font26.setSize(10);
 				chunk26.setFont(font26);
-				Paragraph paragraph26 = new Paragraph();
-				paragraph26.add(chunk26);
-				paragraph26.setAlignment(Element.ALIGN_LEFT);
-				paragraph26.setSpacingBefore(-16);
+				Paragraph paragraphCastValue = new Paragraph();
+				paragraphCastValue.add(chunk26);
+				paragraphCastValue.setAlignment(Element.ALIGN_LEFT);
+				paragraphCastValue.setSpacingBefore(-16);
 
-				Chunk chunk27 = new Chunk(
-						"																																																																																																																																	"
-								+ "			MOTHER TONGUE: ");
+//				Chunk chunk27 = new Chunk(
+//						"																																																																																																																																	"
+//								+ "			MOTHER TONGUE: ");
+				Chunk chunk27 = new Chunk("MOTHER TONGUE: ");
 				Font font27 = FontFactory.getFont("TIMES_ROMAN");
 				font27.setStyle(Font.NORMAL);
 				font27.setSize(10);
 				chunk27.setFont(font27);
-				Paragraph paragraph27 = new Paragraph();
-				paragraph27.add(chunk27);
-				paragraph27.setAlignment(Element.ALIGN_LEFT);
-				paragraph27.setSpacingBefore(-16);
+				Paragraph paragraphMotherTongue = new Paragraph();
+				paragraphMotherTongue.add(chunk27);
+				paragraphMotherTongue.setAlignment(Element.ALIGN_LEFT);
+				paragraphMotherTongue.setSpacingBefore(-16);
 
-				Chunk chunk28 = new Chunk(
-						"																																																																																																																																																																"
-								+ "						" + commonObj.FirstWordCap(studentDetail.get("motherTongue")));
+//				Chunk chunk28 = new Chunk(
+//						"																																																																																																																																																																"
+//								+ "						" + commonObj.FirstWordCap(studentDetail.get("motherTongue")));
+				Chunk chunk28 = new Chunk(commonObj.FirstWordCap(studentDetail.get("motherTongue")));
 				Font font28 = FontFactory.getFont("TIMES_ROMAN");
 				font28.setStyle(Font.NORMAL);
 				font28.setSize(10);
 				chunk28.setFont(font28);
-				Paragraph paragraph28 = new Paragraph();
-				paragraph28.add(chunk28);
-				paragraph28.setAlignment(Element.ALIGN_LEFT);
-				paragraph28.setSpacingBefore(-16);
+				Paragraph paragraphMotherTongueValue = new Paragraph();
+				paragraphMotherTongueValue.add(chunk28);
+				paragraphMotherTongueValue.setAlignment(Element.ALIGN_LEFT);
+				paragraphMotherTongueValue.setSpacingBefore(-16);
 
+				Chunk chunk23 = new Chunk("CATEGORY: "+paragraphCategoryValue.getContent()+"     "
+				+paragraphCast.getContent()+": "+paragraphCastValue.getContent()+"     "
+				+paragraphMotherTongue.getContent()+": "+paragraphMotherTongueValue.getContent());
+				
+				Font font23 = FontFactory.getFont("TIMES_ROMAN");
+				font23.setStyle(Font.NORMAL);
+				font23.setSize(10);
+				chunk23.setFont(font23);
+				Paragraph paragraphCategory = new Paragraph();
+				paragraphCategory.add(chunk23);
+				paragraphCategory.setAlignment(Element.ALIGN_LEFT);
+				paragraphCategory.setSpacingBefore(0);
+				
 				Chunk chunk29 = new Chunk("PARENT'S DETAILS: ");
 				Font font29 = FontFactory.getFont("TIMES_ROMAN");
 				font29.setStyle(Font.BOLD);
@@ -1127,12 +1145,12 @@ public class AddmissionForm_PDF {
 				document.add(paragraph20);
 				document.add(paragraph21);
 				document.add(paragraph22);
-				document.add(paragraph23);
-				document.add(paragraph24);
-				document.add(paragraph25);
-				document.add(paragraph26);
-				document.add(paragraph27);
-				document.add(paragraph28);
+				document.add(paragraphCategory);
+//				document.add(paragraphCategoryValue);
+//				document.add(paragraphCast);
+//				document.add(paragraphCastValue);
+//				document.add(paragraphMotherTongue);
+//				document.add(paragraphMotherTongueValue);
 				document.add(paragraph29);
 				document.add(paragraph30);
 				// document.add(paragraph31);

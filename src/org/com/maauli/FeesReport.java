@@ -949,6 +949,8 @@ public class FeesReport extends JFrame {
 					if(optionAdminStaff.equalsIgnoreCase("1")){
 						optionSelect = JOptionPane.showInputDialog("===Send SMS to Admin=== \n Please Enter option \n 1 : Todays Collection "
 								+ " \n 2 : This Week Collection \n 3 : This Month Collection \n 4 : Selected Date Range");
+//						optionSelect = JOptionPane.showInputDialog("===Send SMS to Admin=== \n Please Enter option \n 1 : Todays Collection "
+//								+ " \n 2 : This Week Collection \n 3 : This Month Collection");
 						
 						if(optionSelect != null && !optionSelect.trim().equalsIgnoreCase("null")){
 							if(optionSelect.equalsIgnoreCase("1")){
@@ -993,6 +995,8 @@ public class FeesReport extends JFrame {
 							
 							optionSelect = JOptionPane.showInputDialog("===Send SMS to Staff=== \n Please Enter option \n 1 : Todays Collection "
 									+ " \n 2 : This Week Collection \n 3 : This Month Collection \n 4 : Selected Date Range");
+//							optionSelect = JOptionPane.showInputDialog("===Send SMS to Staff=== \n Please Enter option \n 1 : Todays Collection "
+//									+ " \n 2 : This Week Collection \n 3 : This Month Collection");
 								
 							if(optionSelect != null && !optionSelect.trim().equalsIgnoreCase("null")){
 								LinkedHashMap<String,String> dateMap = new LinkedHashMap<String,String>();
@@ -2051,8 +2055,9 @@ public class FeesReport extends JFrame {
 			JOptionPane.showMessageDialog(null, "For Classwise report don't select All in std/div");
 			validateFields = false;
 		}
-    	else if(reportTypeSel.equalsIgnoreCase("Consolidate") && (!std.equalsIgnoreCase("All") || !div.equalsIgnoreCase("All"))){
-			JOptionPane.showMessageDialog(null, "For Consolidate report select All in std & div");
+    	else if((reportTypeSel.equalsIgnoreCase("Collection") || reportTypeSel.equalsIgnoreCase("Consolidate") || 
+    			reportTypeSel.equalsIgnoreCase("Quarterly")) && (!std.equalsIgnoreCase("All") || !div.equalsIgnoreCase("All"))){
+			JOptionPane.showMessageDialog(null, "For "+reportTypeSel+" report select All in std & div");
 			validateFields = false;
 		}
 		
@@ -2063,6 +2068,9 @@ public class FeesReport extends JFrame {
 					if(reportTypeSel.equalsIgnoreCase("Daily")){
 						dbValidate.getDailyFeesReport(sessionData, academic, std, div, category, fromDate, toDate);
 //						dbValidate.exportFeesDataToReport(sessionData, academic, std, div, category, fromDate, toDate);
+					}
+					else if(reportTypeSel.equalsIgnoreCase("Collection")){
+						dbValidate.getFeesCollectionReport(sessionData, academic, category, fromDate, toDate);
 					}
 					else if(reportTypeSel.equalsIgnoreCase("Classwise")){
 						LinkedHashMap<String, LinkedHashMap<String, String>> feesHeadMap = new LinkedHashMap<String, LinkedHashMap<String, String>>();
@@ -2092,7 +2100,7 @@ public class FeesReport extends JFrame {
 						for (String retStd: stdList.split(",")) {
 							feesHeadMap = dbValidate.getFeesHeadData(sessionData, academic, retStd, section, category);
 							if(!feesHeadMap.isEmpty()){
-								studentReportList.addAll(dbValidate.getDefaulterFeeReport(sessionData, academic, std, div, category, feesHeadMap, "Defaulter", ""));
+								studentReportList.addAll(dbValidate.getDefaulterFeeReport(sessionData, academic, retStd, div, category, feesHeadMap, "Defaulter", ""));
 							}
 							feesHeadMap.clear();
 			 			}
@@ -2105,6 +2113,9 @@ public class FeesReport extends JFrame {
 							JOptionPane.showMessageDialog(null, "No Data found..");
 						}
 						studentReportList.clear();
+					}
+					else if(reportTypeSel.equalsIgnoreCase("Quarterly")){
+						dbValidate.getFeesQuarterlyReport(sessionData, academic, std, div, category, fromDate, toDate);
 					}
 				}
 			} catch (Exception e1) {

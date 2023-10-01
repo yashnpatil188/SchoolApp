@@ -142,6 +142,10 @@ public class CreateExcel {
 					while (resultSet.next()) {
 						fields = resultSet.getString("FIELDS");
 					}
+					if(fields.equalsIgnoreCase("") && groupTitle.equalsIgnoreCase("FEES") && categoryType.equalsIgnoreCase("COLLECTION")) {
+						JOptionPane.showMessageDialog(null, "Please go to Help page and click button with description \n "
+								+ "Insert Excel Data for Fees Report Quarterly & Collection");
+					}
 				} catch (Exception e) {
 					logger.info("getField list from excelData table Exception=" + e);
 				} 

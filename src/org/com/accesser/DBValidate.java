@@ -49,6 +49,7 @@ import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 
 import org.apache.log4j.Logger;
+import org.apache.poi.util.SystemOutLogger;
 import org.com.maauli.BackupExcel;
 import org.com.maauli.CSVToExcelConverter;
 import org.com.maauli.Common;
@@ -2821,7 +2822,12 @@ public class DBValidate {
 		boolean findFlag = false;
 		List studentList = new ArrayList();
 		LinkedHashMap studentMap = new LinkedHashMap();
+		LinkedHashMap<String, String> leftStudentMap = new LinkedHashMap<String, String>();
 
+		
+		logger.info("findClassAllotList entry method time :: "+cm.getCurrentTimeStamp());
+		System.out.println("findClassAllotList entry method time :: "+cm.getCurrentTimeStamp());
+		
 		if (!academicYear.equalsIgnoreCase("") && !academicYear.equalsIgnoreCase("Year")) {
 			addYearToQuery = " AND CLASS_ALLOTMENT.SECTION_NM='" + section + "' AND CLASS_ALLOTMENT.ACADEMIC_YEAR = '"
 					+ academicYear + "'";
@@ -2837,7 +2843,7 @@ public class DBValidate {
 			/// remove insertattendanceCoulmn once added to all schools and updated create
 			/// table query
 			try {
-				String insertAttendanceCoulmn = "ALTER TABLE HS_GENERAL_REGISTER ADD (ATT_SEM1  VARCHAR(10),"
+				String insertAttendanceCoulmn = "ALTER TABLE "+sessionData1.getDBName()+".HS_GENERAL_REGISTER ADD (ATT_SEM1  VARCHAR(10),"
 						+ "ATT_SEM2  VARCHAR(10),ATT_FINAL  VARCHAR(10))";
 				logger.info("insert Attendance Column query == " + insertAttendanceCoulmn);
 				statement = connection.createStatement();
@@ -2846,6 +2852,9 @@ public class DBValidate {
 				// logger.info("failed to create Attendance column in HS_GENERAL_REGISTER table
 				// >>> "+e);
 			}
+			
+			//get list of left students
+			leftStudentMap = getLeftStudentMap(sessionData1, "", "", "");
 
 			if (exam.equalsIgnoreCase("Semester 1")) {
 				exam = "SEM1";
@@ -2864,10 +2873,8 @@ public class DBValidate {
 						+ " FROM " + sessionData1.getDBName() + "." + "CLASS_ALLOTMENT LEFT JOIN "
 						+ sessionData1.getDBName() + "." + "HS_GENERAL_REGISTER "
 						+ "ON CLASS_ALLOTMENT.GR_NO=HS_GENERAL_REGISTER.GR_NO AND HS_GENERAL_REGISTER.SECTION_NM=CLASS_ALLOTMENT.SECTION_NM "
-						+ "WHERE CLASS_ALLOTMENT.GR_NO NOT IN (SELECT GR_NO FROM " + sessionData1.getDBName() + "."
-						+ "HS_GENERAL_REGISTER WHERE " + "ORIGINAL_LC IS NOT NULL AND HS_GENERAL_REGISTER.SECTION_NM='"
-						+ section + "') AND GR_NO='" + gr.trim() + "' " + addYearToQuery
-						+ " ORDER BY CONVERT(CLASS_ALLOTMENT.ROLL_NO, DECIMAL) ASC";
+						+ "WHERE GR_NO='" + gr.trim() + "' " + addYearToQuery
+						+ " ORDER BY ROLL_NO * 1 ASC";
 				logger.info("findClassAllotList 1 == " + findQuery);
 			} else if (!last.trim().equalsIgnoreCase("") && !first.trim().equalsIgnoreCase("")
 					&& !middle.trim().equalsIgnoreCase("")) {
@@ -2877,11 +2884,11 @@ public class DBValidate {
 						+ " FROM " + sessionData1.getDBName() + "." + "CLASS_ALLOTMENT LEFT JOIN "
 						+ sessionData1.getDBName() + "." + "HS_GENERAL_REGISTER "
 						+ "ON CLASS_ALLOTMENT.GR_NO=HS_GENERAL_REGISTER.GR_NO AND HS_GENERAL_REGISTER.SECTION_NM=CLASS_ALLOTMENT.SECTION_NM "
-						+ "WHERE ORIGINAL_LC IS NOT NULL) AND UPPER (LAST_NAME) LIKE UPPER('%" + last.trim()
-						+ "%') AND " + "UPPER (FIRST_NAME) LIKE UPPER('%" + first.trim()
-						+ "%') AND UPPER(FATHER_NAME) LIKE UPPER('%" + middle.trim() + "%')"
+						+ "WHERE UPPER (CLASS_ALLOTMENT.LAST_NAME) LIKE UPPER('%" + last.trim()
+						+ "%') AND " + "UPPER (CLASS_ALLOTMENT.FIRST_NAME) LIKE UPPER('%" + first.trim()
+						+ "%') AND UPPER(CLASS_ALLOTMENT.FATHER_NAME) LIKE UPPER('%" + middle.trim() + "%')"
 						+ " AND CLASS_ALLOTMENT.PRESENT_STD='" + std.trim() + "' AND CLASS_ALLOTMENT.PRESENT_DIV='"
-						+ div.trim() + "'" + addYearToQuery + " ORDER BY CONVERT(CLASS_ALLOTMENT.ROLL_NO, DECIMAL) ASC";
+						+ div.trim() + "'" + addYearToQuery + " ORDER BY ROLL_NO * 1 ASC";
 				logger.info("findClassAllotList 2 == " + findQuery);
 			} else if (!last.trim().equalsIgnoreCase("") && !first.trim().equalsIgnoreCase("")) {
 				findQuery = "SELECT DISTINCT HS_GENERAL_REGISTER.GENDER AS GENDER, UPPER(CLASS_ALLOTMENT.GR_NO) AS GR_NO, ROLL_NO, UPPER(CLASS_ALLOTMENT.LAST_NAME) AS LAST_NAME, UPPER(CLASS_ALLOTMENT.REMARK_0) AS REMARK_0, "
@@ -2890,10 +2897,10 @@ public class DBValidate {
 						+ " FROM " + sessionData1.getDBName() + "." + "CLASS_ALLOTMENT LEFT JOIN "
 						+ sessionData1.getDBName() + "." + "HS_GENERAL_REGISTER "
 						+ "ON CLASS_ALLOTMENT.GR_NO=HS_GENERAL_REGISTER.GR_NO AND HS_GENERAL_REGISTER.SECTION_NM=CLASS_ALLOTMENT.SECTION_NM "
-						+ "WHERE ORIGINAL_LC IS NOT NULL) AND UPPER(LAST_NAME) LIKE UPPER('%" + last.trim() + "%') AND "
-						+ " UPPER(FIRST_NAME) LIKE UPPER('%" + first.trim() + "%') AND CLASS_ALLOTMENT.PRESENT_STD='"
+						+ "WHERE UPPER(CLASS_ALLOTMENT.LAST_NAME) LIKE UPPER('%" + last.trim() + "%') AND "
+						+ " UPPER(CLASS_ALLOTMENT.FIRST_NAME) LIKE UPPER('%" + first.trim() + "%') AND CLASS_ALLOTMENT.PRESENT_STD='"
 						+ std.trim() + "' AND CLASS_ALLOTMENT.PRESENT_DIV='" + div.trim() + "'" + addYearToQuery
-						+ " ORDER BY CONVERT(CLASS_ALLOTMENT.ROLL_NO, DECIMAL) ASC";
+						+ " ORDER BY ROLL_NO * 1 ASC";
 				logger.info("findClassAllotList 3 == " + findQuery);
 			} else if (!first.trim().equalsIgnoreCase("")) {
 				findQuery = "SELECT DISTINCT HS_GENERAL_REGISTER.GENDER AS GENDER, UPPER(CLASS_ALLOTMENT.GR_NO) AS GR_NO, ROLL_NO, UPPER(CLASS_ALLOTMENT.LAST_NAME) AS LAST_NAME, UPPER(CLASS_ALLOTMENT.REMARK_0) AS REMARK_0, "
@@ -2902,11 +2909,9 @@ public class DBValidate {
 						+ " FROM " + sessionData1.getDBName() + "." + "CLASS_ALLOTMENT LEFT JOIN "
 						+ sessionData1.getDBName() + "." + "HS_GENERAL_REGISTER "
 						+ "ON CLASS_ALLOTMENT.GR_NO=HS_GENERAL_REGISTER.GR_NO AND HS_GENERAL_REGISTER.SECTION_NM=CLASS_ALLOTMENT.SECTION_NM "
-						+ "WHERE CLASS_ALLOTMENT.GR_NO NOT IN (SELECT GR_NO FROM " + sessionData1.getDBName() + "."
-						+ "HS_GENERAL_REGISTER WHERE ORIGINAL_LC IS NOT NULL  AND HS_GENERAL_REGISTER.SECTION_NM='"
-						+ section + "') AND UPPER(FIRST_NAME) LIKE UPPER('%" + first.trim()
+						+ "WHERE UPPER(CLASS_ALLOTMENT.FIRST_NAME) LIKE UPPER('%" + first.trim()
 						+ "%') AND CLASS_ALLOTMENT.PRESENT_STD='" + std.trim() + "' AND CLASS_ALLOTMENT.PRESENT_DIV='"
-						+ div.trim() + "'" + addYearToQuery + " ORDER BY CONVERT(CLASS_ALLOTMENT.ROLL_NO, DECIMAL) ASC";
+						+ div.trim() + "'" + addYearToQuery + " ORDER BY ROLL_NO * 1 ASC";
 				logger.info("findClassAllotList 4 == " + findQuery);
 			} else if (!last.trim().equalsIgnoreCase("")) {
 				findQuery = "SELECT DISTINCT HS_GENERAL_REGISTER.GENDER AS GENDER, UPPER(CLASS_ALLOTMENT.GR_NO) AS GR_NO, ROLL_NO, UPPER(CLASS_ALLOTMENT.LAST_NAME) AS LAST_NAME, UPPER(CLASS_ALLOTMENT.REMARK_0) AS REMARK_0, "
@@ -2915,11 +2920,9 @@ public class DBValidate {
 						+ " FROM " + sessionData1.getDBName() + "." + "CLASS_ALLOTMENT LEFT JOIN "
 						+ sessionData1.getDBName() + "." + "HS_GENERAL_REGISTER "
 						+ "ON CLASS_ALLOTMENT.GR_NO=HS_GENERAL_REGISTER.GR_NO AND HS_GENERAL_REGISTER.SECTION_NM=CLASS_ALLOTMENT.SECTION_NM "
-						+ "WHERE CLASS_ALLOTMENT.GR_NO NOT IN (SELECT GR_NO FROM " + sessionData1.getDBName() + "."
-						+ "HS_GENERAL_REGISTER WHERE ORIGINAL_LC IS NOT NULL  AND HS_GENERAL_REGISTER.SECTION_NM='"
-						+ section + "') AND UPPER (LAST_NAME) LIKE UPPER ('%" + last.trim()
+						+ "WHERE UPPER (CLASS_ALLOTMENT.LAST_NAME) LIKE UPPER ('%" + last.trim()
 						+ "%') AND CLASS_ALLOTMENT.PRESENT_STD='" + std.trim() + "' AND CLASS_ALLOTMENT.PRESENT_DIV='"
-						+ div.trim() + "'" + addYearToQuery + " ORDER BY CONVERT(CLASS_ALLOTMENT.ROLL_NO, DECIMAL) ASC";
+						+ div.trim() + "'" + addYearToQuery + " ORDER BY ROLL_NO * 1 ASC";
 				logger.info("findClassAllotList 5 == " + findQuery);
 			} else if (!middle.trim().equalsIgnoreCase("")) {
 				findQuery = "SELECT DISTINCT HS_GENERAL_REGISTER.GENDER AS GENDER, UPPER(CLASS_ALLOTMENT.GR_NO) AS GR_NO, ROLL_NO, UPPER(CLASS_ALLOTMENT.LAST_NAME) AS LAST_NAME, UPPER(CLASS_ALLOTMENT.REMARK_0) AS REMARK_0, "
@@ -2928,11 +2931,9 @@ public class DBValidate {
 						+ " FROM " + sessionData1.getDBName() + "." + "CLASS_ALLOTMENT LEFT JOIN "
 						+ sessionData1.getDBName() + "." + "HS_GENERAL_REGISTER "
 						+ "ON CLASS_ALLOTMENT.GR_NO=HS_GENERAL_REGISTER.GR_NO AND HS_GENERAL_REGISTER.SECTION_NM=CLASS_ALLOTMENT.SECTION_NM "
-						+ "WHERE CLASS_ALLOTMENT.GR_NO NOT IN (SELECT GR_NO FROM " + sessionData1.getDBName() + "."
-						+ "HS_GENERAL_REGISTER WHERE ORIGINAL_LC IS NOT NULL  AND HS_GENERAL_REGISTER.SECTION_NM='"
-						+ section + "') AND UPPER(FATHER_NAME) LIKE UPPER('%" + middle.trim()
+						+ "WHERE UPPER(CLASS_ALLOTMENT.FATHER_NAME) LIKE UPPER('%" + middle.trim()
 						+ "%') AND CLASS_ALLOTMENT.PRESENT_STD='" + std.trim() + "' AND CLASS_ALLOTMENT.PRESENT_DIV='"
-						+ div.trim() + "'" + addYearToQuery + " ORDER BY CONVERT(CLASS_ALLOTMENT.ROLL_NO, DECIMAL) ASC";
+						+ div.trim() + "'" + addYearToQuery + " ORDER BY ROLL_NO * 1 ASC";
 				logger.info("findClassAllotList 6 == " + findQuery);
 			} else if (!std.trim().equalsIgnoreCase("") && !div.trim().equalsIgnoreCase("") && !isAttendance) {
 				findQuery = "SELECT DISTINCT HS_GENERAL_REGISTER.GENDER AS GENDER, UPPER(CLASS_ALLOTMENT.GR_NO) AS GR_NO, ROLL_NO, UPPER(CLASS_ALLOTMENT.LAST_NAME) AS LAST_NAME, UPPER(CLASS_ALLOTMENT.REMARK_0) AS REMARK_0, "
@@ -2941,11 +2942,9 @@ public class DBValidate {
 						+ " FROM " + sessionData1.getDBName() + "." + "CLASS_ALLOTMENT LEFT JOIN "
 						+ sessionData1.getDBName() + "." + "HS_GENERAL_REGISTER "
 						+ "ON CLASS_ALLOTMENT.GR_NO=HS_GENERAL_REGISTER.GR_NO AND HS_GENERAL_REGISTER.SECTION_NM=CLASS_ALLOTMENT.SECTION_NM "
-						+ "WHERE " + "CLASS_ALLOTMENT.GR_NO NOT IN (SELECT GR_NO FROM " + sessionData1.getDBName() + "."
-						+ "HS_GENERAL_REGISTER WHERE ORIGINAL_LC IS NOT NULL  AND HS_GENERAL_REGISTER.SECTION_NM='"
-						+ section + "') AND  CLASS_ALLOTMENT.PRESENT_STD = '" + std.trim()
+						+ "WHERE CLASS_ALLOTMENT.PRESENT_STD = '" + std.trim()
 						+ "' AND CLASS_ALLOTMENT.PRESENT_DIV = '" + div.trim() + "'" + addYearToQuery + addRollToQuery
-						+ " ORDER BY CONVERT(CLASS_ALLOTMENT.ROLL_NO, DECIMAL) ASC";
+						+ " ORDER BY ROLL_NO * 1 ASC";
 				logger.info("findClassAllotList 7 == " + findQuery);
 			} else if (!std.trim().equalsIgnoreCase("") && !div.trim().equalsIgnoreCase("")) {
 				findQuery = "SELECT DISTINCT HS_GENERAL_REGISTER.GENDER AS GENDER," + attendanceColumn
@@ -2959,18 +2958,27 @@ public class DBValidate {
 						+ "ON CLASS_ALLOTMENT.GR_NO=HS_GENERAL_REGISTER.GR_NO AND HS_GENERAL_REGISTER.SECTION_NM=CLASS_ALLOTMENT.SECTION_NM "
 						+ "WHERE CLASS_ALLOTMENT.PRESENT_STD = '" + std.trim() + "' AND CLASS_ALLOTMENT.PRESENT_DIV = '"
 						+ div.trim() + "' AND (ORIGINAL_LC IS NULL OR ORIGINAL_LC = 0) " + addYearToQuery
-						+ addRollToQuery + " ORDER BY CONVERT(CLASS_ALLOTMENT.ROLL_NO, DECIMAL) ASC";
+						+ addRollToQuery + " ORDER BY ROLL_NO * 1 ASC";
 				logger.info("findClassAllotList 7 == " + findQuery);
 			}
 
+			logger.info("Time before executing findClassAllotList query :: "+cm.getCurrentTimeStamp());
+			System.out.println("Time before executing findClassAllotList query :: "+cm.getCurrentTimeStamp());
+			
 			logger.info("findClassAllotList query == " + findQuery);
 
 			statement = connection.createStatement();
 			resultSet = statement.executeQuery(findQuery);
+			
+			logger.info("Time after executing findClassAllotList query :: "+cm.getCurrentTimeStamp());
+			System.out.println("Time after executing findClassAllotList query :: "+cm.getCurrentTimeStamp());
 
 			while (resultSet.next()) {
 				LinkedHashMap studentDetailMap = new LinkedHashMap();
 				grDB = resultSet.getString("GR_NO");
+				if(leftStudentMap.get(grDB) != null) {
+					continue;
+				}
 				studentDetailMap.put("gr", grDB);
 				genderDB = resultSet.getString("GENDER") == null ? " " : (resultSet.getString("GENDER").trim());
 				if (genderDB.equalsIgnoreCase("")) {
@@ -3038,6 +3046,10 @@ public class DBValidate {
 				}
 				findFlag = true;
 			}
+			
+			logger.info("Time after getting findClassAllotList data :: "+cm.getCurrentTimeStamp());
+			System.out.println("Time after getting findClassAllotList data :: "+cm.getCurrentTimeStamp());
+			
 		} catch (Exception e) {
 			cm.logException(e);
 		} finally {
@@ -8105,6 +8117,27 @@ public class DBValidate {
 			return deleteFlag;
 		}
 	}
+	
+	
+	// /////////insertExcelData////////////////////////////
+	public boolean insertExcelData(SessionData sessionData1) throws Exception {
+
+		logger.info("========insertExcelData==========");
+		try {
+			String query = "INSERT into "+sessionData1.getDBName()+".EXCEL_DATA (GROUP_TITLE,CATEGORY_TYPE,FIELDS) VALUES ('FEES','QUARTERLY','CLASS|Total Strength|Free*3|Payable*3|Dues*3|Q1*3|Q2*3|Q3*3|Q4*3|Total*3|Paid Strength|Q1*3|Q2*3|Q3*3|Q4*3|Paid Fees|Q1*3|Q2*3|Q3*3|Q4*3|Concession*3')";
+			statement = connection.createStatement();
+			statement.executeUpdate(query);
+			
+			query = "INSERT into "+sessionData1.getDBName()+".EXCEL_DATA (GROUP_TITLE,CATEGORY_TYPE,FIELDS) VALUES ('FEES','COLLECTION','STD*8|FEES*8')";
+			statement = connection.createStatement();
+			statement.executeUpdate(query);
+			return true;
+			
+		} catch (Exception e) {
+			cm.logException(e);
+			return false;
+		}
+	}
 
 	// /////////findCategoryWise////////////////////////////////////////
 	public List<String> findCategoryWise(SessionData sessionData1, String std, String div, String academicYear,
@@ -9224,7 +9257,7 @@ public class DBValidate {
 		}
 		return catDataList;
 	}
-
+	
 	/////////// General Print List////////////////////////////////////////
 	public List<String> generalPrintList(SessionData sessionData1, String std, String div, String academicYear,
 			String section, String catType, String print, String tillDate) throws Exception {
@@ -20686,7 +20719,7 @@ public class DBValidate {
 		String coulmnNames = "", dateColumnStr = "", colName = "", alterDateColumn = "", defaultValue = "";
 		String coulmnNamesReport = "";
 		String findColumnListQuery = "";
-		List<String> columnList = new ArrayList<>();
+		LinkedHashMap<String, String> columnMap = new LinkedHashMap<>();
 		int startMonth = Integer.parseInt(bundle.getString("ACADEMIC_START_MONTH"));
 		boolean retFlag = false;
 
@@ -20700,7 +20733,7 @@ public class DBValidate {
 			while (resultSet.next()) {
 				colName = resultSet.getString("COLUMN_NAME");
 				defaultValue = resultSet.getString("COLUMN_DEFAULT");
-				columnList.add(colName);
+				columnMap.put(colName, colName);
 
 				if (colName.contains("_DATE") && defaultValue != null
 						&& !defaultValue.equalsIgnoreCase("CURRENT_TIMESTAMP")) {
@@ -20747,116 +20780,127 @@ public class DBValidate {
 
 //			if(optional.equalsIgnoreCase("No")){
 			if (payFrequency.equalsIgnoreCase("Monthly") || payFrequency.equalsIgnoreCase("Occasionally")) {
-				if (!columnList.contains(fee_name.toUpperCase() + "_JAN"))
-					coulmnNames = coulmnNames + "," + fee_name.toUpperCase() + "_JAN double UNSIGNED DEFAULT NULL,"
+				if (!colName.contains(fee_name.toUpperCase() + "_JAN"))
+					coulmnNames = coulmnNames + "," + fee_name.toUpperCase() + "_JAN double DEFAULT NULL,"
 							+ fee_name.toUpperCase() + "_JAN_DATE DATETIME,"
 							+ fee_name.toUpperCase() + "_JAN_BANK  TEXT";
-				if (!columnList.contains(fee_name.toUpperCase() + "_FEB"))
-					coulmnNames = coulmnNames + "," + fee_name.toUpperCase() + "_FEB double UNSIGNED DEFAULT NULL,"
+				if (!colName.contains(fee_name.toUpperCase() + "_FEB"))
+					coulmnNames = coulmnNames + "," + fee_name.toUpperCase() + "_FEB double DEFAULT NULL,"
 							+ fee_name.toUpperCase() + "_FEB_DATE DATETIME,"
 							+ fee_name.toUpperCase() + "_FEB_BANK  TEXT";
-				if (!columnList.contains(fee_name.toUpperCase() + "_MAR"))
-					coulmnNames = coulmnNames + "," + fee_name.toUpperCase() + "_MAR double UNSIGNED DEFAULT NULL,"
+				if (!colName.contains(fee_name.toUpperCase() + "_MAR"))
+					coulmnNames = coulmnNames + "," + fee_name.toUpperCase() + "_MAR double DEFAULT NULL,"
 							+ fee_name.toUpperCase() + "_MAR_DATE DATETIME,"
 							+ fee_name.toUpperCase() + "_MAR_BANK  TEXT";
-				if (!columnList.contains(fee_name.toUpperCase() + "_APR"))
-					coulmnNames = coulmnNames + "," + fee_name.toUpperCase() + "_APR double UNSIGNED DEFAULT NULL,"
+				if (!colName.contains(fee_name.toUpperCase() + "_APR"))
+					coulmnNames = coulmnNames + "," + fee_name.toUpperCase() + "_APR double DEFAULT NULL,"
 							+ fee_name.toUpperCase() + "_APR_DATE DATETIME,"
 							+ fee_name.toUpperCase() + "_APR_BANK  TEXT";
-				if (!columnList.contains(fee_name.toUpperCase() + "_MAY"))
-					coulmnNames = coulmnNames + "," + fee_name.toUpperCase() + "_MAY double UNSIGNED DEFAULT NULL,"
+				if (!colName.contains(fee_name.toUpperCase() + "_MAY"))
+					coulmnNames = coulmnNames + "," + fee_name.toUpperCase() + "_MAY double DEFAULT NULL,"
 							+ fee_name.toUpperCase() + "_MAY_DATE DATETIME,"
 							+ fee_name.toUpperCase() + "_MAY_BANK  TEXT";
-				if (!columnList.contains(fee_name.toUpperCase() + "_JUN"))
-					coulmnNames = coulmnNames + "," + fee_name.toUpperCase() + "_JUN double UNSIGNED DEFAULT NULL,"
+				if (!colName.contains(fee_name.toUpperCase() + "_JUN"))
+					coulmnNames = coulmnNames + "," + fee_name.toUpperCase() + "_JUN double DEFAULT NULL,"
 							+ fee_name.toUpperCase() + "_JUN_DATE DATETIME,"
 							+ fee_name.toUpperCase() + "_JUN_BANK  TEXT";
-				if (!columnList.contains(fee_name.toUpperCase() + "_JUL"))
-					coulmnNames = coulmnNames + "," + fee_name.toUpperCase() + "_JUL double UNSIGNED DEFAULT NULL,"
+				if (!colName.contains(fee_name.toUpperCase() + "_JUL"))
+					coulmnNames = coulmnNames + "," + fee_name.toUpperCase() + "_JUL double DEFAULT NULL,"
 							+ fee_name.toUpperCase() + "_JUL_DATE DATETIME,"
 							+ fee_name.toUpperCase() + "_JUL_BANK  TEXT";
-				if (!columnList.contains(fee_name.toUpperCase() + "_AUG"))
-					coulmnNames = coulmnNames + "," + fee_name.toUpperCase() + "_AUG double UNSIGNED DEFAULT NULL,"
+				if (!colName.contains(fee_name.toUpperCase() + "_AUG"))
+					coulmnNames = coulmnNames + "," + fee_name.toUpperCase() + "_AUG double DEFAULT NULL,"
 							+ fee_name.toUpperCase() + "_AUG_DATE DATETIME,"
 							+ fee_name.toUpperCase() + "_AUG_BANK  TEXT";
-				if (!columnList.contains(fee_name.toUpperCase() + "_SEP"))
-					coulmnNames = coulmnNames + "," + fee_name.toUpperCase() + "_SEP double UNSIGNED DEFAULT NULL,"
+				if (!colName.contains(fee_name.toUpperCase() + "_SEP"))
+					coulmnNames = coulmnNames + "," + fee_name.toUpperCase() + "_SEP double DEFAULT NULL,"
 							+ fee_name.toUpperCase() + "_SEP_DATE DATETIME,"
 							+ fee_name.toUpperCase() + "_SEP_BANK  TEXT";
-				if (!columnList.contains(fee_name.toUpperCase() + "_OCT"))
-					coulmnNames = coulmnNames + "," + fee_name.toUpperCase() + "_OCT double UNSIGNED DEFAULT NULL,"
+				if (!colName.contains(fee_name.toUpperCase() + "_OCT"))
+					coulmnNames = coulmnNames + "," + fee_name.toUpperCase() + "_OCT double DEFAULT NULL,"
 							+ fee_name.toUpperCase() + "_OCT_DATE DATETIME,"
 							+ fee_name.toUpperCase() + "_OCT_BANK  TEXT";
-				if (!columnList.contains(fee_name.toUpperCase() + "_NOV"))
-					coulmnNames = coulmnNames + "," + fee_name.toUpperCase() + "_NOV double UNSIGNED DEFAULT NULL,"
+				if (!colName.contains(fee_name.toUpperCase() + "_NOV"))
+					coulmnNames = coulmnNames + "," + fee_name.toUpperCase() + "_NOV double DEFAULT NULL,"
 							+ fee_name.toUpperCase() + "_NOV_DATE DATETIME,"
 							+ fee_name.toUpperCase() + "_NOV_BANK  TEXT";
-				if (!columnList.contains(fee_name.toUpperCase() + "_DEC"))
-					coulmnNames = coulmnNames + "," + fee_name.toUpperCase() + "_DEC double UNSIGNED DEFAULT NULL,"
+				if (!colName.contains(fee_name.toUpperCase() + "_DEC"))
+					coulmnNames = coulmnNames + "," + fee_name.toUpperCase() + "_DEC double DEFAULT NULL,"
 							+ fee_name.toUpperCase() + "_DEC_DATE DATETIME,"
 							+ fee_name.toUpperCase() + "_DEC_BANK  TEXT";
 
 				coulmnNames = coulmnNames.substring(1);
 			} else if (payFrequency.equalsIgnoreCase("Quarterly")) {
-				if (!columnList.contains(fee_name.toUpperCase() + "_" + cm.intgerToMonth(startMonth + "")))
+				if (!colName.contains(fee_name.toUpperCase() + "_" + cm.intgerToMonth(startMonth + "")))
 					coulmnNames = coulmnNames + "," + fee_name.toUpperCase() + "_" + cm.intgerToMonth(startMonth + "")
-							+ " double UNSIGNED DEFAULT NULL," + fee_name.toUpperCase() + "_"
+							+ " double DEFAULT NULL," + fee_name.toUpperCase() + "_"
 							+ cm.intgerToMonth(startMonth + "") + "_DATE DATETIME,"
 							+ fee_name.toUpperCase() + "_" + cm.intgerToMonth(startMonth + "") + "_BANK  TEXT";
-				if (!columnList.contains(fee_name.toUpperCase() + "_" + cm.intgerToMonth((startMonth + 3) + "")))
+				if (!colName.contains(fee_name.toUpperCase() + "_" + cm.intgerToMonth((startMonth + 3) + "")))
 					coulmnNames = coulmnNames + "," + fee_name.toUpperCase() + "_"
-							+ cm.intgerToMonth((startMonth + 3) + "") + " double UNSIGNED DEFAULT NULL,"
+							+ cm.intgerToMonth((startMonth + 3) + "") + " double DEFAULT NULL,"
 							+ fee_name.toUpperCase() + "_" + cm.intgerToMonth((startMonth + 3) + "")
 							+ "_DATE DATETIME," + fee_name.toUpperCase() + "_"
 							+ cm.intgerToMonth((startMonth + 3) + "") + "_BANK  TEXT";
-				if (!columnList.contains(fee_name.toUpperCase() + "_" + cm.intgerToMonth((startMonth + 6) + "")))
+				if (!colName.contains(fee_name.toUpperCase() + "_" + cm.intgerToMonth((startMonth + 6) + "")))
 					coulmnNames = coulmnNames + "," + fee_name.toUpperCase() + "_"
-							+ cm.intgerToMonth((startMonth + 6) + "") + " double UNSIGNED DEFAULT NULL,"
+							+ cm.intgerToMonth((startMonth + 6) + "") + " double DEFAULT NULL,"
 							+ fee_name.toUpperCase() + "_" + cm.intgerToMonth((startMonth + 6) + "")
 							+ "_DATE DATETIME," + fee_name.toUpperCase() + "_"
 							+ cm.intgerToMonth((startMonth + 6) + "") + "_BANK  TEXT";
-				if (!columnList.contains(fee_name.toUpperCase() + "_" + cm.intgerToMonth((startMonth + 9) + "")))
+				if (!colName.contains(fee_name.toUpperCase() + "_" + cm.intgerToMonth((startMonth + 9) + "")))
 					coulmnNames = coulmnNames + "," + fee_name.toUpperCase() + "_"
-							+ cm.intgerToMonth((startMonth + 9) + "") + " double UNSIGNED DEFAULT NULL,"
+							+ cm.intgerToMonth((startMonth + 9) + "") + " double DEFAULT NULL,"
 							+ fee_name.toUpperCase() + "_" + cm.intgerToMonth((startMonth + 9) + "")
 							+ "_DATE DATETIME," + fee_name.toUpperCase() + "_"
 							+ cm.intgerToMonth((startMonth + 9) + "") + "_BANK  TEXT";
 
 				coulmnNames = coulmnNames.substring(1);
 			} else if (payFrequency.equalsIgnoreCase("Half Yearly")) {
-				if (!columnList.contains(fee_name.toUpperCase() + "_" + cm.intgerToMonth(startMonth + "")))
+				if (!colName.contains(fee_name.toUpperCase() + "_" + cm.intgerToMonth(startMonth + "")))
 					coulmnNames = coulmnNames + "," + fee_name.toUpperCase() + "_" + cm.intgerToMonth(startMonth + "")
-							+ " double UNSIGNED DEFAULT NULL," + fee_name.toUpperCase() + "_"
+							+ " double DEFAULT NULL," + fee_name.toUpperCase() + "_"
 							+ cm.intgerToMonth(startMonth + "") + "_DATE DATETIME,"
 							+ fee_name.toUpperCase() + "_" + cm.intgerToMonth(startMonth + "") + "_BANK  TEXT";
-				if (!columnList.contains(fee_name.toUpperCase() + "_" + cm.intgerToMonth((startMonth + 6) + "")))
+				if (!colName.contains(fee_name.toUpperCase() + "_" + cm.intgerToMonth((startMonth + 6) + "")))
 					coulmnNames = coulmnNames + "," + fee_name.toUpperCase() + "_"
-							+ cm.intgerToMonth((startMonth + 6) + "") + " double UNSIGNED DEFAULT NULL,"
+							+ cm.intgerToMonth((startMonth + 6) + "") + " double DEFAULT NULL,"
 							+ fee_name.toUpperCase() + "_" + cm.intgerToMonth((startMonth + 6) + "")
 							+ "_DATE DATETIME," + fee_name.toUpperCase() + "_"
 							+ cm.intgerToMonth((startMonth + 6) + "") + "_BANK  TEXT";
 
 				coulmnNames = coulmnNames.substring(1);
 			} else if (payFrequency.equalsIgnoreCase("Yearly")) {
-				if (!columnList.contains(fee_name.toUpperCase() + "_" + cm.intgerToMonth(startMonth + "")))
+				if (!colName.contains(fee_name.toUpperCase() + "_" + cm.intgerToMonth(startMonth + "")))
 					coulmnNames = fee_name.toUpperCase() + "_" + cm.intgerToMonth(startMonth + "")
-							+ " double UNSIGNED DEFAULT NULL," + fee_name.toUpperCase() + "_"
+							+ " double DEFAULT NULL," + fee_name.toUpperCase() + "_"
 							+ cm.intgerToMonth(startMonth + "") + "_DATE DATETIME,"
 							+ fee_name.toUpperCase() + "_" + cm.intgerToMonth(startMonth + "") + "_BANK  TEXT";
 			}
 
 			if (coulmnNames.length() > 1) {
-				insertQuery = "ALTER TABLE " + sessionData1.getDBName() + "." + "FEES_DATA_MANDATORY ADD ("
-						+ coulmnNames + ")";
-				logger.info("insert FEES_DATA_MANDATORY Column query == " + insertQuery);
-				statement = connection.createStatement();
-				statement.executeUpdate(insertQuery);
+				try {
+					insertQuery = "ALTER TABLE " + sessionData1.getDBName() + "." + "FEES_DATA_MANDATORY ADD ("
+							+ coulmnNames + ")";
+					logger.info("insert FEES_DATA_MANDATORY Column query == " + insertQuery);
+					statement = connection.createStatement();
+					statement.executeUpdate(insertQuery);
+				}
+				catch (Exception e) {
+					logger.warn("failed to create column name for subect " + fee_name + " in FEES_DATA_MANDATORY >> " + e);
+				}
 
-				insertQuery = "ALTER TABLE " + sessionData1.getDBName() + "." + "FEES_REPORT_MANDATORY ADD ("
-						+ fee_name.toUpperCase() + " double UNSIGNED)";
-				logger.info("insert FEES_REPORT_MANDATORY Column query == " + insertQuery);
-				statement = connection.createStatement();
-				statement.executeUpdate(insertQuery);
+				try {
+					insertQuery = "ALTER TABLE " + sessionData1.getDBName() + "." + "FEES_REPORT_MANDATORY ADD ("
+							+ fee_name.toUpperCase() + " double UNSIGNED)";
+					logger.info("insert FEES_REPORT_MANDATORY Column query == " + insertQuery);
+					statement = connection.createStatement();
+					statement.executeUpdate(insertQuery);
+				}
+				catch (Exception e) {
+					logger.warn("failed to create column name for subect " + fee_name + " in FEES_REPORT_MANDATORY >> " + e);
+				}
+				
 			}
 
 //			}
@@ -20870,14 +20914,14 @@ public class DBValidate {
 //				}
 //				
 //				if(!columnList.contains(fee_name.toUpperCase()))
-//					coulmnNames = coulmnNames + fee_name.toUpperCase() + " double UNSIGNED DEFAULT NULL,"+fee_name.toUpperCase() + "_DATE timestamp NOT NULL DEFAULT '0000-00-00 00:00:00',"+fee_name.toUpperCase() + "_BANK  TEXT";
+//					coulmnNames = coulmnNames + fee_name.toUpperCase() + " double DEFAULT NULL,"+fee_name.toUpperCase() + "_DATE timestamp NOT NULL DEFAULT '0000-00-00 00:00:00',"+fee_name.toUpperCase() + "_BANK  TEXT";
 //				
 //				insertQuery = "ALTER TABLE "+sessionData1.getDBName()+"."+"FEES_DATA_OPTIONAL ADD (" + coulmnNames + ")";
 //				logger.info("insert FEES_DATA_OPTIONAL Column query == " + insertQuery);
 //				statement = connection.createStatement();
 //				statement.executeUpdate(insertQuery);
 //				
-//				insertQuery = "ALTER TABLE "+sessionData1.getDBName()+"."+"FEES_REPORT_OPTIONAL ADD (" + fee_name.toUpperCase() + " double UNSIGNED DEFAULT NULL)";
+//				insertQuery = "ALTER TABLE "+sessionData1.getDBName()+"."+"FEES_REPORT_OPTIONAL ADD (" + fee_name.toUpperCase() + " double DEFAULT NULL)";
 //				logger.info("insert FEES_REPORT_MANDATORY Column query == " + insertQuery);
 //				statement = connection.createStatement();
 //				statement.executeUpdate(insertQuery);
@@ -20933,7 +20977,7 @@ public class DBValidate {
 			String academic, String std, String section, String category) throws Exception {
 		LinkedHashMap<String, LinkedHashMap<String, String>> retFeesHeadMap = new LinkedHashMap<String, LinkedHashMap<String, String>>();
 		String findFeesHeadQuery, addToCondition = "";
-		String fees_name, categorydb, amount, frequency, optionaldb, order_no, shortName = "";
+		String fees_name, categorydb, amount, frequency, optionaldb, order_no, shortName = "", stdDb = "";
 
 		try {
 //			retFeesHeadMap.put("Select", null);
@@ -20947,12 +20991,14 @@ public class DBValidate {
 			}
 
 			findFeesHeadQuery = "SELECT * FROM " + sessionData.getDBName() + "." + "FEES_HEAD WHERE ACADEMIC_YEAR='"
-					+ academic + "' " + "AND SECTION_NM='" + section + "' " + addToCondition + " ORDER BY ORDER_NO";
+					+ academic + "' " + "AND SECTION_NM='" + section + "' " + addToCondition + " ORDER BY STD_1,ORDER_NO";
 			statement = connection.createStatement();
 			resultSet = statement.executeQuery(findFeesHeadQuery);
 
 			while (resultSet.next()) {
 				LinkedHashMap<String, String> feesHeadDetailMap = new LinkedHashMap<String, String>();
+				stdDb = resultSet.getString("STD_1") == null ? "" : (resultSet.getString("STD_1").trim());
+				feesHeadDetailMap.put("std", stdDb);
 				fees_name = resultSet.getString("FEES_NAME") == null ? "" : (resultSet.getString("FEES_NAME").trim());
 				fees_name = cm.replaceCommaApostrophy(fees_name);
 				feesHeadDetailMap.put("fees_name", fees_name);
@@ -20980,6 +21026,48 @@ public class DBValidate {
 		}
 		return retFeesHeadMap;
 	}
+	
+//	/////////// get Fees Head Data with Std////////////////////////////////////////
+//	public LinkedHashMap<String, String> getFeesHeadDataWithStd(SessionData sessionData,
+//			String academic, String std, String section, String category) throws Exception {
+//		LinkedHashMap<String, String> retFeesHeadMap = new LinkedHashMap<String, String>();
+//		String findFeesHeadQuery, addToCondition = "";
+//		String fees_name, categorydb, amount, frequency, optionaldb, order_no, shortName = "";
+//	
+//		try {
+//			if (!category.equalsIgnoreCase("")) {
+//				addToCondition = " AND CATEGORY='" + category + "'";
+//			}
+//			if (std.contains(",")) {
+//				addToCondition += " AND STD_1 IN (" + std + ")";
+//			} else {
+//				addToCondition += " AND STD_1='" + std + "'";
+//			}
+//	
+//			findFeesHeadQuery = "SELECT DISTINCT FEES_NAME,FREQUENCY FROM " + sessionData.getDBName() + "." + "FEES_HEAD WHERE ACADEMIC_YEAR='"
+//					+ academic + "' " + "AND SECTION_NM='" + section + "' " + addToCondition + " ORDER BY ORDER_NO";
+//			statement = connection.createStatement();
+//			resultSet = statement.executeQuery(findFeesHeadQuery);
+//	
+//			while (resultSet.next()) {
+//				fees_name = resultSet.getString("FEES_NAME") == null ? "" : (resultSet.getString("FEES_NAME").trim());
+//				fees_name = cm.replaceCommaApostrophy(fees_name);
+//				frequency = resultSet.getString("FREQUENCY") == null ? "" : (resultSet.getString("FREQUENCY").trim());
+//	
+//				if (retFeesHeadMap.get(fees_name) == null) {
+//					retFeesHeadMap.put(fees_name, frequency);
+//				} else if(retFeesHeadMap.get(fees_name).equalsIgnoreCase(frequency)) {
+//					retFeesHeadMap = null;
+//					JOptionPane.showMessageDialog(null, "Duplicate Fees with differet frequency. Please contact administrator.");
+//					break;
+//				}
+//			}
+//	
+//		} catch (Exception e) {
+//			cm.logException(e);
+//		}
+//		return retFeesHeadMap;
+//	}
 
 	/////////// get free student Data from HS General
 	/////////// Register////////////////////////////////////////
@@ -20992,15 +21080,22 @@ public class DBValidate {
 		try {
 			logger.info("=========getFreeStudentData============");
 			if (!std.equalsIgnoreCase("") && !std.equalsIgnoreCase("All")) {
-				addToCondition += " AND PRESENT_STD = '" + std + "'";
+				addToCondition += " AND CLASS_ALLOTMENT.PRESENT_STD = '" + std + "'";
 			}
 			if (!div.equalsIgnoreCase("") && !div.equalsIgnoreCase("All")) {
-				addToCondition += " AND PRESENT_DIV = '" + div + "'";
+				addToCondition += " AND CLASS_ALLOTMENT.PRESENT_DIV = '" + div + "'";
 			}
 
-			findFreeStudentQuery = "SELECT GR_NO,PAYING_FREE FROM " + sessionData.getDBName() + "."
-					+ "hs_general_register WHERE ACADEMIC_YEAR='" + academic + "' " + "AND SECTION_NM='" + section
+//			findFreeStudentQuery = "SELECT GR_NO,PAYING_FREE FROM " + sessionData.getDBName() + "."
+//					+ "hs_general_register WHERE ACADEMIC_YEAR='" + academic + "' " + "AND SECTION_NM='" + section
+//					+ "' " + addToCondition + "";
+			
+			findFreeStudentQuery = "SELECT CLASS_ALLOTMENT.GR_NO,HS_GENERAL_REGISTER.PAYING_FREE "
+					+ "FROM "+sessionData.getDBName()+".HS_GENERAL_REGISTER LEFT JOIN "+sessionData.getDBName()+".CLASS_ALLOTMENT ON "
+					+ "HS_GENERAL_REGISTER.GR_NO=CLASS_ALLOTMENT.GR_NO AND HS_GENERAL_REGISTER.SECTION_NM=CLASS_ALLOTMENT.SECTION_NM  "
+					+ "WHERE CLASS_ALLOTMENT.ACADEMIC_YEAR='" + academic + "' " + "AND CLASS_ALLOTMENT.SECTION_NM='" + section
 					+ "' " + addToCondition + "";
+			
 			statement = connection.createStatement();
 			resultSet = statement.executeQuery(findFreeStudentQuery);
 
@@ -21981,7 +22076,7 @@ public class DBValidate {
 								+ "', concat(DD_DETAIL, '|" + paymentDetails + "'))";
 					}
 				} else {
-					feeReportQuery = "INSERT INTO FEES_REPORT_MANDATORY (";
+					feeReportQuery = "INSERT INTO "+sessionData.getDBName()+".FEES_REPORT_MANDATORY (";
 					insertReportFields = "STD_1,DIV_1,ACADEMIC_YEAR,FEE_STATUS,TOTAL_AMOUNT,CONCESSION_AMOUNT,CREATED_BY,SECTION_NM,FEE_DATE,PENALTY_AMOUNT,BALANCE_AMOUNT";
 					insertReportValues = "'" + std + "','" + div + "','" + academic + "','" + feeStatus + "',"
 							+ String.format("%.2f", totalAmount) + "," + String.format("%.2f", concessionAmount) + ",'"
@@ -22008,7 +22103,7 @@ public class DBValidate {
 						+ sessionData.getSectionName() + "','" + concessionPercent + "',"
 						+ String.format("%.2f", concessionAmount) + "," + penaltyAmount + "," + balanceAmount;
 
-				feeReportQuery = "INSERT INTO FEES_REPORT_MANDATORY (";
+				feeReportQuery = "INSERT INTO "+sessionData.getDBName()+".FEES_REPORT_MANDATORY (";
 				insertReportFields = "STD_1,DIV_1,ACADEMIC_YEAR,FEE_STATUS,TOTAL_AMOUNT,CONCESSION_AMOUNT,CREATED_BY,SECTION_NM,FEE_DATE,PENALTY_AMOUNT";
 				insertReportValues = "'" + std + "','" + div + "','" + academic + "','" + feeStatus + "',"
 						+ String.format("%.2f", totalAmount) + "," + String.format("%.2f", concessionAmount) + ",'"
@@ -22178,11 +22273,11 @@ public class DBValidate {
 //			}
 
 			statement = connection.createStatement();
+			statement.executeUpdate(feeReportQuery);
+			
+			statement = connection.createStatement();
 			statement.executeUpdate(feeDataQuery);
 			returnFlag = true;
-
-			statement = connection.createStatement();
-			statement.executeUpdate(feeReportQuery);
 
 			// update name & roll no in fees data
 //			updateNameInFeesData(sessionData);
@@ -22230,7 +22325,9 @@ public class DBValidate {
 				errorMesssage = errorMesssage.substring(errorMesssage.indexOf("'") + 1,
 						errorMesssage.indexOf(" in") - 1);
 				errorMesssage = cm.revertCommaApostrophy(errorMesssage);
-				errorMesssage = errorMesssage.substring(0, errorMesssage.lastIndexOf("_"));
+				if(errorMesssage.contains("_")) {
+					errorMesssage = errorMesssage.substring(0, errorMesssage.lastIndexOf("_"));
+				}
 				JOptionPane.showMessageDialog(null, "Click edit and save in fees head for " + errorMesssage);
 			}
 			cm.logException(e);
@@ -22636,6 +22733,270 @@ public class DBValidate {
 		}
 		return studentPartialFeeMap;
 	}
+	
+	/////////// list of students whose fees is Quarterly paid for that frequency////////////////////////////////////////
+	public LinkedHashMap<String, LinkedHashMap<String, Double>> getQuarterlyFeesData(SessionData sessionData,
+			String academic, String section, String category, LinkedHashMap<String, LinkedHashMap<String, Double>> quarterlyFeeMap) throws Exception {
+		logger.info("=========getQuarterlyFeesData Query============");
+		String sumQuery = "", std = "", frequency = "Quarterly";
+		boolean flag = false;
+		int startMonth = Integer.parseInt(bundle.getString("ACADEMIC_START_MONTH"));
+		int count = 0;
+		LinkedHashMap<String, LinkedHashMap<String, Double>> stdDivQuarterlyFeeMap = new LinkedHashMap<String, LinkedHashMap<String, Double>>();
+		LinkedHashMap<String, LinkedHashMap<String, String>> feesHeadMap = new LinkedHashMap<String, LinkedHashMap<String, String>>();
+		LinkedHashMap<String, Double> feesAllTotalMap = new LinkedHashMap<String, Double>();
+		String feesHeadColumn = "";
+		int frequencyInt = 0;
+		String feesHead = "";
+		String grDb = "", stdDb = "", divDb = "";
+		int monthInt = 0;
+		double q1StdCount = 0, q2StdCount = 0, q3StdCount = 0, q4StdCount = 0;
+		double q1StdSum = 0, q2StdSum = 0, q3StdSum = 0, q4StdSum = 0, stdConcession = 0;
+		
+		double q1Sum = 0, q2Sum = 0, q3Sum = 0, q4Sum = 0, q1AllCount = 0, q2AllCount = 0, q3AllCount = 0, q4AllCount = 0;
+		double concessionDb = 0, q1AllSum = 0, q2AllSum = 0, q3AllSum = 0, q4AllSum = 0, allConcession = 0;
+	
+		try {
+	
+			List<String>  quarterList = Arrays.asList("Q 1", "Q 2", "Q 3", "Q 4");
+			std = bundle.getString(section.toUpperCase() + "_STD");
+			String[] stdList = std.split(",");
+			
+			for(String stdStr : stdList) {
+				LinkedHashMap<String, Double> feesTotalMap = new LinkedHashMap<String, Double>();
+				feesHeadMap = getFeesHeadData(sessionData, academic, stdStr, section, category);
+				
+				for(String subFrequency : quarterList) {
+					
+					Set set = feesHeadMap.entrySet();
+					Iterator i = set.iterator();
+					ArrayList<Integer> frequencyList = new ArrayList<>();
+					while (i.hasNext()) {
+						Map.Entry me = (Map.Entry) i.next();
+						feesHead = me.getKey().toString();
+						frequencyInt = cm.frequencyToInteger(
+								((LinkedHashMap<?, ?>) feesHeadMap.get(feesHead)).get("frequency").toString());
+						
+						if (frequencyInt == 12) {
+							feesHeadColumn = feesHeadColumn + "SUM(IF(" + feesHead + "_"
+									+ cm.intgerToMonth((startMonth + cm.QuarterToIntger(subFrequency)) + "") + ">0, "
+									+ feesHead + "_"
+									+ cm.intgerToMonth((startMonth + cm.QuarterToIntger(subFrequency)) + "") + ", 0))"
+									+ " + SUM(IF(" + feesHead + "_"
+									+ cm.intgerToMonth((startMonth + cm.QuarterToIntger(subFrequency) + 1) + "") + ">0, "
+									+ feesHead + "_"
+									+ cm.intgerToMonth((startMonth + cm.QuarterToIntger(subFrequency) + 1) + "") + ", 0))"
+									+ " + SUM(IF(" + feesHead + "_"
+									+ cm.intgerToMonth((startMonth + cm.QuarterToIntger(subFrequency) + 2) + "") + ">0, "
+									+ feesHead + "_"
+									+ cm.intgerToMonth((startMonth + cm.QuarterToIntger(subFrequency) + 2) + "")
+									+ ", 0)) + ";
+						} else if (frequencyInt == 4) {
+							feesHeadColumn = feesHeadColumn + "SUM(IF(" + feesHead + "_"
+									+ cm.intgerToMonth((startMonth + cm.QuarterToIntger(subFrequency)) + "") + ">0, "
+									+ feesHead + "_"
+									+ cm.intgerToMonth((startMonth + cm.QuarterToIntger(subFrequency)) + "") + ", 0)) + ";
+						} else if (frequencyInt == 2
+								&& (subFrequency.equalsIgnoreCase("Q 1") || subFrequency.equalsIgnoreCase("Q 3"))) {
+							feesHeadColumn = feesHeadColumn + "SUM(IF(" + feesHead + "_"
+									+ cm.intgerToMonth((startMonth + cm.QuarterToIntger(subFrequency)) + "") + ">0, "
+									+ feesHead + "_"
+									+ cm.intgerToMonth((startMonth + cm.QuarterToIntger(subFrequency) + "")) + ", 0)) + ";
+						} else if (frequencyInt == 1 && subFrequency.equalsIgnoreCase("Q 1")) {
+							feesHeadColumn = feesHeadColumn + "SUM(IF(" + feesHead + "_"
+									+ cm.intgerToMonth((startMonth + cm.QuarterToIntger(subFrequency)) + "") + ">0, "
+									+ feesHead + "_"
+									+ cm.intgerToMonth((startMonth + cm.QuarterToIntger(subFrequency)) + "") + ", 0)) + ";
+						}
+					}
+					feesHeadColumn = feesHeadColumn.substring(0, feesHeadColumn.lastIndexOf("+")) + "AS "+subFrequency.replace(" ", "")+"_FEES_SUM,";
+				}
+				
+				if (!feesHeadColumn.equalsIgnoreCase("")) {
+					feesHeadColumn = feesHeadColumn.substring(0, feesHeadColumn.length()-1);
+					sumQuery = "SELECT GR_NO,STD_1,DIV_1,CONCESSION_AMOUNT," + feesHeadColumn + " FROM "
+							+ sessionData.getDBName() + ".FEES_DATA_MANDATORY WHERE ACADEMIC_YEAR='" + academic + "' " + " and "
+							+ "SECTION_NM='" + sessionData.getSectionName() + "' and STD_1='"+stdStr+"' GROUP BY GR_NO,STD_1,DIV_1,CONCESSION_AMOUNT "
+							+ "ORDER BY STD_1,DIV_1";
+					
+					statement = connection.createStatement();
+					resultSet = statement.executeQuery(sumQuery);
+					feesHeadColumn = "";
+					sumQuery = "";
+		
+					while (resultSet.next()) {
+						LinkedHashMap<String, Double> feesTypeDetailMap = new LinkedHashMap<String, Double>();
+						grDb = resultSet.getString("GR_NO");
+						stdDb = resultSet.getString("STD_1");
+						divDb = resultSet.getString("DIV_1");
+//						feesSumDb = Double.parseDouble(resultSet.getString("FEES_SUM") == null ? "0" : resultSet.getString("FEES_SUM"));
+						
+						q1Sum = Double.parseDouble(resultSet.getString("Q1_FEES_SUM") == null ? "0" : resultSet.getString("Q1_FEES_SUM"));
+						q2Sum = Double.parseDouble(resultSet.getString("Q2_FEES_SUM") == null ? "0" : resultSet.getString("Q2_FEES_SUM"));
+						q3Sum = Double.parseDouble(resultSet.getString("Q3_FEES_SUM") == null ? "0" : resultSet.getString("Q3_FEES_SUM"));
+						q4Sum = Double.parseDouble(resultSet.getString("Q4_FEES_SUM") == null ? "0" : resultSet.getString("Q4_FEES_SUM"));
+						concessionDb = resultSet.getDouble("CONCESSION_AMOUNT");
+						
+						q1AllSum += q1Sum;
+						q2AllSum += q2Sum;
+						q3AllSum += q3Sum;
+						q4AllSum += q4Sum;
+						allConcession += concessionDb;
+						
+						if (stdDivQuarterlyFeeMap != null && stdDivQuarterlyFeeMap.get(stdDb+"_"+divDb) != null) {
+							feesTypeDetailMap = stdDivQuarterlyFeeMap.get(stdDb+"_"+divDb);
+							
+							if(quarterlyFeeMap.get(stdDb).get("q1") == q1Sum) {
+								feesTypeDetailMap.put("q1Count", (feesTypeDetailMap.get("q1Count")+1.0));
+								q1StdCount += 1;
+								q1AllCount += 1;
+								
+								feesTypeDetailMap.put("q1Sum", (feesTypeDetailMap.get("q1Sum")+q1Sum));
+								q1StdSum += q1Sum;
+							}
+							if(quarterlyFeeMap.get(stdDb).get("q2") == q2Sum) {
+								feesTypeDetailMap.put("q2Count", (feesTypeDetailMap.get("q2Count")+1.0));
+								q2StdCount += 1;
+								q2AllCount += 1;
+								
+								feesTypeDetailMap.put("q2Sum", (feesTypeDetailMap.get("q2Sum")+q2Sum));
+								q2StdSum += q2Sum;
+							}
+							if(quarterlyFeeMap.get(stdDb).get("q3") == q3Sum) {
+								feesTypeDetailMap.put("q3Count", (feesTypeDetailMap.get("q3Count")+1.0));
+								q3StdCount += 1;
+								q3AllCount += 1;
+								
+								feesTypeDetailMap.put("q3Sum", (feesTypeDetailMap.get("q3Sum")+q3Sum));
+								q3StdSum += q3Sum;
+							}
+							if(quarterlyFeeMap.get(stdDb).get("q4") == q4Sum) {
+								feesTypeDetailMap.put("q4Count", (feesTypeDetailMap.get("q4Count")+1.0));
+								q4StdCount += 1;
+								q4AllCount += 1;
+								
+								feesTypeDetailMap.put("q4Sum", (feesTypeDetailMap.get("q4Sum")+q4Sum));
+								q4StdSum += q4Sum;
+							}
+							
+							feesTypeDetailMap.put("qStdDivConcession",(feesTypeDetailMap.get("qStdDivConcession")+concessionDb));
+							stdConcession += concessionDb;
+							
+							stdDivQuarterlyFeeMap.put(stdDb+"_"+divDb, feesTypeDetailMap);
+							
+						} else {
+							
+							if(quarterlyFeeMap.get(stdDb).get("q1") == q1Sum) {
+								feesTypeDetailMap.put("q1Count", 1.0);
+								q1StdCount += 1;
+								q1AllCount += 1;
+								
+								feesTypeDetailMap.put("q1Sum", q1Sum);
+								q1StdSum += q1Sum;
+							}
+							else {
+								feesTypeDetailMap.put("q1Count", 0.0);
+								q1StdCount += 0;
+								q1AllCount += 0;
+								
+								feesTypeDetailMap.put("q1Sum", 0.0);
+								q1StdSum += 0.0;
+							}
+							if(quarterlyFeeMap.get(stdDb).get("q2") == q2Sum) {
+								feesTypeDetailMap.put("q2Count", 1.0);
+								q2StdCount += 1;
+								q2AllCount += 1;
+								
+								feesTypeDetailMap.put("q2Sum", q2Sum);
+								q2StdSum += q2Sum;
+							}
+							else {
+								feesTypeDetailMap.put("q2Count", 0.0);
+								q2StdCount += 0;
+								q2AllCount += 0;
+								
+								feesTypeDetailMap.put("q2Sum", 0.0);
+								q2StdSum += 0.0;
+							}
+							if(quarterlyFeeMap.get(stdDb).get("q3") == q3Sum) {
+								feesTypeDetailMap.put("q3Count", 1.0);
+								q3StdCount += 1;
+								q3AllCount += 1;
+								
+								feesTypeDetailMap.put("q3Sum", q3Sum);
+								q3StdSum += q3Sum;
+							}
+							else {
+								feesTypeDetailMap.put("q3Count", 0.0);
+								q3StdCount += 0;
+								q3AllCount += 0;
+								
+								feesTypeDetailMap.put("q3Sum", 0.0);
+								q3StdSum += 0.0;
+							}
+							if(quarterlyFeeMap.get(stdDb).get("q4") == q4Sum) {
+								feesTypeDetailMap.put("q4Count", 1.0);
+								q4StdCount += 1;
+								q4AllCount += 1;
+								
+								feesTypeDetailMap.put("q4Sum", q4Sum);
+								q4StdSum += q4Sum;
+							}
+							else {
+								feesTypeDetailMap.put("q4Count", 0.0);
+								q4StdCount += 0;
+								q4AllCount += 0;
+								
+								feesTypeDetailMap.put("q4Sum", 0.0);
+								q4StdSum += 0.0;
+							}
+							
+							feesTypeDetailMap.put("qStdDivConcession",concessionDb);
+							
+							stdConcession += concessionDb;
+							
+							stdDivQuarterlyFeeMap.put(stdDb+"_"+divDb, feesTypeDetailMap);
+						}
+					}
+					flag = true;
+				}
+				
+				feesTotalMap.put("q1StdCount", q1StdCount);
+				feesTotalMap.put("q2StdCount", q2StdCount);
+				feesTotalMap.put("q3StdCount", q3StdCount);
+				feesTotalMap.put("q4StdCount", q4StdCount);
+				feesTotalMap.put("q1StdSum", q1StdSum);
+				feesTotalMap.put("q2StdSum", q2StdSum);
+				feesTotalMap.put("q3StdSum", q3StdSum);
+				feesTotalMap.put("q4StdSum", q4StdSum);
+				feesTotalMap.put("qStdConcession", stdConcession);
+				stdDivQuarterlyFeeMap.put(stdDb+"_Total", feesTotalMap);
+				
+//				feesTotalMap.clear();
+				feesHeadMap.clear();
+				q1StdCount = 0; q2StdCount = 0; q3StdCount = 0; q4StdCount = 0;
+				q1StdSum = 0; q2StdSum = 0; q3StdSum = 0; q4StdSum = 0; stdConcession = 0;
+			}
+			
+			feesAllTotalMap.put("q1AllCount", q1AllCount);
+			feesAllTotalMap.put("q2AllCount", q2AllCount);
+			feesAllTotalMap.put("q3AllCount", q3AllCount);
+			feesAllTotalMap.put("q4AllCount", q4AllCount);
+			
+			feesAllTotalMap.put("q1AllSum", q1AllSum);
+			feesAllTotalMap.put("q2AllSum", q2AllSum);
+			feesAllTotalMap.put("q3AllSum", q3AllSum);
+			feesAllTotalMap.put("q4AllSum", q4AllSum);
+			feesAllTotalMap.put("allConcession", allConcession);
+			
+			stdDivQuarterlyFeeMap.put("Grand_Total", feesAllTotalMap);
+			
+		} catch (Exception e) {
+			cm.logException(e);
+			return stdDivQuarterlyFeeMap;
+		}
+		return stdDivQuarterlyFeeMap;
+	}
 
 	//// getContact GR map from hs_general_register///
 	public LinkedHashMap<String, String> getContactGrMap(SessionData sessionData, String academicYear, String std,
@@ -22646,15 +23007,17 @@ public class DBValidate {
 		ResultSet contactData = null;
 
 		if (!std.equalsIgnoreCase("All")) {
-			contactCondition = "AND PRESENT_STD='" + std + "'";
+			contactCondition = "AND CLASS_ALLOTMENT.PRESENT_STD='" + std + "'";
 		}
 		if (!div.equalsIgnoreCase("All")) {
-			contactCondition += " AND PRESENT_DIV='" + div + "'";
+			contactCondition += " AND CLASS_ALLOTMENT.PRESENT_DIV='" + div + "'";
 		}
 
-		String getContactQuery = "Select GR_No,CONTACT_1 FROM " + sessionData.getDBName() + ".hs_general_register "
-				+ "where academic_year='" + academicYear + "' and section_nm='" + sessionData.getSectionName() + "' "
-				+ contactCondition + "";
+		String getContactQuery = "Select CLASS_ALLOTMENT.GR_NO,HS_GENERAL_REGISTER.CONTACT_1 "
+				+ "FROM "+sessionData.getDBName()+".HS_GENERAL_REGISTER LEFT JOIN "+sessionData.getDBName()+".CLASS_ALLOTMENT ON HS_GENERAL_REGISTER.GR_NO=CLASS_ALLOTMENT.GR_NO "
+				+ "AND HS_GENERAL_REGISTER.SECTION_NM=CLASS_ALLOTMENT.SECTION_NM "
+				+ "where CLASS_ALLOTMENT.academic_year='"+academicYear+"' and CLASS_ALLOTMENT.section_nm='"+sessionData.getSectionName()+"' "
+				+ contactCondition + "order by CLASS_ALLOTMENT.GR_NO";
 		statement = connection.createStatement();
 		contactData = statement.executeQuery(getContactQuery);
 		while (contactData.next()) {
@@ -22675,13 +23038,14 @@ public class DBValidate {
 		LinkedHashMap<String, String> receiptDetailMap = new LinkedHashMap<String, String>();
 		LinkedHashMap<String, Double> selFeesHeadMap = new LinkedHashMap<String, Double>();
 		LinkedHashMap<String, LinkedHashMap<String, String>> feesHeadMap = new LinkedHashMap<String, LinkedHashMap<String, String>>();
-		LinkedHashMap<String, String> contactDetailMap = new LinkedHashMap<String, String>();
+//		LinkedHashMap<String, String> contactDetailMap = new LinkedHashMap<String, String>();
 		LinkedHashMap<String, String> dateMap = new LinkedHashMap<String, String>();
+		LinkedHashMap<String, String> columnMap = new LinkedHashMap<String, String>();
 	
 		String feesHead = "", feesHeadColumn = "", grNoDb = "", stdDb = "", divDb = "", rollNo = "", feesDate = "",
 				whereCondition = "", bank = "", paymentMode = "", chequeDDNo = "", chequeDDDate = "", detailStr = "",
 				feesHeadStr = "", feeData = "", nameDb = "", rollNoDb = "", prevStd = "", findColumnListQuery = "",
-				columnList = "", columnName = "", tableName = "", contact = "", insertFeeReport = "", feesStr = "", 
+				columnList = "", columnName = "", tableName = "", insertFeeReport = "", feesStr = "", 
 				feesValue = "", updateFeeReport = "";
 		int frequencyInt = 0, receipt = 0, udpdateCount = 0;
 		double feesHeadAmount = 0, studentTotalAmount = 0, penalty = 0, concession = 0, balanceAmount = 0,
@@ -22692,9 +23056,6 @@ public class DBValidate {
 	
 		try {
 			if(deleteTable) {
-//				String trucateQuery = "TRUNCATE TABLE " + sessionData.getDBName() + ".FEES_REPORT_MANDATORY";
-//				statement = connection.createStatement();
-//				statement.executeQuery(trucateQuery);
 				
 				try {
 					String alterQuery = "DROP TABLE " + sessionData.getDBName() + "." + "FEES_REPORT_MANDATORY";
@@ -22706,10 +23067,16 @@ public class DBValidate {
 				
 				try {
 					String feesHeadQuery = "SELECT DISTINCT FEES_NAME from " + sessionData.getDBName() + "." + "fees_head";
+					String feeHead = "";
 					statement = connection.createStatement();
 					resultSet = statement.executeQuery(feesHeadQuery);
 					while (resultSet.next()) {
-						colFees = colFees + resultSet.getString("FEES_NAME") + " double UNSIGNED,";
+						feeHead = resultSet.getString("FEES_NAME");
+						feeHead = cm.replaceCommaApostrophy(feeHead);
+						if(!columnMap.containsKey(feeHead)) {
+							colFees = colFees + feeHead + " double,";
+							columnMap.put(feeHead, feeHead);
+						}
 					}
 				} catch(Exception e) {
 					cm.logException(e);
@@ -22718,7 +23085,7 @@ public class DBValidate {
 				try {
 					String queryfees_data = "CREATE TABLE `fees_report_mandatory` ( `STD_1` varchar(10) DEFAULT NULL, `DIV_1` varchar(10) DEFAULT NULL, "
 							+ "`ACADEMIC_YEAR` varchar(10) DEFAULT NULL,  `FEE_STATUS` varchar(20) DEFAULT NULL, `PENALTY_AMOUNT` double DEFAULT NULL, "
-							+ "`TOTAL_AMOUNT` double unsigned DEFAULT NULL, `CONCESSION_AMOUNT` double unsigned DEFAULT NULL, `FEE_DATE` date DEFAULT NULL, "
+							+ "`TOTAL_AMOUNT` double DEFAULT NULL, `CONCESSION_AMOUNT` double DEFAULT NULL, `FEE_DATE` date DEFAULT NULL, "
 							+ "`CASH_TOTAL` double DEFAULT NULL, `CHEQUE_TOTAL` double DEFAULT NULL, `UPI_TOTAL` double DEFAULT NULL, `OTHER_TOTAL` double DEFAULT NULL, "
 							+ "`CHEQUE_DETAIL` varchar(5000) DEFAULT NULL, `DD_TOTAL` double DEFAULT NULL, `DD_DETAIL` varchar(5000) DEFAULT NULL, "
 							+ "`CREATED_DATE` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP, `CREATED_BY` varchar(30) DEFAULT NULL, "
@@ -22758,7 +23125,7 @@ public class DBValidate {
 			}
 	
 			/// Get contact Number
-			contactDetailMap = getContactGrMap(sessionData, academicYear, std, div);
+//			contactDetailMap = getContactGrMap(sessionData, academicYear, std, div);
 	
 			ResultSet resultSetFeesData = null;
 			String query = "SELECT " + columnList
@@ -22878,7 +23245,7 @@ public class DBValidate {
 										.getDouble(feesHead + "_" + cm.intgerToMonth((startMonth + i) + ""));
 								feeData = resultSetFeesData.getString(cm.replaceCommaApostrophy(feesHead) + "_"
 										+ cm.intgerToMonth((startMonth + i) + "") + "_BANK");
-								if (feeData == null)
+								if (feeData == null || feeData.trim().equalsIgnoreCase(""))
 									continue;
 								dataSplit = feeData.split("\\!");
 								data = cm.toAddInReport(dataSplit);
@@ -22976,12 +23343,12 @@ public class DBValidate {
 	
 				feesReceipt = (LinkedHashMap<String, String>) me.getValue();
 	
-				contact = contactDetailMap.get(feesReceipt.get("grNo")) == null ? "0"
-						: contactDetailMap.get(feesReceipt.get("grNo")).toString();
-				if (contact.equalsIgnoreCase("")) {
-					contact = "0";
-				}
-				valueStr = feesReceipt.get("grNo") + "|" + feesReceipt.get("name") + "|" + contact + "|"
+//				contact = contactDetailMap.get(feesReceipt.get("grNo")) == null ? "0"
+//						: contactDetailMap.get(feesReceipt.get("grNo")).toString();
+//				if (contact.equalsIgnoreCase("")) {
+//					contact = "0";
+//				}
+				valueStr = feesReceipt.get("grNo") + "|" + feesReceipt.get("name") + "| |"
 						+ feesReceipt.get("std") + "|" + feesReceipt.get("div") + "|" + feesReceipt.get("rollNo") + "|"
 						+ me.getKey() + "|" + feesReceipt.get("feesDate") + "|";
 	
@@ -23008,32 +23375,33 @@ public class DBValidate {
 					feesValue = feesValue.substring(0, feesValue.length()-1);
 				}
 				
+				DecimalFormat f = new DecimalFormat("##.00");
 				if(feesReceipt.get("paymentMode").toString().equalsIgnoreCase("Cash")) {
-					cashTotal = Double.parseDouble((String) feesReceipt.get("total"));
+					cashTotal = Double.parseDouble(f.format(Double.parseDouble((String) feesReceipt.get("total"))));
 					chequeTotal = 0;
 					upiTotal = 0;
 					otherTotal = 0;
 					ddTotal = 0;
 				} else if(feesReceipt.get("paymentMode").toString().equalsIgnoreCase("Cheque")) {
-					chequeTotal = Double.parseDouble((String) feesReceipt.get("total"));
+					chequeTotal = Double.parseDouble(f.format(Double.parseDouble((String) feesReceipt.get("total"))));
 					cashTotal = 0;
 					upiTotal = 0;
 					otherTotal = 0;
 					ddTotal = 0;
 				} else if(feesReceipt.get("paymentMode").toString().equalsIgnoreCase("DD")) {
-					ddTotal = Double.parseDouble((String) feesReceipt.get("total"));
+					ddTotal = Double.parseDouble(f.format(Double.parseDouble((String) feesReceipt.get("total"))));
 					cashTotal = 0;
 					upiTotal = 0;
 					otherTotal = 0;
 					chequeTotal = 0;
 				} else if(feesReceipt.get("paymentMode").toString().equalsIgnoreCase("UPI")) {
-					upiTotal = Double.parseDouble((String) feesReceipt.get("total"));
+					upiTotal = Double.parseDouble(f.format(Double.parseDouble((String) feesReceipt.get("total"))));
 					cashTotal = 0;
 					chequeTotal = 0;
 					otherTotal = 0;
 					ddTotal = 0;
 				} else {
-					otherTotal = Double.parseDouble((String) feesReceipt.get("total"));
+					otherTotal = Double.parseDouble(f.format(Double.parseDouble((String) feesReceipt.get("total"))));
 					cashTotal = 0;
 					chequeTotal = 0;
 					upiTotal = 0;
@@ -23043,7 +23411,7 @@ public class DBValidate {
 				if(dateMap.get(feesReceipt.get("feesDate").toString()) != null) {
 					updateFeeReport = "UPDATE " + sessionData.getDBName() + ".fees_report_mandatory SET "+feesStr 
 							+ "PENALTY_AMOUNT=PENALTY_AMOUNT+"+Double.parseDouble((String) feesReceipt.get("penalty"))
-							+",TOTAL_AMOUNT=TOTAL_AMOUNT+"+ Double.parseDouble((String) feesReceipt.get("total"))
+							+",TOTAL_AMOUNT=TOTAL_AMOUNT+"+ Double.parseDouble(f.format(Double.parseDouble((String) feesReceipt.get("total"))))
 							+",CONCESSION_AMOUNT=CONCESSION_AMOUNT+"+ Double.parseDouble((String) feesReceipt.get("concession")) 
 							+",CASH_TOTAL=CASH_TOTAL+"+cashTotal+",CHEQUE_TOTAL=CHEQUE_TOTAL+"+chequeTotal
 							+",UPI_TOTAL=UPI_TOTAL+"+upiTotal+",OTHER_TOTAL=OTHER_TOTAL+"+otherTotal+",DD_TOTAL=DD_TOTAL+"+ddTotal
@@ -23059,7 +23427,7 @@ public class DBValidate {
 							+ "CASH_TOTAL,CHEQUE_TOTAL,UPI_TOTAL,OTHER_TOTAL, CHEQUE_DETAIL, DD_TOTAL, DD_DETAIL, CREATED_DATE, CREATED_BY, MODIFIED_DATE, "
 							+ "MODIFIED_BY,SECTION_NM, "+feesStr+") "
 							+ "VALUES ('" + feesReceipt.get("std") + "','" + feesReceipt.get("div") + "','" + academicYear.trim() + "','Pending'," 
-							+ Double.parseDouble((String) feesReceipt.get("penalty")) +","+ Double.parseDouble((String) feesReceipt.get("total"))+","
+							+ Double.parseDouble((String) feesReceipt.get("penalty")) +","+ Double.parseDouble(f.format(Double.parseDouble((String) feesReceipt.get("total"))))+","
 							+ Double.parseDouble((String) feesReceipt.get("concession")) +",STR_TO_DATE('"+feesReceipt.get("feesDate")+"', '%d/%m/%Y'),"+ cashTotal +","
 							+ chequeTotal +","+ upiTotal +","+ otherTotal+ ",'',"+ ddTotal+",'',SYSDATE(),'"+sessionData.getUserName()+"',SYSDATE(),'"
 							+ sessionData.getUserName()+"','"+sessionData.getSectionName() +"'," +feesValue  +")";
@@ -23070,7 +23438,7 @@ public class DBValidate {
 				
 				feesStr = "";
 				feesValue = "";
-				dateMap.put(feesReceipt.get("feesDate").toString(),"");
+				dateMap.put(feesReceipt.get("feesDate") + " : " +feesReceipt.get("std") +" - " + feesReceipt.get("div"),"");
 			}
 	
 	
@@ -23475,6 +23843,278 @@ public class DBValidate {
 		return feesReportMap;
 	}
 
+		/////////// getFeesCollectionReport////////////////////////////////////////
+		public TreeMap<String, Double> getFeesCollectionReport(SessionData sessionData,
+				String academicYear, String category, String fromDateStr, String toDateStr)
+				throws Exception {
+		//	logger.info("=========getFeesCollectionReport Query============");
+			TreeMap<String, Double> feesReportMap = new TreeMap<String, Double>();
+			LinkedHashMap<String, String> receiptDetailMap = new LinkedHashMap<String, String>();
+			LinkedHashMap<String, Double> selFeesHeadMap = new LinkedHashMap<String, Double>();
+			LinkedHashMap<String, LinkedHashMap<String, String>> feesHeadMap = new LinkedHashMap<String, LinkedHashMap<String, String>>();
+			LinkedHashMap<String, String> contactDetailMap = new LinkedHashMap<String, String>();
+		
+			String feesHead = "", feesHeadColumn = "", grNoDb = "", stdDb = "", divDb = "", rollNo = "", feesDate = "",
+					whereCondition = "", bank = "", paymentMode = "", chequeDDNo = "", chequeDDDate = "", detailStr = "",
+					feesHeadStr = "", feeData = "", nameDb = "", rollNoDb = "", prevStd = "", findColumnListQuery = "",
+					columnList = "", columnName = "", tableName = "", contact = "";
+			int frequencyInt = 0, receipt = 0;
+			double feesHeadAmount = 0, studentTotalAmount = 0, penalty = 0, concession = 0, balanceAmount = 0,
+					prevBalanceAmount = 0;
+			List<String> feeCollectionReportList = new ArrayList<String>();
+			String[] data = null, dataSplit = null;
+		
+			try {
+		
+				tableName = "FEES_DATA_MANDATORY";
+		
+				int startMonth = Integer.parseInt(bundle.getString("ACADEMIC_START_MONTH"));
+		
+				findColumnListQuery = "select DISTINCT COLUMN_NAME from INFORMATION_SCHEMA.COLUMNS where " + "TABLE_NAME='"
+						+ tableName + "' AND TABLE_SCHEMA='" + sessionData.getDBName() + "'";
+				statement = connection.createStatement();
+				resultSet = statement.executeQuery(findColumnListQuery);
+				while (resultSet.next()) {
+					columnName = resultSet.getString("COLUMN_NAME");
+					if (columnName.contains("_DATE") && !columnName.equalsIgnoreCase("CREATED_DATE")
+							&& !columnName.equalsIgnoreCase("MODIFIED_DATE")) {
+						columnList += "DATE_FORMAT(" + resultSet.getString("COLUMN_NAME") + ", '%d/%m/%Y')" + " AS "
+								+ resultSet.getString("COLUMN_NAME") + ",";
+					} else {
+						columnList += tableName + "." + resultSet.getString("COLUMN_NAME") + ",";
+					}
+				}
+		
+				/// Get contact Number
+//				contactDetailMap = getContactGrMap(sessionData, academicYear, std, div);
+		
+				ResultSet resultSetFeesData = null;
+				String query = "SELECT " + columnList
+						+ "FEES_DATA_MANDATORY.ROLL_NO,concat(FEES_DATA_MANDATORY.LAST_NAME,' ',FEES_DATA_MANDATORY.FIRST_NAME,' ',FEES_DATA_MANDATORY.FATHER_NAME) AS NAME "
+						+ "FROM " + sessionData.getDBName() + "." + tableName + " WHERE " + tableName + ".ACADEMIC_YEAR='"
+						+ academicYear + "' " + "AND " + tableName + ".SECTION_NM='" + sessionData.getSectionName() + "' "
+						+ whereCondition + " ORDER BY " + tableName + ".STD_1";
+				statement = connection.createStatement();
+				resultSetFeesData = statement.executeQuery(query);
+		
+				while (resultSetFeesData.next()) {
+					detailStr = "";
+					studentTotalAmount = 0;
+					LinkedHashMap<String, String> feesReportDetailMap = new LinkedHashMap<String, String>();
+					grNoDb = resultSetFeesData.getString("GR_NO");
+					stdDb = resultSetFeesData.getString("STD_1");
+					divDb = resultSetFeesData.getString("DIV_1");
+					nameDb = resultSetFeesData.getString("NAME") == null ? " "
+							: (resultSetFeesData.getString("NAME").trim());
+					rollNoDb = resultSetFeesData.getString("ROLL_NO");
+					data = new String[20];
+		
+					if (!prevStd.equalsIgnoreCase(stdDb)) {
+						feesHeadMap = getFeesHeadData(sessionData, academicYear, stdDb, sessionData.getSectionName(),
+								category);
+					}
+		
+					Set set = feesHeadMap.entrySet();
+					Iterator j = set.iterator();
+					while (j.hasNext()) {
+						feesHeadAmount = 0;
+						penalty = 0;
+						concession = 0;
+		
+						Map.Entry me = (Map.Entry) j.next();
+						feesHead = me.getKey().toString();
+						frequencyInt = cm.frequencyToInteger(
+								((LinkedHashMap<?, ?>) feesHeadMap.get(feesHead)).get("frequency").toString());
+						if (frequencyInt == 12) {
+							for (int i = 0; i < 12; i++) {
+		
+								feesDate = resultSetFeesData.getString(cm.replaceCommaApostrophy(feesHead) + "_"
+										+ cm.intgerToMonth((startMonth + i) + "") + "_DATE");
+								if (feesDate != null && cm.isDateBetween(fromDateStr, toDateStr, feesDate)) {
+									feesHeadAmount = resultSetFeesData
+											.getDouble(feesHead + "_" + cm.intgerToMonth((startMonth + i) + ""));
+									feeData = resultSetFeesData.getString(cm.replaceCommaApostrophy(feesHead) + "_"
+											+ cm.intgerToMonth((startMonth + i) + "") + "_BANK");
+									if (feeData == null)
+										continue;
+									dataSplit = feeData.split("\\!");
+									data = cm.toAddInReport(dataSplit);
+									if (data == null)
+										continue;
+		
+									paymentMode = data[0];
+									bank = data[1];
+									chequeDDNo = data[2];
+									chequeDDDate = data[3];
+									penalty = Double.parseDouble(data[4].equalsIgnoreCase("NA") ? "0" : (data[4]));
+									concession = Double.parseDouble(data[5].equalsIgnoreCase("NA") ? "0" : (data[5]));
+									receipt = Integer.parseInt(data[6]);
+									if (data.length > 10) {
+										balanceAmount = Double
+												.parseDouble(data[10].equalsIgnoreCase("NA") ? "0" : (data[10]));
+										prevBalanceAmount = Double
+												.parseDouble(data[11].equalsIgnoreCase("NA") ? "0" : (data[11]));
+									}
+		
+									updateFeesCollectionReportMap(sessionData, feesReportMap, stdDb, 
+											feesHead, feesHeadAmount, penalty, concession, paymentMode, balanceAmount);
+								}
+							}
+						} else if (frequencyInt == 4) {
+							for (int i = 0; i < 12; i += 3) {
+								feesDate = resultSetFeesData.getString(cm.replaceCommaApostrophy(feesHead) + "_"
+										+ cm.intgerToMonth((startMonth + i) + "") + "_DATE");
+								if (feesDate != null && cm.isDateBetween(fromDateStr, toDateStr, feesDate)) {
+									feesHeadAmount = resultSetFeesData
+											.getDouble(feesHead + "_" + cm.intgerToMonth((startMonth + i) + ""));
+									feeData = resultSetFeesData.getString(cm.replaceCommaApostrophy(feesHead) + "_"
+											+ cm.intgerToMonth((startMonth + i) + "") + "_BANK");
+									if (feeData == null)
+										continue;
+									dataSplit = feeData.split("\\!");
+									data = cm.toAddInReport(dataSplit);
+									if (data == null)
+										continue;
+									paymentMode = data[0];
+									bank = data[1];
+									chequeDDNo = data[2];
+									chequeDDDate = data[3];
+									penalty = Double.parseDouble(data[4].equalsIgnoreCase("NA") ? "0" : (data[4]));
+									concession = Double.parseDouble(data[5].equalsIgnoreCase("NA") ? "0" : (data[5]));
+									receipt = Integer.parseInt(data[6]);
+									if (data.length > 10) {
+										balanceAmount = Double
+												.parseDouble(data[10].equalsIgnoreCase("NA") ? "0" : (data[10]));
+										prevBalanceAmount = Double
+												.parseDouble(data[11].equalsIgnoreCase("NA") ? "0" : (data[11]));
+									}
+		
+									updateFeesCollectionReportMap(sessionData, feesReportMap, stdDb, 
+											feesHead, feesHeadAmount, penalty, concession, paymentMode, balanceAmount);
+								}
+							}
+						} else if (frequencyInt == 2) {
+							for (int i = 0; i < 12; i += 6) {
+								feesDate = resultSetFeesData.getString(cm.replaceCommaApostrophy(feesHead) + "_"
+										+ cm.intgerToMonth((startMonth + i) + "") + "_DATE");
+								if (feesDate != null && cm.isDateBetween(fromDateStr, toDateStr, feesDate)) {
+									feesHeadAmount = resultSetFeesData
+											.getDouble(feesHead + "_" + cm.intgerToMonth((startMonth + i) + ""));
+									feeData = resultSetFeesData.getString(cm.replaceCommaApostrophy(feesHead) + "_"
+											+ cm.intgerToMonth((startMonth + i) + "") + "_BANK");
+									if (feeData == null)
+										continue;
+									dataSplit = feeData.split("\\!");
+									data = cm.toAddInReport(dataSplit);
+									if (data == null)
+										continue;
+									paymentMode = data[0];
+									bank = data[1];
+									chequeDDNo = data[2];
+									chequeDDDate = data[3];
+									penalty = Double.parseDouble(data[4].equalsIgnoreCase("NA") ? "0" : (data[4]));
+									concession = Double.parseDouble(data[5].equalsIgnoreCase("NA") ? "0" : (data[5]));
+									receipt = Integer.parseInt(data[6]);
+									if (data.length > 10) {
+										balanceAmount = Double
+												.parseDouble(data[10].equalsIgnoreCase("NA") ? "0" : (data[10]));
+										prevBalanceAmount = Double
+												.parseDouble(data[11].equalsIgnoreCase("NA") ? "0" : (data[11]));
+									}
+		
+									updateFeesCollectionReportMap(sessionData, feesReportMap, stdDb, 
+											feesHead, feesHeadAmount, penalty, concession, paymentMode, balanceAmount);
+								}
+							}
+						} else if (frequencyInt == 1) {
+							feesDate = resultSetFeesData.getString(cm.replaceCommaApostrophy(feesHead) + "_"
+									+ cm.intgerToMonth(startMonth + "") + "_DATE");
+							if (feesDate != null && cm.isDateBetween(fromDateStr, toDateStr, feesDate)) {
+								feesHeadAmount = resultSetFeesData
+										.getDouble(feesHead + "_" + cm.intgerToMonth(startMonth + ""));
+								feeData = resultSetFeesData.getString(cm.replaceCommaApostrophy(feesHead) + "_"
+										+ cm.intgerToMonth(startMonth + "") + "_BANK");
+								if (feeData == null)
+									continue;
+								dataSplit = feeData.split("\\!");
+								data = cm.toAddInReport(dataSplit);
+								if (data == null)
+									continue;
+								paymentMode = data[0];
+								bank = data[1];
+								chequeDDNo = data[2];
+								chequeDDDate = data[3];
+								penalty = Double.parseDouble(data[4].equalsIgnoreCase("NA") ? "0" : (data[4]));
+								concession = Double.parseDouble(data[5].equalsIgnoreCase("NA") ? "0" : (data[5]));
+								receipt = Integer.parseInt(data[6]);
+								if (data.length > 10) {
+									balanceAmount = Double.parseDouble(data[10].equalsIgnoreCase("NA") ? "0" : (data[10]));
+									prevBalanceAmount = Double
+											.parseDouble(data[11].equalsIgnoreCase("NA") ? "0" : (data[11]));
+								}
+		
+								updateFeesCollectionReportMap(sessionData, feesReportMap, stdDb, 
+										feesHead, feesHeadAmount, penalty, concession, paymentMode, balanceAmount);
+								
+							}
+						}
+					}
+		
+					// clear fields for next student
+					receipt = 0;
+					paymentMode = "";
+					bank = "";
+					chequeDDNo = "";
+					chequeDDDate = "";
+					prevStd = stdDb;
+				}
+		
+				String[] stdList = bundle.getString(sessionData.getSectionName().toUpperCase() + "_STD").split(",");
+				String headerStr = "STD|FEES";
+				feeCollectionReportList.add(headerStr);			
+				for(String stdStr : stdList) {
+					feeCollectionReportList.add(stdStr+"|"+(feesReportMap.get(stdStr) == null ? "0" : feesReportMap.get(stdStr)));	
+				}
+				
+				feeCollectionReportList.add("Std Total|"+(feesReportMap.get("stdTotal") == null ? "0" : feesReportMap.get("stdTotal")));
+				feeCollectionReportList.add("Cheque|"+(feesReportMap.get("chequeTotal") == null ? "0" : feesReportMap.get("chequeTotal")));
+				feeCollectionReportList.add("DD|"+(feesReportMap.get("ddTotal") == null ? "0" : feesReportMap.get("ddTotal")));
+				feeCollectionReportList.add("UPI|"+(feesReportMap.get("upiTotal") == null ? "0" : feesReportMap.get("upiTotal")));
+				feeCollectionReportList.add("Cash|"+(feesReportMap.get("cashTotal") == null ? "0" : feesReportMap.get("cashTotal")));
+				feeCollectionReportList.add("Concession|"+feesReportMap.get("concessionTotal"));
+				feeCollectionReportList.add("Penalty|"+feesReportMap.get("penaltyTotal"));
+//				feeCollectionReportList.add("Total|"+feesReportMap.get("allTotal"));
+				
+				if (feeCollectionReportList.size() > 2) {
+//					ce.generateExcel(sessionData, "FEES",
+//							"COLLECTION", "",
+//							feeCollectionReportList, false,
+//							"Fee Report for " + fromDateStr + " to " + toDateStr + "  Year:" + academicYear + "   Category:" + category, 1);
+					
+					ce.generateExcel(sessionData, "FEES", "COLLECTION", "", feeCollectionReportList, false,
+							sessionData.getSectionName() + " Fee Report for " + fromDateStr + " to " + toDateStr + "  Year:" + academicYear + "   Category:" + category, 1);
+					
+				} else {
+					JOptionPane.showMessageDialog(null, "No Data found..");
+				}
+		
+			} catch (Exception e) {
+				if (e.getMessage() != null && e.getMessage().contains("not found")) {
+					String columnError = cm.revertCommaApostrophy(e.getMessage()).toString();
+					columnError = columnError.substring(columnError.indexOf("'") + 1, columnError.lastIndexOf("'"));
+					if (columnError.contains("_DATE")) {
+						columnError = columnError.substring(0, columnError.length() - 9);
+					}
+					JOptionPane.showMessageDialog(null,
+							"Please click edit & save for fee head " + columnError + " " + "\n academic year : "
+									+ academicYear + " and std : All \n Then try again to generate report.");
+				}
+				cm.logException(e);
+				return feesReportMap;
+			}
+			return feesReportMap;
+		}
+
 	/////////// getFeesAbstractReport////////////////////////////////////////
 	public TreeMap<Integer, LinkedHashMap<String, Double>> getFeesAbstractReport(SessionData sessionData,
 			String academicYear, String std, String div, String category, String fromDateStr, String toDateStr)
@@ -23571,7 +24211,7 @@ public class DBValidate {
 
 							feesDate = resultSetFeesData.getString(cm.replaceCommaApostrophy(feesHead) + "_"
 									+ cm.intgerToMonth((startMonth + i) + "") + "_DATE");
-							if (cm.isDateBetween(fromDateStr, toDateStr, feesDate)) {
+							if (feesDate != null && cm.isDateBetween(fromDateStr, toDateStr, feesDate)) {
 								feesHeadAmount = resultSetFeesData
 										.getDouble(feesHead + "_" + cm.intgerToMonth((startMonth + i) + ""));
 								feesHeadData = resultSetFeesData.getString(cm.replaceCommaApostrophy(feesHead) + "_"
@@ -23607,7 +24247,7 @@ public class DBValidate {
 						for (int i = 0; i < 12; i += 3) {
 							feesDate = resultSetFeesData.getString(cm.replaceCommaApostrophy(feesHead) + "_"
 									+ cm.intgerToMonth((startMonth + i) + "") + "_DATE");
-							if (cm.isDateBetween(fromDateStr, toDateStr, feesDate)) {
+							if (feesDate != null && cm.isDateBetween(fromDateStr, toDateStr, feesDate)) {
 								feesHeadAmount = resultSetFeesData
 										.getDouble(feesHead + "_" + cm.intgerToMonth((startMonth + i) + ""));
 								feesHeadData = resultSetFeesData.getString(cm.replaceCommaApostrophy(feesHead) + "_"
@@ -23642,7 +24282,7 @@ public class DBValidate {
 						for (int i = 0; i < 12; i += 6) {
 							feesDate = resultSetFeesData.getString(cm.replaceCommaApostrophy(feesHead) + "_"
 									+ cm.intgerToMonth((startMonth + i) + "") + "_DATE");
-							if (cm.isDateBetween(fromDateStr, toDateStr, feesDate)) {
+							if (feesDate != null && cm.isDateBetween(fromDateStr, toDateStr, feesDate)) {
 								feesHeadAmount = resultSetFeesData
 										.getDouble(feesHead + "_" + cm.intgerToMonth((startMonth + i) + ""));
 								feesHeadData = resultSetFeesData.getString(cm.replaceCommaApostrophy(feesHead) + "_"
@@ -23676,7 +24316,7 @@ public class DBValidate {
 					} else if (frequencyInt == 1) {
 						feesDate = resultSetFeesData.getString(cm.replaceCommaApostrophy(feesHead) + "_"
 								+ cm.intgerToMonth(startMonth + "") + "_DATE");
-						if (cm.isDateBetween(fromDateStr, toDateStr, feesDate)) {
+						if (feesDate != null && cm.isDateBetween(fromDateStr, toDateStr, feesDate)) {
 							feesHeadAmount = resultSetFeesData
 									.getDouble(feesHead + "_" + cm.intgerToMonth(startMonth + ""));
 							feesHeadData = resultSetFeesData.getString(cm.replaceCommaApostrophy(feesHead) + "_"
@@ -23819,6 +24459,250 @@ public class DBValidate {
 		return feesReportMap;
 	}
 
+	///////////findQuarterlyFeesAmount////////////////////////////////////////
+	public LinkedHashMap<String, LinkedHashMap<String, Double>> findQuarterlyFeesAmount(SessionData sessionData, String std, String div, String academicYear,
+			String section, String category) throws Exception {
+		logger.info("=========findQuarterlyFeesAmount Query============");
+		LinkedHashMap<String, LinkedHashMap<String, Double>> quarterlyFeeMap = new LinkedHashMap<String, LinkedHashMap<String, Double>>();
+		String stddB = "";
+		double q1 = 0, q2 = 0, q3 = 0, q4 = 0, total = 0;
+		String feesQuery = "SELECT FEES_HEAD.STD_1, (SUM(IF(FREQUENCY='MONTHLY',AMOUNT*3,0)) + SUM(IF(FREQUENCY='QUARTERLY',AMOUNT/4,0)) + SUM(IF(FREQUENCY='HALF YEARLY',AMOUNT/2,0)) + SUM(IF(FREQUENCY='YEARLY',AMOUNT,0))) AS Q1, "
+				+ "(SUM(IF(FREQUENCY='MONTHLY',AMOUNT*3,0)) + SUM(IF(FREQUENCY='QUARTERLY',AMOUNT/4,0))) AS Q2, "
+				+ "(SUM(IF(FREQUENCY='MONTHLY',AMOUNT*3,0)) + SUM(IF(FREQUENCY='QUARTERLY',AMOUNT/4,0)) + SUM(IF(FREQUENCY='HALF YEARLY',AMOUNT/2,0))) AS Q3, "
+				+ "(SUM(IF(FREQUENCY='MONTHLY',AMOUNT*3,0)) + SUM(IF(FREQUENCY='QUARTERLY',AMOUNT/4,0))) AS Q4, "
+				+ "(SUM(IF(FREQUENCY='MONTHLY',AMOUNT,0)) + SUM(IF(FREQUENCY='QUARTERLY',AMOUNT,0)) + SUM(IF(FREQUENCY='HALF YEARLY',AMOUNT,0))  + SUM(IF(FREQUENCY='YEARLY',AMOUNT,0))) AS TOTAL "
+				+ "from "+sessionData.getDBName()+".FEES_HEAD WHERE  FEES_HEAD.ACADEMIC_YEAR = '"+academicYear+"' AND "
+				+ "FEES_HEAD.SECTION_NM = '"+sessionData.getSectionName()+"' AND FEES_HEAD.CATEGORY='"+category+"' GROUP BY FEES_HEAD.STD_1 WITH  ROLLUP";
+		statement = connection.createStatement();
+		resultSet = statement.executeQuery(feesQuery);
+
+		while (resultSet.next()) {
+			LinkedHashMap feesQuarterlyMap = new LinkedHashMap();
+			stddB = resultSet.getString("STD_1");
+			if(stddB == null) {
+				stddB = "Grand Total";
+			}
+			q1 = resultSet.getDouble("Q1");
+			q2 = resultSet.getDouble("Q2");
+			q3 = resultSet.getDouble("Q3");
+			q4 = resultSet.getDouble("Q4");
+			total = resultSet.getDouble("TOTAL");
+			
+			feesQuarterlyMap.put("q1", q1);
+			feesQuarterlyMap.put("q2", q2);
+			feesQuarterlyMap.put("q3", q3);
+			feesQuarterlyMap.put("q4", q4);
+			feesQuarterlyMap.put("total", total);
+			
+			quarterlyFeeMap.put(stddB, feesQuarterlyMap);
+			
+		}
+		
+		return quarterlyFeeMap;
+	}
+	// /////////findPaymentFreeStrengthWise////////////////////////////////////////
+	public List<String> findPaymentFreeStrengthWise(SessionData sessionData1, String std, String div, String academicYear, 
+			String category, String section, String tillDate) throws Exception {
+
+		logger.info("=========findPaymentFreeStrengthWise Query============");
+		String findQuery = "";
+		String stdDb = "", stdForStrength= "";
+		String divDb = "";
+		String freeDB = "";
+		String payableDB = "";
+		String totalDB = "";
+		String queryCondition = "", totalDuesStr = "";
+		boolean findFlag = false;
+		List catDataList = new ArrayList();
+		String addToQuery = "";
+		double q1amount = 0, q2amount = 0, q3amount = 0, q4amount = 0, totQrtAmount = 0;
+		String secName = bundle.getString(section.toUpperCase() + "_SEC");
+		if (secName.contains("Section")) {
+			secName = secName.substring(0, secName.indexOf("Section"));
+		}
+		if(std.equalsIgnoreCase("All")){
+			std = "";
+		}
+		if(div.equalsIgnoreCase("All")){
+			div = "";
+		}
+		if (!tillDate.equalsIgnoreCase("")) {
+			addToQuery = "OR DATE_LEAVING >= '" + tillDate + "'";
+		}
+		TreeMap<Integer, String> sortRoman = new TreeMap();
+		LinkedHashMap<String, LinkedHashMap<String, Double>> quarterlyFeeMap = new LinkedHashMap<String, LinkedHashMap<String, Double>>();
+		quarterlyFeeMap = findQuarterlyFeesAmount(sessionData1, std, div, academicYear, section, category);
+		LinkedHashMap<String, LinkedHashMap<String, Double>> getQuarterlyFeesData = new LinkedHashMap<String, LinkedHashMap<String, Double>>();
+		getQuarterlyFeesData = getQuarterlyFeesData(sessionData1, academicYear, section, category, quarterlyFeeMap);
+
+		if (!std.equalsIgnoreCase("")) {
+			queryCondition = "WHERE  CLASS_ALLOTMENT.ACADEMIC_YEAR = '" + academicYear
+					+ "'  AND  CLASS_ALLOTMENT.PRESENT_STD = '" + std + "' AND HS_GENERAL_REGISTER.SECTION_NM = '"
+					+ section + "' AND (ORIGINAL_LC IS NULL OR ORIGINAL_LC = 0 " + addToQuery + ")";
+		} else if (!std.equalsIgnoreCase("") && div.equalsIgnoreCase("")) {
+			queryCondition = "WHERE  CLASS_ALLOTMENT.ACADEMIC_YEAR = '" + academicYear
+					+ "'  AND  CLASS_ALLOTMENT.PRESENT_STD = '" + std + "' AND HS_GENERAL_REGISTER.SECTION_NM = '"
+					+ section + "' AND (ORIGINAL_LC IS NULL OR ORIGINAL_LC = 0 " + addToQuery + ")";
+		} else if (std.equalsIgnoreCase("")) {
+			queryCondition = "WHERE  CLASS_ALLOTMENT.ACADEMIC_YEAR = '" + academicYear
+					+ "' AND HS_GENERAL_REGISTER.SECTION_NM = '" + section
+					+ "' AND (ORIGINAL_LC IS NULL OR ORIGINAL_LC = 0 " + addToQuery + ")";
+		}
+
+		try {
+			findQuery = "SELECT CLASS_ALLOTMENT.PRESENT_STD  AS  PRESENT_STD, CLASS_ALLOTMENT.PRESENT_DIV  AS  PRESENT_DIV, "
+					+ "COUNT(CASE WHEN HS_GENERAL_REGISTER.PAYING_FREE = 'PAYING' THEN "
+					+ "CLASS_ALLOTMENT.PRESENT_STD ELSE NULL END) AS PAYABLE,  "
+					+ "COUNT(CASE WHEN HS_GENERAL_REGISTER.PAYING_FREE = 'FREE' THEN "
+					+ "CLASS_ALLOTMENT.PRESENT_STD ELSE NULL END) AS FREE, COUNT(*) AS TOTAL  " + "FROM "
+					+ sessionData1.getDBName() + "." + "HS_GENERAL_REGISTER  " + "LEFT  JOIN "
+					+ sessionData1.getDBName() + "." + "CLASS_ALLOTMENT  ON  "
+					+ "HS_GENERAL_REGISTER.GR_NO=CLASS_ALLOTMENT.GR_NO "
+					+ "AND HS_GENERAL_REGISTER.SECTION_NM=CLASS_ALLOTMENT.SECTION_NM " + queryCondition
+					+ " GROUP BY CLASS_ALLOTMENT.PRESENT_STD,CLASS_ALLOTMENT.PRESENT_DIV  WITH  ROLLUP";
+
+			logger.info("findPaymentFreeStrengthWise query :: " + findQuery);
+
+			statement = connection.createStatement();
+			resultSet = statement.executeQuery(findQuery);
+
+			catDataList.add("Class|Total Strength||Free|||Payable||||Dues=>|||||Q1||||||Q2||||||Q3||||||Q4|||||||Total Dues||||||||Paid Strength=>|||||||||Q1||||||||||Q2|||||||||||Q3||||||||||||Q4|||||||||||||Paid Fees=>||||||||||||||Q1|||||||||||||||Q2||||||||||||||||Q3|||||||||||||||||Q4||||||||||||||||||Concession");
+
+			String stdDivInInt = "";
+			int i = 0;
+			int rowcount = 0;
+			int grandTotal = 0;
+			int freeTotal = 0;
+			int payableTotal = 0;
+			if (resultSet.last()) {
+				rowcount = resultSet.getRow();
+				resultSet.beforeFirst(); // not rs.first() because the rs.next() below will move on, missing the first
+											// element
+			}
+
+			while (resultSet.next()) {
+				stdDb = resultSet.getString("PRESENT_STD") == null ? " " : (resultSet.getString("PRESENT_STD").trim());
+				stdForStrength = stdDb;
+				if(stdForStrength.equalsIgnoreCase("JR KG")) {
+					stdForStrength = "LOWER_KG";
+				}
+				else if(stdForStrength.equalsIgnoreCase("SR KG")) {
+					stdForStrength = "UPPER_KG";
+				}
+				divDb = resultSet.getString("PRESENT_DIV") == null ? " " : (resultSet.getString("PRESENT_DIV").trim());
+				freeDB = resultSet.getString("FREE") == null ? " " : (resultSet.getString("FREE").trim());
+				payableDB = resultSet.getString("PAYABLE") == null ? " " : (resultSet.getString("PAYABLE").trim());
+				totalDB = resultSet.getString("TOTAL") == null ? " " : (resultSet.getString("TOTAL").trim());
+
+				if(stdDb != null && !stdDb.trim().equalsIgnoreCase("")) {
+					q1amount = quarterlyFeeMap.get(stdDb).get("q1");
+					q2amount = quarterlyFeeMap.get(stdDb).get("q2");
+					q3amount = quarterlyFeeMap.get(stdDb).get("q3");
+					q4amount = quarterlyFeeMap.get(stdDb).get("q4");
+					totQrtAmount = quarterlyFeeMap.get(stdDb).get("total");
+				}
+				
+				if (i == (rowcount - 2)) {
+					grandTotal = grandTotal + Integer.parseInt(totalDB);
+					freeTotal = freeTotal + Integer.parseInt(freeDB);
+					payableTotal = payableTotal + Integer.parseInt(payableDB);
+					divDb = "Total";
+					stdDivInInt = cm.RomanToInteger(stdForStrength) + "" + cm.AlphabetToInteger("Total");
+					int stdDivIntValue = Integer.parseInt(stdDivInInt);
+					if(stdDivIntValue < 0) {
+						stdDivIntValue = stdDivIntValue * (-1);
+					}
+					sortRoman.put(stdDivIntValue,
+							stdDb + " Total |" + totalDB + "|" + freeDB + "|" + payableDB + "|           |" + (Double.parseDouble(payableDB)*q1amount) + "|" + (Double.parseDouble(payableDB)*q2amount) + "|" + (Double.parseDouble(payableDB)*q3amount) + "|" + (Double.parseDouble(payableDB)*q4amount) + "|" + (Double.parseDouble(payableDB)*totQrtAmount)+"|           |"+
+							getQuarterlyFeesData.get(stdDb+"_"+divDb).get("q1StdCount")+"|"+getQuarterlyFeesData.get(stdDb+"_"+divDb).get("q2StdCount")+"|"+getQuarterlyFeesData.get(stdDb+"_"+divDb).get("q3StdCount")+"|"+getQuarterlyFeesData.get(stdDb+"_"+divDb).get("q4StdCount")+"|           |"+
+							getQuarterlyFeesData.get(stdDb+"_"+divDb).get("q1StdSum")+"|"+getQuarterlyFeesData.get(stdDb+"_"+divDb).get("q2StdSum")+"|"+getQuarterlyFeesData.get(stdDb+"_"+divDb).get("q3StdSum")+"|"+getQuarterlyFeesData.get(stdDb+"_"+divDb).get("q4StdSum")+"|"+getQuarterlyFeesData.get(stdDb+"_"+divDb).get("qStdConcession"));
+					
+					stdDivInInt = cm.RomanToInteger(stdDb) + "" + cm.AlphabetToInteger("Grand_Total");
+					stdDivIntValue = Integer.parseInt(stdDivInInt);
+					if(stdDivIntValue < 0) {
+						stdDivIntValue = stdDivIntValue * (-1);
+					}
+					
+					q1amount = quarterlyFeeMap.get("Grand Total").get("q1");
+					q2amount = quarterlyFeeMap.get("Grand Total").get("q2");
+					q3amount = quarterlyFeeMap.get("Grand Total").get("q3");
+					q4amount = quarterlyFeeMap.get("Grand Total").get("q4");
+					totQrtAmount = quarterlyFeeMap.get("Grand Total").get("total");
+					sortRoman.put(stdDivIntValue,
+							"Grand Total |" + grandTotal + "|" + freeTotal + "|" + payableTotal + "|           |" + (Double.parseDouble(payableDB)*q1amount) + "|" + (Double.parseDouble(payableDB)*q2amount) + "|" + (Double.parseDouble(payableDB)*q3amount) + "|" + (Double.parseDouble(payableDB)*q4amount) + "|" + (Double.parseDouble(payableDB)*totQrtAmount)+"|           |"+
+							getQuarterlyFeesData.get("Grand_Total").get("q1AllCount")+"|"+getQuarterlyFeesData.get("Grand_Total").get("q2AllCount")+"|"+getQuarterlyFeesData.get("Grand_Total").get("q3AllCount")+"|"+getQuarterlyFeesData.get("Grand_Total").get("q4AllCount")+"|           |"+
+							getQuarterlyFeesData.get("Grand_Total").get("q1AllSum")+"|"+getQuarterlyFeesData.get("Grand_Total").get("q2AllSum")+"|"+getQuarterlyFeesData.get("Grand_Total").get("q3AllSum")+"|"+getQuarterlyFeesData.get("Grand_Total").get("q4AllSum")+"|"+getQuarterlyFeesData.get("Grand_Total").get("allConcession"));
+				} else if (i < (rowcount - 2)) {
+					if (divDb.trim().equalsIgnoreCase("")) {
+						divDb = "Total";
+						grandTotal = grandTotal + Integer.parseInt(totalDB);
+						freeTotal = freeTotal + Integer.parseInt(freeDB);
+						payableTotal = payableTotal + Integer.parseInt(payableDB);
+					}
+					stdDivInInt = cm.RomanToInteger(stdForStrength) + "" + cm.AlphabetToInteger(divDb);
+					int stdDivIntValue = Integer.parseInt(stdDivInInt);
+					if(stdDivIntValue < 0) {
+						stdDivIntValue = stdDivIntValue * (-1);
+					}
+					
+					if(divDb.equalsIgnoreCase("Total")) {
+						sortRoman.put(stdDivIntValue,
+								stdDb + " Total |" + totalDB + "|" + freeDB + "|" + payableDB + "|           |" + (Double.parseDouble(payableDB)*q1amount) + "|" + (Double.parseDouble(payableDB)*q2amount) + "|" + (Double.parseDouble(payableDB)*q3amount) + "|" + (Double.parseDouble(payableDB)*q4amount) + "|" + (Double.parseDouble(payableDB)*totQrtAmount)+"|           |"+
+								getQuarterlyFeesData.get(stdDb+"_"+divDb).get("q1StdCount")+"|"+getQuarterlyFeesData.get(stdDb+"_"+divDb).get("q2StdCount")+"|"+getQuarterlyFeesData.get(stdDb+"_"+divDb).get("q3StdCount")+"|"+getQuarterlyFeesData.get(stdDb+"_"+divDb).get("q4StdCount")+"|           |"+
+								getQuarterlyFeesData.get(stdDb+"_"+divDb).get("q1StdSum")+"|"+getQuarterlyFeesData.get(stdDb+"_"+divDb).get("q2StdSum")+"|"+getQuarterlyFeesData.get(stdDb+"_"+divDb).get("q3StdSum")+"|"+getQuarterlyFeesData.get(stdDb+"_"+divDb).get("q4StdSum")+"|"+getQuarterlyFeesData.get(stdDb+"_"+divDb).get("qStdConcession"));
+					}
+					else {
+						sortRoman.put(stdDivIntValue,
+								stdDb + " " + divDb + "|" + totalDB + "|" + freeDB + "|" + payableDB + "|           |" + 
+						(Double.parseDouble(payableDB)*q1amount) + "|" + (Double.parseDouble(payableDB)*q2amount) + "|" + (Double.parseDouble(payableDB)*q3amount) + "|" + (Double.parseDouble(payableDB)*q4amount) + "|" + (Double.parseDouble(payableDB)*totQrtAmount) + "|           |"+
+						getQuarterlyFeesData.get(stdDb+"_"+divDb).get("q1Count")+"|"+getQuarterlyFeesData.get(stdDb+"_"+divDb).get("q2Count")+"|"+getQuarterlyFeesData.get(stdDb+"_"+divDb).get("q3Count")+"|"+getQuarterlyFeesData.get(stdDb+"_"+divDb).get("q4Count")+"|           |"+
+						getQuarterlyFeesData.get(stdDb+"_"+divDb).get("q1Sum")+"|"+getQuarterlyFeesData.get(stdDb+"_"+divDb).get("q2Sum")+"|"+getQuarterlyFeesData.get(stdDb+"_"+divDb).get("q3Sum")+"|"+getQuarterlyFeesData.get(stdDb+"_"+divDb).get("q4Sum")+"|"+getQuarterlyFeesData.get(stdDb+"_"+divDb).get("qStdDivConcession"));
+					}
+					
+//					sortRoman.put(stdDivIntValue,
+//							stdDb + " " + divDb + "|" + totalDB + "|" + freeDB + "|" + payableDB );
+				}
+				findFlag = true;
+				i++;
+			}
+			Set set = sortRoman.entrySet();
+			// Get an iterator
+			Iterator j = set.iterator();
+			// Display elements
+			while (j.hasNext()) {
+				Map.Entry me = (Map.Entry) j.next();
+				catDataList.add(me.getValue());
+			}
+
+//				if (!print.equalsIgnoreCase("")) {
+					if (div.equalsIgnoreCase("")) {
+						div = "All";
+					}
+					if (std.equalsIgnoreCase("")) {
+						std = "All";
+					}
+					ce.generateExcel(sessionData1, "FEES", "QUARTERLY", "", catDataList, false,
+							secName + " Quarterly Fees Report  STD:" + std + "  DIV:" + div + " " + academicYear, 1);
+					return null;
+//				}
+
+		} catch (Exception e) {
+			cm.logException(e);
+		}
+		return catDataList;
+	}
+		
+	/////////// getFeesQuarterlyReport////////////////////////////////////////
+	public void getFeesQuarterlyReport(SessionData sessionData,
+			String academicYear, String std, String div, String category, String fromDateStr, String toDateStr)
+			throws Exception {
+		//	logger.info("=========getFeesQuarterlyReport Query============");
+		List findPaymentFreeStrengthWise = new ArrayList();
+		String dateTillSelected = cm.dateFormat_yyyymmdd(toDateStr);
+		findPaymentFreeStrengthWise = findPaymentFreeStrengthWise(sessionData, std, div, academicYear, category, sessionData.getSectionName(), dateTillSelected);
+		
+		
+	}
 	/////////// getClasswiseFeeReport////////////////////////////////////////
 	public LinkedHashMap<String, LinkedHashMap<String, String>> getClasswiseFeeReport(SessionData sessionData,
 			String academicYear, String std, String div, String category,
@@ -23982,7 +24866,8 @@ public class DBValidate {
 				LinkedHashMap<String, String> feesReportDetailMap = new LinkedHashMap<String, String>();
 				LinkedHashMap concessionMap = new LinkedHashMap();
 				grNoDb = resultSet.getString("GR_NO");
-				if (freePayingData.get(grNoDb) == null || freePayingData.get(grNoDb).toString().equalsIgnoreCase("Free")) {
+				if (freePayingData.get(grNoDb) !=null && 
+						(freePayingData.get(grNoDb) == null || freePayingData.get(grNoDb).toString().equalsIgnoreCase("Free"))) {
 					continue;
 				}
 				nameDb = resultSet.getString("NAME");
@@ -24134,7 +25019,7 @@ public class DBValidate {
 		LinkedHashMap<String, String> contactDetailMap = new LinkedHashMap<String, String>();
 		LinkedHashMap<String, String> freePayingData = new LinkedHashMap<String, String>();
 		LinkedHashMap<String, LinkedHashMap<String, String>> multiFeeHeadMap = new LinkedHashMap<String, LinkedHashMap<String, String>>();
-		boolean isOptional = false;
+		boolean isOptional = false, isData = false;
 		String optionalFee = "", optional = "", subFee = "", contact = "";
 
 		try {
@@ -24182,8 +25067,11 @@ public class DBValidate {
 								+ feesHead + "_" + cm.intgerToMonth((startMonth + i) + "") + ", 0)) +";
 						unpaidList += " SUM(IF(" + feesHead + "_" + cm.intgerToMonth((startMonth + i) + "")
 								+ ">0, 0, 1)) +";
-						feesHeadColumn = feesHead + "_" + cm.intgerToMonth((startMonth + i) + "") + ","
+						feesHeadColumn = "SUM(IF(" + feesHead + "_" + cm.intgerToMonth((startMonth + i) + "") + ">=0, "
+								+ feesHead + "_" + cm.intgerToMonth((startMonth + i) + "") + ", 0)) AS "+feesHead + "_" + cm.intgerToMonth((startMonth + i) + "")+","
 								+ feesHeadColumn;
+//						feesHeadColumn = feesHead + "_" + cm.intgerToMonth((startMonth + i) + "") + ","
+//								+ feesHeadColumn;
 					}
 					columnList = columnList.substring(0, columnList.lastIndexOf("+"));
 					unpaidList = unpaidList.substring(0, unpaidList.lastIndexOf("+"));
@@ -24195,8 +25083,11 @@ public class DBValidate {
 								+ feesHead + "_" + cm.intgerToMonth((startMonth + i) + "") + ", 0)) +";
 						unpaidList += "SUM(IF(" + feesHead + "_" + cm.intgerToMonth((startMonth + i) + "")
 								+ ">0, 0, 1)) +";
-						feesHeadColumn = feesHead + "_" + cm.intgerToMonth((startMonth + i) + "") + ","
+						feesHeadColumn = "SUM(IF(" + feesHead + "_" + cm.intgerToMonth((startMonth + i) + "") + ">=0, "
+								+ feesHead + "_" + cm.intgerToMonth((startMonth + i) + "") + ", 0)) AS "+feesHead + "_" + cm.intgerToMonth((startMonth + i) + "")+","
 								+ feesHeadColumn;
+//						feesHeadColumn = feesHead + "_" + cm.intgerToMonth((startMonth + i) + "") + ","
+//								+ feesHeadColumn;
 					}
 					columnList = columnList.substring(0, columnList.lastIndexOf("+"));
 					unpaidList = unpaidList.substring(0, unpaidList.lastIndexOf("+"));
@@ -24208,8 +25099,11 @@ public class DBValidate {
 								+ feesHead + "_" + cm.intgerToMonth((startMonth + i) + "") + ", 0)) +";
 						unpaidList += "SUM(IF(" + feesHead + "_" + cm.intgerToMonth((startMonth + i) + "")
 								+ ">0, 0, 1)) +";
-						feesHeadColumn = feesHead + "_" + cm.intgerToMonth((startMonth + i) + "") + ","
+						feesHeadColumn = "SUM(IF(" + feesHead + "_" + cm.intgerToMonth((startMonth + i) + "") + ">=0, "
+								+ feesHead + "_" + cm.intgerToMonth((startMonth + i) + "") + ", 0)) AS "+feesHead + "_" + cm.intgerToMonth((startMonth + i) + "")+","
 								+ feesHeadColumn;
+//						feesHeadColumn = feesHead + "_" + cm.intgerToMonth((startMonth + i) + "") + ","
+//								+ feesHeadColumn;
 					}
 					columnList = columnList.substring(0, columnList.lastIndexOf("+"));
 					unpaidList = unpaidList.substring(0, unpaidList.lastIndexOf("+"));
@@ -24219,7 +25113,10 @@ public class DBValidate {
 					columnList += "SUM(IF(" + feesHead + "_" + cm.intgerToMonth((startMonth) + "") + ">=0, " + feesHead
 							+ "_" + cm.intgerToMonth((startMonth) + "") + ", 0))";
 					unpaidList += "SUM(IF(" + feesHead + "_" + cm.intgerToMonth((startMonth) + "") + ">0, 0, 1))";
-					feesHeadColumn = feesHead + "_" + cm.intgerToMonth((startMonth) + "") + "," + feesHeadColumn;
+					feesHeadColumn = "SUM(IF(" + feesHead + "_" + cm.intgerToMonth((startMonth) + "") + ">=0, "
+							+ feesHead + "_" + cm.intgerToMonth((startMonth) + "") + ", 0)) AS "+feesHead + "_" + cm.intgerToMonth((startMonth) + "")+","
+							+ feesHeadColumn;
+//					feesHeadColumn = feesHead + "_" + cm.intgerToMonth((startMonth) + "") + "," + feesHeadColumn;
 					columnList += " AS " + feesHead + ",";
 					unpaidList += " AS " + feesHead + "_UNPAID,";
 				}
@@ -24232,11 +25129,14 @@ public class DBValidate {
 			studentReportList.add(paidStr);
 
 			String query = "SELECT STD_1,DIV_1," + columnList + unpaidList + feesHeadColumn
-					+ "SUM(IF(TOTAL_AMOUNT>=0, TOTAL_AMOUNT, 0))  AS TOTAL_AMOUNT,CONCESSION_AMOUNT,CONCESSION_PERCENT,PENALTY_AMOUNT,FEES_DATA_MANDATORY.GR_NO,"
+					+ "SUM(IF(TOTAL_AMOUNT>=0, TOTAL_AMOUNT, 0))  AS TOTAL_AMOUNT,"
+					+ "SUM(IF(CONCESSION_AMOUNT>=0, CONCESSION_AMOUNT, 0)) AS CONCESSION_AMOUNT,"
+					+ "SUM(IF(CONCESSION_PERCENT>=0, CONCESSION_PERCENT, 0)) AS CONCESSION_PERCENT,"
+					+ "SUM(IF(PENALTY_AMOUNT>=0, PENALTY_AMOUNT, 0)) AS PENALTY_AMOUNT,FEES_DATA_MANDATORY.GR_NO,"
 					+ "FEES_DATA_MANDATORY.ROLL_NO,concat(FEES_DATA_MANDATORY.LAST_NAME,' ',FEES_DATA_MANDATORY.FIRST_NAME,' ',FEES_DATA_MANDATORY.FATHER_NAME) AS NAME "
 					+ "FROM " + sessionData.getDBName() + "." + tableName + " WHERE " + tableName + ".ACADEMIC_YEAR='"
 					+ academicYear + "' " + "AND " + tableName + ".SECTION_NM='" + sessionData.getSectionName() + "' "
-					+ whereCondition + " " + "GROUP BY " + tableName + ".GR_NO ORDER BY ROLL_NO * 1";
+					+ whereCondition + " " + "GROUP BY GR_NO,STD_1,DIV_1,ROLL_NO,NAME ORDER BY STD_1,DIV_1,GR_NO,ROLL_NO * 1";
 			statement = connection.createStatement();
 			resultSet = statement.executeQuery(query);
 
@@ -24250,9 +25150,11 @@ public class DBValidate {
 				LinkedHashMap<String, String> feesReportDetailMap = new LinkedHashMap<String, String>();
 				LinkedHashMap concessionMap = new LinkedHashMap();
 				grNoDb = resultSet.getString("GR_NO");
+				
 				if (freePayingData.get(grNoDb) == null || freePayingData.get(grNoDb).toString().equalsIgnoreCase("Free")) {
 					continue;
 				}
+				
 				nameDb = resultSet.getString("NAME");
 				rollNoDb = resultSet.getString("ROLL_NO");
 				stdDb = resultSet.getString("STD_1");
@@ -24327,22 +25229,29 @@ public class DBValidate {
 				}
 				detailStr += unpaidStr + "|" + String.format("%.2f", dueTotal);
 				if (reportName.equalsIgnoreCase("Defaulter") && dueTotal > 0.0) {
+					isData = true;
 					studentReportList.add(detailStr);
 				} else if (reportName.equalsIgnoreCase("DefaulterCheck")) {
+					isData = true;
 					studentReportList.add(grNoDb);
 				}
 				concessionDueFeeTotal = 0;
 				isOptional = false;
 			}
 
-			Set setFeeUnpaidTotal = unpaidTotalMap.entrySet();
-			Iterator n = setFeeUnpaidTotal.iterator();
-			while (n.hasNext()) {
-				Map.Entry me = (Map.Entry) n.next();
-				totalStr += "|" + me.getValue();
+			if(isData) {
+				Set setFeeUnpaidTotal = unpaidTotalMap.entrySet();
+				Iterator n = setFeeUnpaidTotal.iterator();
+				while (n.hasNext()) {
+					Map.Entry me = (Map.Entry) n.next();
+					totalStr += "|" + me.getValue();
+				}
+				totalStr += "|" + String.format("%.2f", dueGrandTotal);
+				studentReportList.add(totalStr);
 			}
-			totalStr += "|" + String.format("%.2f", dueGrandTotal);
-			studentReportList.add(totalStr);
+			else {
+				studentReportList.clear();
+			}
 
 		} catch (Exception e) {
 			logger.info("getConsolidateFeeReport error===>"+e.toString());
@@ -24764,12 +25673,18 @@ public class DBValidate {
 				selFeesHeadMap.put(feesHead, 0.0);
 			}
 
+			DecimalFormat f = new DecimalFormat("##.00");
+			feesHeadAmount = Double.parseDouble(f.format(feesHeadAmount));
+			
 			if (feesReportMap.containsKey(receipt)) {
 				receiptDetailMap = feesReportMap.get(receipt);
 				if (receiptDetailMap.get(feesHead) != null) {
 					feesHeadAmtFromMap = Double.parseDouble(receiptDetailMap.get(feesHead));
 				}
-				receiptDetailMap.put(feesHead, (feesHeadAmtFromMap + feesHeadAmount) + "");
+				
+				double feesHeadAmountTotal = feesHeadAmtFromMap + feesHeadAmount;
+		           
+				receiptDetailMap.put(feesHead, f.format(feesHeadAmountTotal));
 				receiptDetailMap.put("concession",
 						(concession + Double.parseDouble(receiptDetailMap.get("concession"))) + "");
 				if (receiptDetailMap.get("balanceAmount") == null) {
@@ -24785,11 +25700,11 @@ public class DBValidate {
 				if (receiptDetailMap.get("penalty") == null) {
 					receiptDetailMap.put("penalty", (Double.parseDouble(receiptDetailMap.get("penalty"))) + "");
 					receiptDetailMap.put("total",
-							(Double.parseDouble(receiptDetailMap.get("total")) + feesHeadAmount + penalty - concession)
+							(Double.parseDouble(receiptDetailMap.get("total")) + Double.parseDouble(f.format(feesHeadAmount + penalty - concession)))
 									+ "");
 				} else {
 					receiptDetailMap.put("total",
-							(Double.parseDouble(receiptDetailMap.get("total")) + feesHeadAmount - concession) + "");
+							(Double.parseDouble(receiptDetailMap.get("total")) + Double.parseDouble(f.format(feesHeadAmount - concession))) + "");
 				}
 			} else {
 				receiptDetailMap.put("receipt", receipt + "");
@@ -24808,9 +25723,48 @@ public class DBValidate {
 				receiptDetailMap.put("concession", concession + "");
 				receiptDetailMap.put("balanceAmount", balanceAmount + "");
 				receiptDetailMap.put(feesHead, feesHeadAmount + "");
-				receiptDetailMap.put("total", (feesHeadAmount + penalty - concession - balanceAmount) + "");
+				receiptDetailMap.put("total", f.format(feesHeadAmount + penalty - concession - balanceAmount) + "");
 				feesReportMap.put(receipt, receiptDetailMap);
 			}
+		} catch (Exception e) {
+			cm.logException(e);
+		}
+		return feesReportMap;
+	}
+	
+	public TreeMap<String, Double> updateFeesCollectionReportMap(SessionData sessionData,
+			TreeMap<String, Double> feesReportMap, String std, String feesHead, double feesHeadAmount, double penalty, 
+			double concession, String paymentMode,	double balanceAmount) throws Exception {
+
+		double feesAmt = 0;
+		try {
+				DecimalFormat df = new DecimalFormat("####0.00");
+				feesHeadAmount = Double.parseDouble(df.format(feesHeadAmount));
+				penalty = Double.parseDouble(df.format(penalty));
+				concession = Double.parseDouble(df.format(concession));
+				balanceAmount = Double.parseDouble(df.format(balanceAmount));
+				
+				feesAmt = (feesHeadAmount + penalty - concession - balanceAmount);
+				feesAmt = Double.parseDouble(df.format(feesAmt));
+				
+				cm.updateTreeMap(feesReportMap, std, feesAmt);
+				cm.updateTreeMap(feesReportMap, "penaltyTotal", penalty);
+				cm.updateTreeMap(feesReportMap, "concessionTotal", concession);
+				cm.updateTreeMap(feesReportMap, "balanceTotal", balanceAmount);
+				cm.updateTreeMap(feesReportMap, "stdTotal", feesAmt);
+				
+				if(paymentMode.equalsIgnoreCase("Cash")){
+					cm.updateTreeMap(feesReportMap, "cashTotal", feesAmt);
+				} else if(paymentMode.equalsIgnoreCase("Cheque")){
+					cm.updateTreeMap(feesReportMap, "chequeTotal", feesAmt);
+				} else if(paymentMode.equalsIgnoreCase("DD")){
+					cm.updateTreeMap(feesReportMap, "ddTotal", feesAmt);
+				} else if(paymentMode.equalsIgnoreCase("UPI")){
+					cm.updateTreeMap(feesReportMap, "upiTotal", feesAmt);
+				}
+				
+				cm.updateTreeMap(feesReportMap, "allTotal", feesAmt);
+//			}
 		} catch (Exception e) {
 			cm.logException(e);
 		}
@@ -24931,10 +25885,13 @@ public class DBValidate {
 	public LinkedHashMap<String, String> getLeftStudentMap(SessionData sessionData, String academicYear, String std,
 			String div) throws Exception {
 		LinkedHashMap<String, String> leftDataMap = new LinkedHashMap<String, String>();
+		String condition = "";
+		if(!academicYear.equalsIgnoreCase("") && !std.equalsIgnoreCase("")){
+			condition = "ACADEMIC_YEAR='" + academicYear + "' AND PRESENT_STD='" + std + "' AND PRESENT_DIV='" + div + "' " + "AND ";
+		}
 
 		String findQuery = "SELECT GR_NO FROM " + sessionData.getDBName() + "." + "hs_general_register "
-				+ "WHERE ACADEMIC_YEAR='" + academicYear + "' AND PRESENT_STD='" + std + "' AND PRESENT_DIV='" + div
-				+ "' " + "AND SECTION_NM='" + sessionData.getSectionName() + "' AND DATE_LEAVING IS NOT NULL "
+				+ "WHERE "+condition+" SECTION_NM='" + sessionData.getSectionName() + "' AND DATE_LEAVING IS NOT NULL "
 				+ "ORDER BY GR_NO";
 		logger.info("fetch left student list query == " + findQuery);
 
@@ -25313,11 +26270,10 @@ public class DBValidate {
 		return b;
 	}
 
-	public boolean insertStudentImage(SessionData sessionData, String name, String grNo, String imgPath,
-			boolean isUpdate) throws Exception {
+	public boolean insertStudentImage(SessionData sessionData, String name, String grNo, String imgPath) throws Exception {
 		PreparedStatement ps = null;
 		FileInputStream inputStream = null;
-		boolean flag = false;
+		boolean flag = false, isUpdate = false;
 
 		try {
 			statement = connection.createStatement();

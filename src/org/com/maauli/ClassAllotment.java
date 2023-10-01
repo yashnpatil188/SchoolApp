@@ -850,9 +850,16 @@ public class ClassAllotment extends JFrame {
 
 		if(!stdClass.equalsIgnoreCase("All") && !stdClass.equalsIgnoreCase("Select") && 
 	    		!stdClass.equalsIgnoreCase("") && findStudentDB.connectDatabase(sessionData)){
+			
+			logger.info("Time before getting getDistinctDiv data :: "+commonObj.getCurrentTimeStamp());
+			System.out.println("Time before getting getDistinctDiv data :: "+commonObj.getCurrentTimeStamp());
+			
 			admittedDiv_combo.removeAllItems();
 			String divAvailabe = findStudentDB.getDistinctDiv(sessionData, stdClass, section, 
 					"PRESENT_DIV", "PRESENT_STD", "class_allotment",academicYearClass);
+			
+			logger.info("Time after getting getDistinctDiv data :: "+commonObj.getCurrentTimeStamp());
+			System.out.println("Time after getting getDistinctDiv data :: "+commonObj.getCurrentTimeStamp());
 			
 			for (String retval: divAvailabe.split(",")) {
 				admittedDiv_combo.addItem(retval);

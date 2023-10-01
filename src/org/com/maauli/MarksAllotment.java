@@ -736,6 +736,9 @@ public class MarksAllotment extends JFrame {
 		final JRadioButton createSubject_radio = new JRadioButton();
 		createSubject_radio.setBounds(mainCentre - 350, 55, 20, 20);
 		findPanel.add(createSubject_radio);
+		if(!sessionData.getUserRole().equalsIgnoreCase("ADMINISTRATOR")) {
+			createSubject_radio.setEnabled(false);
+		}
 
 		final JLabel createSubject_label = new JLabel("Create Subject");
 		createSubject_label.setFont(new Font("Book Antiqua", Font.BOLD, 16));
@@ -746,6 +749,9 @@ public class MarksAllotment extends JFrame {
 		final JRadioButton allotSubject_radio = new JRadioButton();
 		allotSubject_radio.setBounds(mainCentre - 160, 55, 20, 20);
 		findPanel.add(allotSubject_radio);
+		if(!sessionData.getUserRole().equalsIgnoreCase("ADMINISTRATOR")) {
+			allotSubject_radio.setEnabled(false);
+		}
 
 		final JLabel allotSubject_label = new JLabel("Marks Allotment");
 		allotSubject_label.setFont(new Font("Book Antiqua", Font.BOLD, 16));
@@ -756,6 +762,9 @@ public class MarksAllotment extends JFrame {
 		final JRadioButton studentSubject_radio = new JRadioButton();
 		studentSubject_radio.setBounds(mainCentre + 70, 55, 20, 20);
 		findPanel.add(studentSubject_radio);
+//		if(!sessionData.getUserRole().equalsIgnoreCase("ADMINISTRATOR")) {
+//			studentSubject_radio.setEnabled(false);
+//		}
 
 		final JLabel studentSubject_label = new JLabel("Student Subject Allotment");
 		studentSubject_label.setFont(new Font("Book Antiqua", Font.BOLD, 16));
@@ -807,7 +816,7 @@ public class MarksAllotment extends JFrame {
 		});
 
 		createSubject_radio.setSelected(false);
-		allotSubject_radio.setSelected(true);
+		allotSubject_radio.setSelected(false);
 		studentSubject_radio.setSelected(false);
 		presentDiv_combo.setEnabled(false);
 		// compOptional_combo.setEnabled(false);
@@ -887,9 +896,15 @@ public class MarksAllotment extends JFrame {
 				String academicSel = "";
 				String div = "";
 				String semester = "";
+				int stdInt = 0;
 
 				std = (String) admittedStd_combo.getSelectedItem();
-				int stdInt = commonObj.RomanToInteger(std);
+				if (std.equalsIgnoreCase("Select")) {
+					validateFields = false;
+					JOptionPane.showMessageDialog(null, "Please select Std");
+				}
+				
+				stdInt = commonObj.RomanToInteger(std);
 				academicSel = (String) academicYear_combo.getSelectedItem();
 				div = (String) presentDiv_combo.getSelectedItem();
 				if(stdInt <= 10){

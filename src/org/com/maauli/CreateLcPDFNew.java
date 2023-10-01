@@ -1269,10 +1269,16 @@ public class CreateLcPDFNew {
 						
 						if(admittedStdBranch.equalsIgnoreCase("") || admittedStdBranch.equalsIgnoreCase("NA") || admittedStdBranch.equalsIgnoreCase("-") || admittedStdBranch.equalsIgnoreCase(null) 
 								|| admittedStdBranch.equalsIgnoreCase("null") || !currentStdDb.equalsIgnoreCase(leavingStdDb) || !admittedStdBranch.contains(commonLc.RomanToWord(lcadmittedStdDb))){
-							admittedToken = lcadmittedStdDb.toUpperCase() + " " +admittedToken;
-							if(admittedToken.contains("WORDSVALUE")){
-								admittedToken = admittedToken.replace("WORDSVALUE", stdAdmittedWords);
+							if(!lcadmittedStdDb.contains(" ")) {
+								admittedToken = lcadmittedStdDb.toUpperCase() + " " +admittedToken;
+								
+								if(admittedToken.contains("WORDSVALUE")){
+									admittedToken = admittedToken.replace("WORDSVALUE", stdAdmittedWords);
+								}
+							} else {
+								admittedToken = lcadmittedStdDb.toUpperCase();
 							}
+							
 						}
 						else{
 							admittedToken = admittedStdBranch;
@@ -1490,8 +1496,10 @@ public class CreateLcPDFNew {
 						else if(stdSinceToken.contains("ABBREVIATION") && leavingStdDb.equalsIgnoreCase("XII")){
 							stdSinceToken = stdSinceToken.replace("ABBREVIATION", "(S.Y.J.C.)") ;
 						}
-						else if(stdSinceToken.contains("WORDSVALUE")){
+						else if(stdSinceToken.contains("WORDSVALUE") && !leavingStdDb.contains(" ")){
 							stdSinceToken = stdSinceToken.replace("WORDSVALUE", stdWords);
+						} else {
+							stdSinceToken = "";
 						}
 						
 						String studyingSince = "";

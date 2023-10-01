@@ -152,6 +152,35 @@ public class HelpPageWithoutScroll {
         });
         
         height = height + 45;
+		JButton insertExcelDataButton = new JButton("Excel Data");
+		insertExcelDataButton.setFont(new Font("Book Antiqua", Font.BOLD, 12));
+		insertExcelDataButton.setBounds(width, height, 200, 35);
+        panel.add(insertExcelDataButton);
+        
+        JLabel insertExcelDataLabel = new JLabel("Insert Excel Data for Quarterly Fees");
+        insertExcelDataLabel.setFont(new Font("Book Antiqua", Font.BOLD, 18));
+        insertExcelDataLabel.setBounds(260, height, 900, 40);
+		panel.add(insertExcelDataLabel);
+		
+		insertExcelDataButton.addActionListener(new ActionListener() {
+
+            public void actionPerformed(ActionEvent e) {
+            	
+            	boolean isSuccess;
+				try {
+					isSuccess = dbValidate.insertExcelData(sessionData);
+					if(isSuccess) {
+	            		JOptionPane.showMessageDialog(null, "Excel data for quarterly fees inserted successfully");
+	            	}
+	            	else {
+	            		JOptionPane.showMessageDialog(null, "Excel data for quarterly fees failed");
+	            	}
+				} catch (Exception e1) {
+				}
+            }
+        });
+        
+        height = height + 45;
 		JButton updateFeesReportButton = new JButton("Update Fees Report");
 		updateFeesReportButton.setFont(new Font("Book Antiqua", Font.BOLD, 12));
 		updateFeesReportButton.setBounds(width, height, 200, 35);
@@ -160,7 +189,7 @@ public class HelpPageWithoutScroll {
 		try {
 			String feesReportYearList = "";
 			if (dbValidate.connectDatabase(sessionData)) {
-				feesReportYearList = dbValidate.getAcademicYearList(sessionData, "FEES_REPORT_MANDATORY", "ACADEMIC_YEAR").toString();
+				feesReportYearList = dbValidate.getAcademicYearList(sessionData, "FEES_DATA_MANDATORY", "ACADEMIC_YEAR").toString();
 			}
 			
 			String[] academicYearList = feesReportYearList.split(",");
@@ -183,14 +212,17 @@ public class HelpPageWithoutScroll {
 			updateFeesReportButton.addActionListener(new ActionListener() {
 
 	            public void actionPerformed(ActionEvent e) {
-					
+	            	String startYear = "", endYear = "";
 	            	try {
 	            		if (dbValidate.connectDatabase(sessionData)) {
 	            			boolean isTableDelete = Boolean.parseBoolean(deleteTable_combo.getSelectedItem().toString());
 	            			String academicSelected = (String) academicYear_combo.getSelectedItem();
 	            			String startDate = bundle.getString("ACADEMIC_YEAR_START_"+sessionData.getDBName());
-	            			String startYear = academicSelected.substring(0, academicSelected.indexOf("-"));
-	            			String endYear = (Integer.parseInt(startYear)+1) + "";
+	            			if(academicSelected.equalsIgnoreCase("")) {
+	            				academicSelected = commonObj.getAcademicYear(dateToday);
+	            			}
+	            			startYear = academicSelected.substring(0, academicSelected.indexOf("-"));
+	            			endYear = (Integer.parseInt(startYear)+1) + "";
 	    					startDate = commonObj.formatyyyymmddtoddmmyyyy(startYear + "-" + startDate);//yyyy-mm-dd
 	    					
 	    					String endDate = bundle.getString("ACADEMIC_YEAR_END_"+sessionData.getDBName());
@@ -198,10 +230,10 @@ public class HelpPageWithoutScroll {
 	            			boolean isSuccess = dbValidate.exportFeesDataToReport(sessionData, academicSelected, "All", "All", "Academic", startDate, endDate, isTableDelete);
 	            			deleteTable_combo.setSelectedItem("False");
 	            			if(isSuccess) {
-	    	            		JOptionPane.showMessageDialog(null, "Attendance Periodly table created successfully.");
+	    	            		JOptionPane.showMessageDialog(null, "Fees data updated successfully for "+academicSelected);
 	    	            	}
 	    	            	else {
-	    	            		JOptionPane.showMessageDialog(null, "Attendance Periodly table already created.");
+	    	            		JOptionPane.showMessageDialog(null, "Fees data updated failed for "+academicSelected);
 	    	            	}
 	    				}
 	            	}
