@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="src" path="src"/>
+	<classpathentry kind="lib" path="/Users/yashpal/Documents/Maauli_School_App/jar files/classes12.jar"/>
+	<classpathentry kind="lib" path="/Users/yashpal/Documents/Maauli_School_App/jar files/com.mysql.jdbc_5.1.5.jar"/>
+	<classpathentry kind="lib" path="/Users/yashpal/Documents/Maauli_School_App/jar files/dom4j-1.6.jar"/>
+	<classpathentry kind="lib" path="/Users/yashpal/Documents/Maauli_School_App/jar files/itext-1.3.jar"/>
+	<classpathentry kind="lib" path="/Users/yashpal/Documents/Maauli_School_App/jar files/itextpdf-5.0.6.jar"/>
+	<classpathentry kind="lib" path="/Users/yashpal/Documents/Maauli_School_App/jar files/jdatepicker-1.3.4.jar"/>
+	<classpathentry kind="lib" path="/Users/yashpal/Documents/Maauli_School_App/jar files/jxl-2.6.12.jar"/>
+	<classpathentry kind="lib" path="/Users/yashpal/Documents/Maauli_School_App/jar files/lcrypto-jdk15.jar"/>
+	<classpathentry kind="lib" path="/Users/yashpal/Documents/Maauli_School_App/jar files/log4j-1.2.7.jar"/>
+	<classpathentry kind="lib" path="/Users/yashpal/Documents/Maauli_School_App/jar files/poi-3.5-FINAL.jar"/>
+	<classpathentry kind="lib" path="/Users/yashpal/Documents/Maauli_School_App/jar files/poi-3.9.jar"/>
+	<classpathentry kind="lib" path="/Users/yashpal/Documents/Maauli_School_App/jar files/poi-ooxml-3.5-beta5.jar"/>
+	<classpathentry kind="lib" path="/Users/yashpal/Documents/Maauli_School_App/jar files/poi-ooxml-3.7-20101029.jar"/>
+	<classpathentry kind="lib" path="/Users/yashpal/Documents/Maauli_School_App/jar files/sun.misc.BASE64Decoder.jar"/>
+	<classpathentry kind="lib" path="/Users/yashpal/Documents/Maauli_School_App/jar files/zip4j-1.3.1.jar"/>
+	<classpathentry kind="lib" path="/Users/yashpal/Documents/Maauli_School_App/jar files/commons-pool-1.5.6.jar"/>
+	<classpathentry kind="lib" path="/Users/yashpal/Documents/Maauli_School_App/jar files/jcodings-1.0.4-sources.jar"/>
+	<classpathentry kind="lib" path="/Users/yashpal/Documents/Maauli_School_App/jar files/json-20210307.jar"/>
+	<classpathentry kind="lib" path="/Users/yashpal/Documents/Maauli_School_App/jar files/poi-3.7-jdk1.4-20110417-rc1.jar"/>
+	<classpathentry kind="lib" path="/Users/yashpal/Documents/Maauli_School_App/jar files/xmlbeans-2.6.0.jar"/>
+	<classpathentry kind="lib" path="/Users/yashpal/Documents/Maauli_School_App/jar files/commons-dbcp-all-1.3-r699049.jar"/>
+	<classpathentry kind="lib" path="/Users/yashpal/Documents/Maauli_School_App/jar files/ooxml-schemas-1.0.jar"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.launching.macosx.MacOSXType/Home"/>
+	<classpathentry kind="output" path="bin"/>
+</classpath>
